@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Títulos de Roupas</title>
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      background: #f7f2ef; 
+      padding: 30px;
+      color: #4b3226; 
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      background: #f0e6db; 
+      padding: 25px 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 30px auto;
+      box-shadow: 0 4px 12px rgba(75, 50, 38, 0.15);
+      border: 1.5px solid #a87c63; 
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    h2, h3 {
+      color: #6f4e37; 
+      font-weight: 700;
+      margin-bottom: 18px;
+      font-family: Helvetica, Arial, sans-serif;
+      transition: color 0.3s ease;
+    }
+
+    label {
+      margin-top: 18px;
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #5a3e2b;
+      font-family: Helvetica, Arial, sans-serif;
+      transition: color 0.3s ease;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 12px 16px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1.8px solid #a87c63;
+      background: #fff9f4;
+      font-size: 1rem;
+      font-family: Helvetica, Arial, sans-serif;
+      color: #4b3226;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+      box-sizing: border-box;
+      outline-offset: 2px;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: #7a5230;
+      box-shadow: 0 0 6px #b89375;
+      background: #fff8f0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border-radius: 8px;
+      border: none;
+      background: #7a5230;
+      color: #f0e6db;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      font-family: Helvetica, Arial, sans-serif;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 3px 6px rgba(122, 82, 48, 0.6);
+    }
+
+    button:hover {
+      background: #593a1e;
+      box-shadow: 0 4px 10px rgba(89, 58, 30, 0.8);
+    }
+
+    .output {
+      margin-top: 20px;
+      background: #f9f4ee; 
+      padding: 14px 18px;
+      border-radius: 8px;
+      border: 1.5px solid #a87c63;
+      white-space: pre-line;
+      font-family: Helvetica, Arial, sans-serif;
+      color: #4b3226;
+      min-height: 50px;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: 0;
+      border-top: 1.5px solid #c9b59a;
+      transition: border-color 0.3s ease;
+    }
+
+
+    /* === Modo Escuro === */
+    body.dark-mode {
+      background: #1e1e1e;
+      color: #ddd6cc;
+    }
+
+    body.dark-mode .container {
+      background: #2b2b2b;
+      border-color: #5a4b3c;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode h2, body.dark-mode h3 {
+      color: #c8b8a6;
+    }
+
+    body.dark-mode label {
+      color: #c0b3a0;
+    }
+
+    body.dark-mode input[type="text"], body.dark-mode select {
+      background: #3a3a3a;
+      border-color: #5a4b3c;
+      color: #ddd6cc;
+    }
+
+    body.dark-mode input[type="text"]:focus, body.dark-mode select:focus {
+      border-color: #a2856f;
+      background: #4a4a4a;
+      box-shadow: 0 0 6px #a2856f;
+    }
+
+    body.dark-mode button {
+      background: #a2856f;
+      color: #2b2b2b;
+      box-shadow: 0 3px 6px rgba(162, 133, 111, 0.8);
+    }
+
+    body.dark-mode button:hover {
+      background: #7f6a52;
+      box-shadow: 0 4px 10px rgba(127, 106, 82, 0.9);
+    }
+
+    body.dark-mode .output {
+      background: #3a3a3a;
+      border-color: #5a4b3c;
+      color: #ddd6cc;
+    }
+
+    body.dark-mode hr {
+      border-top-color: #5a4b3c;
+    }
+
+    /* Botão modo escuro */
+    #darkModeToggle {
+      width: auto;
+      padding: 8px 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background: #7a5230;
+      color: #f0e6db;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s ease;
+      font-family: Helvetica, Arial, sans-serif;
+      box-shadow: 0 3px 6px rgba(122, 82, 48, 0.6);
+    }
+
+    #darkModeToggle:hover {
+      background: #593a1e;
+      box-shadow: 0 4px 10px rgba(89, 58, 30, 0.8);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Botão para alternar modo escuro -->
+<button id="darkModeToggle">Modo Escuro</button>
+
+<!-- Section 1: Gerador de Títulos Pai/Filho e Códigos -->
+<div class="container" id="section1">
+  <h2>Gerador de Títulos para Roupas (Pai, Filho e Código)</h2>
+
+  <input type="text" id="categoria" placeholder="Categoria (ex: SAIA)">
+  <input type="text" id="comprimento" placeholder="Comprimento / Modelagem (opcional)">
+  <input type="text" id="tecido" placeholder="Tecido (ex: ALFAIATARIA)">
+  <input type="text" id="cor" placeholder="Cor (ex: PRETO)">
+  <input type="text" id="marca" placeholder="Marca (ex: LEKAZIS)">
+
+  <label for="gradeInicio">Grade Inicial:</label>
+  <select id="gradeInicio">
+    <option value="XPP">XPP</option>
+    <option value="PP">PP</option>
+    <option value="P">P</option>
+    <option value="M">M</option>
+    <option value="G">G</option>
+    <option value="GG">GG</option>
+    <option value="G1">G1</option>
+    <option value="G2">G2</option>
+    <option value="G3">G3</option>
+    <option value="G4">G4</option>
+	<option value="34">34</option>
+	<option value="36">36</option>
+	<option value="38">38</option>
+	<option value="40">40</option>
+	<option value="42">42</option>
+	<option value="44">44</option>
+	<option value="46">46</option>
+	<option value="48">48</option>
+	<option value="50">50</option>
+	<option value="52">52</option>
+
+  </select>
+
+  <label for="gradeFim">Grade Final:</label>
+  <select id="gradeFim">
+    <option value="XPP">XPP</option>
+    <option value="PP">PP</option>
+    <option value="P">P</option>
+    <option value="M">M</option>
+    <option value="G">G</option>
+    <option value="GG">GG</option>
+    <option value="G1">G1</option>
+    <option value="G2">G2</option>
+    <option value="G3">G3</option>
+    <option value="G4">G4</option>
+	<option value="34">34</option>
+	<option value="36">36</option>
+	<option value="38">38</option>
+	<option value="40">40</option>
+	<option value="42">42</option>
+	<option value="44">44</option>
+	<option value="46">46</option>
+	<option value="48">48</option>
+	<option value="50">50</option>
+	<option value="52">52</option>
+  </select>
+
+  <button onclick="gerarTituloPai()">Gerar Título Pai</button>
+  <button onclick="gerarTituloFilho()">Gerar Títulos Filhos</button>
+
+  <div class="output" id="tituloOutput"></div>
+
+  <div class="output" id="tituloOutput"></div>
+<button onclick="copiarTexto('tituloOutput')">Copiar Título</button>
+
+  <hr>
+
+  <h3>Gerador de Código</h3>
+  <input type="text" id="codigoManual" placeholder="Código da Peça (ex: SA006VD)">
+  <button onclick="gerarCodigo()">Gerar Código Pai e Filhos</button>
+
+  <div class="output" id="codigoOutput"></div>
+
+  <div class="output" id="codigoOutput"></div>
+<button onclick="copiarTexto('codigoOutput')">Copiar Título</button>
+
+</div>
+
+<!-- Section 2: Gerador de Título Completo com Final Escolhido e Meta Description -->
+<div class="container" id="section2">
+  <h2>Gerador de Título Completo + Meta Description</h2>
+
+  <input type="text" id="categoria2" placeholder="Categoria (ex: SAIA)">
+  <input type="text" id="comprimento2" placeholder="Comprimento / Modelagem (opcional)">
+  <input type="text" id="tecido2" placeholder="Tecido (ex: ALFAIATARIA)">
+  <input type="text" id="cor2" placeholder="Cor (ex: PRETO)">
+  <input type="text" id="marca2" placeholder="Marca (ex: LEKAZIS)">
+
+  <label for="finalTitulo">Selecione o final do título:</label>
+  <select id="finalTitulo">
+    <option value="QVestido - Moda Evangélica">QVestido - Moda Evangélica Feminina</option>
+    <option value="QVestido - Moda Executiva Feminina" selected>QVestido - Moda Executiva Feminina</option>
+  </select>
+
+  <button onclick="gerarTituloCompleto()">Gerar Título Completo</button>
+  <div class="output" id="outputTitulo"></div>
+
+  <div class="output" id="outputTitulo"></div>
+<button onclick="copiarTexto('outputTitulo')">Copiar Título</button>
+
+  <button onclick="gerarMetaDescription()">Gerar Meta Description</button>
+  <div class="output" id="outputMetaTag"></div>
+
+  <div class="output" id="outputMetaTag"></div>
+<button onclick="copiarTexto('outputMetaTag')">Copiar Título</button>
+
+  <hr>
+
+  <h3>Gerador de URL</h3>
+  <button onclick="gerarURL()">Gerar URL</button>
+  <div class="output" id="urlOutput"></div>
+
+  <div class="output" id="urlOutput"></div>
+<button onclick="copiarTexto('urlOutput')">Copiar Título</button>
+
+
+</div>
+
+<script>
+  // === Modo escuro toggle ===
+  const toggleBtn = document.getElementById('darkModeToggle');
+  toggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    toggleBtn.innerText = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
+  });
+
+  const tamanhos = ["XPP", "PP", "P", "M", "G", "GG", "G1", "G2", "G3", "G4", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52"];
+
+
+  // === Espelhamento de campos da Section 1 para Section 2 ===
+  function sincronizarCampos() {
+    const mapeamento = [
+      { origem: "categoria", destino: "categoria2" },
+      { origem: "comprimento", destino: "comprimento2" },
+      { origem: "tecido", destino: "tecido2" },
+      { origem: "cor", destino: "cor2" },
+      { origem: "marca", destino: "marca2" },
+    ];
+
+    mapeamento.forEach(par => {
+      const origemEl = document.getElementById(par.origem);
+      const destinoEl = document.getElementById(par.destino);
+      origemEl.addEventListener('input', () => {
+        destinoEl.value = origemEl.value;
+      });
+    });
+  }
+
+  sincronizarCampos();
+
+  // === Section 1 Functions ===
+  function gerarTituloPai() {
+    const cat = document.getElementById("categoria").value.toUpperCase();
+    const comp = document.getElementById("comprimento").value.toUpperCase();
+    const tecido = document.getElementById("tecido").value.toUpperCase();
+    const cor = document.getElementById("cor").value.toUpperCase();
+    const marca = document.getElementById("marca").value.toUpperCase();
+
+    const base = comp ? `${cat} ${comp}` : cat;
+    const titulo = `${base} EM ${tecido} ${cor} - ${marca}`;
+
+    document.getElementById("tituloOutput").innerText = titulo;
+  }
+
+  function gerarTituloFilho() {
+    const cat = document.getElementById("categoria").value.toUpperCase();
+    const comp = document.getElementById("comprimento").value.toUpperCase();
+    const tecido = document.getElementById("tecido").value.toUpperCase();
+    const cor = document.getElementById("cor").value.toUpperCase();
+    const marca = document.getElementById("marca").value.toUpperCase();
+    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
+    const fim = document.getElementById("gradeFim").value.toUpperCase();
+
+    const base = comp ? `${cat} ${comp}` : cat;
+    const tituloBase = `${base} EM ${tecido} ${cor} - ${marca}`;
+
+    const inicioIndex = tamanhos.indexOf(inicio);
+    const fimIndex = tamanhos.indexOf(fim);
+
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
+      alert("Selecione uma grade válida.");
+      return;
+    }
+
+    let titulos = [];
+    for (let i = inicioIndex; i <= fimIndex; i++) {
+      titulos.push(`${tituloBase} - ${tamanhos[i]}`);
+    }
+
+    document.getElementById("tituloOutput").innerText =  titulos.join("\n");
+  }
+
+  function gerarCodigo() {
+    const codigoBase = document.getElementById("codigoManual").value.toUpperCase();
+    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
+    const fim = document.getElementById("gradeFim").value.toUpperCase();
+
+    const inicioIndex = tamanhos.indexOf(inicio);
+    const fimIndex = tamanhos.indexOf(fim);
+
+    if (!codigoBase) {
+      alert("Digite o código da peça.");
+      return;
+    }
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
+      alert("Selecione uma grade válida.");
+      return;
+    }
+
+    let codigos = [`${codigoBase}`];
+    for (let i = inicioIndex; i <= fimIndex; i++) {
+      codigos.push(`${codigoBase}-${tamanhos[i]}`);
+    }
+
+    document.getElementById("codigoOutput").innerText = codigos.join("\n");
+  }
+
+  // === Section 2 Functions ===
+  function capitalizarTitulo(texto) {
+  return texto
+    .toLowerCase()
+    .split(' ')
+    .filter(Boolean)
+    .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+    .join(' ');
+}
+
+function gerarTituloCompleto() {
+  const cat = document.getElementById("categoria2").value.trim();
+  const comp = document.getElementById("comprimento2").value.trim();
+  const tecido = document.getElementById("tecido2").value.trim();
+  const cor = document.getElementById("cor2").value.trim();
+  const marca = document.getElementById("marca2").value.trim();
+  const finalTitulo = document.getElementById("finalTitulo").value;
+
+  const base = comp ? `${cat} ${comp}` : cat;
+  // Removi o hífen aqui
+  const tituloBase = `${base} em ${tecido} ${cor} ${marca}`;
+
+  const tituloCapitalizado = capitalizarTitulo(tituloBase);
+
+  const tituloCompleto = `${tituloCapitalizado} ${finalTitulo}`;
+
+  document.getElementById("outputTitulo").innerText = tituloCompleto;
+}
+
+  function gerarMetaDescription() {
+  const cat = document.getElementById("categoria2").value.toLowerCase();
+  const comp = document.getElementById("comprimento2").value.toLowerCase();
+  const tecido = document.getElementById("tecido2").value.toLowerCase();
+  const cor = document.getElementById("cor2").value.toLowerCase();
+  const marca = document.getElementById("marca2").value;
+
+  // Título da peça com a primeira letra maiúscula
+  const titulo = `${cat} ${comp} em ${tecido} ${cor} ${marca}`.replace(/\b\w/g, l => l.toUpperCase());
+
+  const desc = `Compre ${cat.charAt(0).toUpperCase() + cat.slice(1)} ${cor.charAt(0).toUpperCase() + cor.slice(1)} em até 10x sem juros na QVestido! Moda Evangélica Premium. Confira ${titulo} na Loja oficial da QVestido - Moda Executiva Feminina`;
+
+  document.getElementById("outputMetaTag").innerText = desc;
+}
+
+  function gerarURL() {
+    const cat = document.getElementById("categoria2").value.toLowerCase().replace(/\s+/g, "-");
+    const comp = document.getElementById("comprimento2").value.toLowerCase().replace(/\s+/g, "-");
+    const tecido = document.getElementById("tecido2").value.toLowerCase().replace(/\s+/g, "-");
+    const cor = document.getElementById("cor2").value.toLowerCase().replace(/\s+/g, "-");
+    const marca = document.getElementById("marca2").value.toLowerCase().replace(/\s+/g, "-");
+
+    const parts = [];
+    if(cat) parts.push(cat);
+    if(comp) parts.push(comp);
+    if(tecido) parts.push(tecido);
+    if(cor) parts.push(cor);
+    if(marca) parts.push(marca);
+
+    const url = parts.join("-");
+
+    document.getElementById("urlOutput").innerText = url;
+  }
+
+  function copiarTexto(id) {
+  const texto = document.getElementById(id).innerText;
+  if (!texto) {
+    alert("Nada para copiar!");
+    return;
+  }
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Texto copiado para a área de transferência!");
+  }).catch(err => {
+    alert("Erro ao copiar: " + err);
+  });
+}
+</script>
+
+</body>
+</html>

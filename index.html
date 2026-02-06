@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QVestido | Gerador de Títulos</title>
+
+  <!-- ✅ JSZip (gera .zip no navegador) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f6f6f6;
+      --text: #0f0f0f;
+      --muted: #4b4b4b;
+      --border: #e6e6e6;
+      --shadow: 0 14px 40px rgba(0,0,0,.08);
+      --shadow-soft: 0 10px 24px rgba(0,0,0,.06);
+      --accent: #0f0f0f; /* preto */
+      --accent-2: #2a2a2a;
+      --focus: 0 0 0 4px rgba(0,0,0,.12);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    body.dark-mode{
+      --bg: #0b0b0b;
+      --surface: #111111;
+      --surface-2: #151515;
+      --text: #f1f1f1;
+      --muted: #bdbdbd;
+      --border: #252525;
+      --shadow: 0 16px 46px rgba(0,0,0,.6);
+      --shadow-soft: 0 10px 26px rgba(0,0,0,.45);
+      --accent: #f1f1f1; /* branco */
+      --accent-2: #d8d8d8;
+      --focus: 0 0 0 4px rgba(255,255,255,.14);
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin: 0;
+      font-family: var(--font);
+      background: radial-gradient(1200px 500px at 50% -120px, rgba(0,0,0,.06), transparent 60%), var(--bg);
+      color: var(--text);
+      padding: 26px 18px 60px;
+      transition: background-color .25s ease, color .25s ease;
+    }
+
+    .page{
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .topbar{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand{
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand img{
+      height: 26px;
+      width: auto;
+      display: block;
+      filter: none;
+    }
+
+    body.dark-mode .brand img{
+      /* deixa o SVG “branco” quando possível (depende do SVG). Se não funcionar, ele fica normal mesmo. */
+      filter: invert(1) grayscale(1) contrast(1.1);
+    }
+
+    .brand .titlewrap{
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      min-width: 0;
+    }
+
+    .brand .title{
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand .subtitle{
+      font-size: 12px;
+      color: var(--muted);
+      margin: 2px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .actions{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 800;
+      box-shadow: var(--shadow-soft);
+      transition: transform .15s ease, background-color .2s ease, border-color .2s ease;
+      white-space: nowrap;
+    }
+    .icon-btn:hover{ transform: translateY(-1px); border-color: var(--accent); }
+    .icon-btn:active{ transform: translateY(0px); }
+    .icon-btn:focus{ outline: none; box-shadow: var(--shadow-soft), var(--focus); }
+
+    /* Cards */
+    .grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      transition: border-color .2s ease, background-color .2s ease;
+    }
+
+    .card h2{
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
+
+    .card h3{
+      margin: 16px 0 10px 0;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: var(--text);
+      opacity: .92;
+    }
+
+    .desc{
+      margin: 0 0 14px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 720px){
+      .row{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .2px;
+    }
+
+    input[type="text"], select, input[type="file"]{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      transition: box-shadow .2s ease, border-color .2s ease, transform .15s ease;
+      outline: none;
+    }
+    input[type="text"]:focus, select:focus, input[type="file"]:focus{
+      border-color: var(--accent);
+      box-shadow: var(--focus);
+    }
+
+    .btn{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform .15s ease, opacity .2s ease, background-color .2s ease;
+      margin-top: 10px;
+    }
+    .btn:hover{ transform: translateY(-1px); opacity: .92; }
+    .btn:active{ transform: translateY(0px); }
+    .btn:focus{ outline: none; box-shadow: var(--focus); }
+
+    .btn.secondary{
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn.secondary:hover{ border-color: var(--accent); }
+
+    .output{
+      margin-top: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      white-space: pre-line;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12.5px;
+      color: var(--text);
+      min-height: 54px;
+    }
+    .output.small{ min-height: 34px; }
+
+    .divider{
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .inline-row{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .inline-row input[type="checkbox"]{
+      width: auto;
+      margin: 0;
+      transform: scale(1.05);
+      accent-color: var(--accent);
+    }
+    .inline-row label{
+      margin: 0;
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ✅ Toast popup */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg);
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease, transform 220ms ease;
+      max-width: 92vw;
+      text-align: center;
+      z-index: 9999;
+      border: 1px solid var(--border);
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="topbar">
+      <div class="brand">
+        <img src="https://recursos.qvestido.com.br/i/SVG-diversos/logo.svg" alt="QVestido" />
+        <div class="titlewrap">
+          <p class="title">Gerador de Cadastro</p>
+          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • ZIP de Imagens</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="icon-btn" id="darkModeToggle" type="button">Modo Escuro</button>
+      </div>
+    </header>
+
+    <!-- ✅ Toast -->
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <div class="grid">
+
+      <!-- ===================== Section 1 ===================== -->
+      <section class="card" id="section1">
+        <h2>Gerador de Títulos para Roupas</h2>
+        <p class="desc">Preencha os campos e gere títulos (pai e filhos), SKUs linkados e NCM padrão automaticamente.</p>
+
+        <div class="row">
+          <div>
+            <label for="categoria">Categoria</label>
+            <input type="text" id="categoria" placeholder="Ex: SAIA">
+          </div>
+          <div>
+            <label for="comprimento">Comprimento / Modelagem (opcional)</label>
+            <input type="text" id="comprimento" placeholder="Ex: MIDI / EVASÊ">
+          </div>
+          <div>
+            <label for="tecido">Tecido</label>
+            <input type="text" id="tecido" placeholder="Ex: ALFAIATARIA">
+          </div>
+          <div>
+            <label for="cor">Cor</label>
+            <input type="text" id="cor" placeholder="Ex: PRETO">
+          </div>
+          <div>
+            <label for="marca">Marca</label>
+            <input type="text" id="marca" placeholder="Ex: LEKAZIS">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="gradeInicio">Grade Inicial</label>
+            <select id="gradeInicio">
+              <option value="XPP">XPP</option><option value="PP">PP</option><option value="P">P</option><option value="M">M</option>
+              <option value="G">G</option><option value="GG">GG</option><option value="G1">G1</option><option value="G2">G2</option>
+              <option value="G3">G3</option><option value="G4">G4</option><option value="34">34</option><option value="36">36</option>
+              <option value="38">38</option><option value="40">40</option><option value="42">42</option><option value="44">44</option>
+              <option value="46">46</option><option value="48">48</option><option value="50">50</option><option value="52">52</option>
+            </select>
+          </div>
+          <div>
+            <label for="gradeFim">Grade Final</label>
+            <select id="gradeFim">
+              <option value="XPP">XPP</option><option value="PP">PP</option><option value="P">P</option><option value="M">M</option>
+              <option value="G">G</option><option value="GG">GG</option><option value="G1">G1</option><option value="G2">G2</option>
+              <option value="G3">G3</option><option value="G4">G4</option><option value="34">34</option><option value="36">36</option>
+              <option value="38">38</option><option value="40">40</option><option value="42">42</option><option value="44">44</option>
+              <option value="46">46</option><option value="48">48</option><option value="50">50</option><option value="52">52</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn" onclick="gerarTituloCompleto()">Gerar Títulos (Pai + Filhos)</button>
+        <div class="output" id="tituloOutput"></div>
+        <button class="btn secondary" onclick="copiarTexto('tituloOutput')">Copiar Títulos</button>
+
+        <div class="divider"></div>
+
+        <h3>Gerador de Código / SKU Base</h3>
+        <label for="codigoManual">Código da Peça</label>
+        <input type="text" id="codigoManual" placeholder="Ex: SA006VD">
+        <button class="btn" onclick="gerarCodigo()">Gerar Códigos (Pai + Filhos)</button>
+        <div class="output" id="codigoOutput"></div>
+        <button class="btn secondary" onclick="copiarTexto('codigoOutput')">Copiar Códigos</button>
+
+        <div class="divider"></div>
+
+        <h3>Títulos + SKUs (Pai e Filhos) • Linkado</h3>
+        <button class="btn" onclick="gerarTitulosESkus()">Gerar Títulos + SKUs</button>
+        <div class="output" id="tituloSkuOutput"></div>
+        <button class="btn secondary" onclick="copiarTexto('tituloSkuOutput')">Copiar Títulos + SKUs</button>
+
+        <div class="divider"></div>
+
+        <h3>NCM (padrão)</h3>
+        <button class="btn" onclick="gerarNcmDoTitulo()">Gerar NCM do Título</button>
+        <div class="output small" id="ncmOutput"></div>
+        <button class="btn secondary" onclick="copiarTexto('ncmOutput')">Copiar NCM</button>
+      </section>
+
+      <!-- ===================== Section 2 ===================== -->
+      <section class="card" id="section2">
+        <h2>Gerador de Título Completo + Meta Description</h2>
+        <p class="desc">Use para SEO: título final + meta description + URL amigável.</p>
+
+        <div class="row">
+          <div>
+            <label for="categoria2">Categoria</label>
+            <input type="text" id="categoria2" placeholder="Ex: SAIA">
+          </div>
+          <div>
+            <label for="comprimento2">Comprimento / Modelagem (opcional)</label>
+            <input type="text" id="comprimento2" placeholder="Ex: MIDI">
+          </div>
+          <div>
+            <label for="tecido2">Tecido</label>
+            <input type="text" id="tecido2" placeholder="Ex: ALFAIATARIA">
+          </div>
+          <div>
+            <label for="cor2">Cor</label>
+            <input type="text" id="cor2" placeholder="Ex: PRETO">
+          </div>
+          <div>
+            <label for="marca2">Marca</label>
+            <input type="text" id="marca2" placeholder="Ex: LEKAZIS">
+          </div>
+        </div>
+
+        <label for="finalTitulo">Final do título</label>
+        <select id="finalTitulo">
+          <option value="QVestido - Moda Evangélica">QVestido - Moda Evangélica Feminina</option>
+          <option value="QVestido - Moda Executiva Feminina" selected>QVestido - Moda Executiva Feminina</option>
+        </select>
+
+        <button class="btn" onclick="gerarTituloSEO()">Gerar Título SEO</button>
+        <div class="output" id="outputTitulo"></div>
+        <button class="btn secondary" onclick="copiarTexto('outputTitulo')">Copiar Título SEO</button>
+
+        <button class="btn" onclick="gerarMetaDescription()">Gerar Meta Description</button>
+        <div class="output" id="outputMetaTag"></div>
+        <button class="btn secondary" onclick="copiarTexto('outputMetaTag')">Copiar Meta Description</button>
+
+        <div class="divider"></div>
+
+        <h3>Gerador de URL</h3>
+        <button class="btn" onclick="gerarURL()">Gerar URL</button>
+        <div class="output small" id="urlOutput"></div>
+        <button class="btn secondary" onclick="copiarTexto('urlOutput')">Copiar URL</button>
+      </section>
+
+      <!-- ===================== Section 3 ===================== -->
+      <section class="card" id="section3">
+        <h2>Renomear Imagens + Baixar ZIP</h2>
+        <p class="desc">
+          Padrão aceito:
+          1 imagem: <b>SKU_Nome do produto.jpg</b> • várias: <b>SKU_A_Nome.jpg</b>, <b>SKU_B_Nome.jpg</b> • ZIP: <b>ID_DO_GRUPO.zip</b><br>
+          Se marcar “por grade”, gera cópia por SKU/tamanho.
+        </p>
+
+        <label for="imgCodigo">Código / SKU base</label>
+        <input type="text" id="imgCodigo" placeholder="Ex: SA006VD (ou 998234)">
+
+        <label for="imgNome">Nome do produto</label>
+        <input type="text" id="imgNome" placeholder="Ex: SAIA MIDI EM ALFAIATARIA PRETO - LEKAZIS">
+
+        <label for="imgGrupoId">ID do grupo de imagens (nome do .zip)</label>
+        <input type="text" id="imgGrupoId" placeholder="Ex: 12345">
+
+        <label for="imgFiles">Selecione as imagens</label>
+        <input type="file" id="imgFiles" accept="image/*" multiple />
+
+        <div class="inline-row">
+          <input type="checkbox" id="zipPorGrade" />
+          <label for="zipPorGrade">Gerar imagens por grade (1 imagem por SKU/tamanho)</label>
+        </div>
+
+        <div class="inline-row">
+          <input type="checkbox" id="forceJpg" />
+          <label for="forceJpg">Forçar extensão .jpg (apenas renomeia, não converte)</label>
+        </div>
+
+        <button class="btn" onclick="gerarZipImagens()">Gerar ZIP para o grupo</button>
+
+        <div class="output" id="zipPreview"></div>
+        <button class="btn secondary" onclick="copiarTexto('zipPreview')">Copiar Lista Gerada</button>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+  // === Modo escuro ===
+  const toggleBtn = document.getElementById('darkModeToggle');
+  toggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    toggleBtn.innerText = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
+  });
+
+  const tamanhos = ["XPP","PP","P","M","G","GG","G1","G2","G3","G4","34","36","38","40","42","44","46","48","50","52"];
+
+  // ✅ Toast (entra e sai sozinho)
+  let toastTimer = null;
+  function showToast(msg, ms = 1600) {
+    const el = document.getElementById("toast");
+    if (!el) return;
+    el.textContent = msg;
+
+    el.classList.remove("show");
+    void el.offsetWidth;
+    el.classList.add("show");
+
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), ms);
+  }
+
+  // ✅ copiar com toast (sem OK)
+  function copiarTexto(id) {
+    const texto = (document.getElementById(id).innerText || "").trim();
+    if (!texto) {
+      showToast("Nada para copiar 😅", 1500);
+      return;
+    }
+    navigator.clipboard.writeText(texto).then(() => {
+      showToast("Copiado! ✅", 1400);
+    }).catch(err => {
+      try {
+        const temp = document.createElement("textarea");
+        temp.value = texto;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        temp.remove();
+        showToast("Copiado! ✅", 1400);
+      } catch (e) {
+        showToast("Não consegui copiar 😭", 1800);
+        console.error(err);
+      }
+    });
+  }
+
+  // ✅ NCM: normalização
+  function norm(str) {
+    return (str || "")
+      .toUpperCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function tecidoEhMalha(tecidoRaw) {
+    const t = norm(tecidoRaw);
+    const chavesMalha = [
+      "MALHA", "CANELADO", "RIBANA", "TRICOT", "TRICO", "MOLETOM",
+      "JERSEY", "JERSEI", "PONTO ROMA", "PONTO-ROMA", "FLAME", "FLAMÊ",
+      "VISCOLYCRA", "VISCO LYCRA", "POLIAMIDA", "LYCRA", "ELASTANO"
+    ];
+    return chavesMalha.some(k => t.includes(k));
+  }
+
+  function obterNcm(categoriaPrimeiraPalavra, tecidoRaw) {
+    const cat = norm(categoriaPrimeiraPalavra);
+    const ehMalha = tecidoEhMalha(tecidoRaw);
+
+    if (cat === "T-SHIRT" || cat === "TSHIRT" || cat === "CAMISETA") return "6109.90.00";
+    if (ehMalha && (cat === "BLUSA" || cat === "BLUSAS")) return "6109.90.00";
+
+    const mapa = {
+      "BLUSA": "6206.40.00",
+      "BLUSAS": "6206.40.00",
+      "CAMISA": "6206.40.00",
+      "CAMISAS": "6206.40.00",
+      "VESTIDO": "6204.43.00",
+      "VESTIDOS": "6204.43.00",
+      "SAIA": "6204.53.00",
+      "SAIAS": "6204.53.00",
+      "CONJUNTO": "6204.23.00",
+      "CONJUNTOS": "6204.23.00",
+      "CALCA": "6204.63.00",
+      "CALCAS": "6204.63.00",
+      "SHORT": "6204.63.00",
+      "SHORTS": "6204.63.00",
+      "JAQUETA": "6202.93.00",
+      "JAQUETAS": "6202.93.00",
+      "CASACO": "6202.93.00",
+      "CASACOS": "6202.93.00",
+      "CASAQUETO": "6202.93.00",
+      "CASAQUETOS": "6202.93.00",
+      "BLAZER": "6204.33.00",
+      "BLAZERS": "6204.33.00",
+      "MACACAO": "6204.23.00",
+      "MACACOES": "6204.23.00"
+    };
+
+    return mapa[cat] || "6206.40.00";
+  }
+
+  function gerarNcmDoTitulo() {
+    const catRaw = document.getElementById("categoria").value;
+    const tecidoRaw = document.getElementById("tecido").value;
+
+    if (!catRaw || !tecidoRaw) {
+      showToast("Preencha Categoria e Tecido para gerar o NCM.", 1800);
+      return;
+    }
+
+    const catNorm = norm(catRaw);
+    let chaveCategoria = catNorm.split(" ")[0] || catNorm;
+
+    if (catNorm.includes("SHIRT")) chaveCategoria = "T-SHIRT";
+    if (catNorm.includes("CAMISETA")) chaveCategoria = "CAMISETA";
+
+    const ncm = obterNcm(chaveCategoria, tecidoRaw);
+
+    const comp = norm(document.getElementById("comprimento").value);
+    const cor = norm(document.getElementById("cor").value);
+    const marca = norm(document.getElementById("marca").value);
+    const base = comp ? `${catNorm} ${comp}` : catNorm;
+    const tituloPrev = `${base} EM ${norm(tecidoRaw)} ${cor} - ${marca}`.replace(/\s+/g, " ").trim();
+
+    document.getElementById("ncmOutput").innerText =
+      `NCM: ${ncm}\nTítulo lido: ${tituloPrev}\nRegra: ${tecidoEhMalha(tecidoRaw) ? "MALHA (6109 quando aplicável)" : "TECIDO PLANO (620x)"}`;
+  }
+
+  // === Espelhamento de campos (Section1 -> Section2) ===
+  function sincronizarCampos() {
+    const mapeamento = [
+      { origem: "categoria", destino: "categoria2" },
+      { origem: "comprimento", destino: "comprimento2" },
+      { origem: "tecido", destino: "tecido2" },
+      { origem: "cor", destino: "cor2" },
+      { origem: "marca", destino: "marca2" },
+    ];
+
+    mapeamento.forEach(par => {
+      const origemEl = document.getElementById(par.origem);
+      const destinoEl = document.getElementById(par.destino);
+      origemEl.addEventListener('input', () => { destinoEl.value = origemEl.value; });
+    });
+  }
+  sincronizarCampos();
+
+  // ===== Section 1 =====
+  function gerarTituloCompleto() {
+    const cat = document.getElementById("categoria").value.toUpperCase();
+    const comp = document.getElementById("comprimento").value.toUpperCase();
+    const tecido = document.getElementById("tecido").value.toUpperCase();
+    const cor = document.getElementById("cor").value.toUpperCase();
+    const marca = document.getElementById("marca").value.toUpperCase();
+    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
+    const fim = document.getElementById("gradeFim").value.toUpperCase();
+
+    if (!cat || !tecido || !cor || !marca) {
+      showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800);
+      return;
+    }
+
+    const base = comp ? `${cat} ${comp}` : cat;
+    const tituloPai = `${base} EM ${tecido} ${cor} - ${marca}`;
+
+    const inicioIndex = tamanhos.indexOf(inicio);
+    const fimIndex = tamanhos.indexOf(fim);
+
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
+      showToast("Selecione uma grade válida.", 1800);
+      return;
+    }
+
+    let titulos = [tituloPai];
+    for (let i = inicioIndex; i <= fimIndex; i++) {
+      titulos.push(`${tituloPai} - ${tamanhos[i]}`);
+    }
+
+    document.getElementById("tituloOutput").innerText = titulos.join("\n");
+    try { gerarNcmDoTitulo(); } catch(e) {}
+  }
+
+  function gerarCodigo() {
+    const codigoBase = document.getElementById("codigoManual").value.toUpperCase();
+    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
+    const fim = document.getElementById("gradeFim").value.toUpperCase();
+
+    const inicioIndex = tamanhos.indexOf(inicio);
+    const fimIndex = tamanhos.indexOf(fim);
+
+    if (!codigoBase) {
+      showToast("Digite o código da peça.", 1700);
+      return;
+    }
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
+      showToast("Selecione uma grade válida.", 1800);
+      return;
+    }
+
+    let codigos = [codigoBase];
+    for (let i = inicioIndex; i <= fimIndex; i++) {
+      codigos.push(`${codigoBase}-${tamanhos[i]}`);
+    }
+
+    document.getElementById("codigoOutput").innerText = codigos.join("\n");
+  }
+
+  function gerarTitulosESkus() {
+    const cat = document.getElementById("categoria").value.toUpperCase();
+    const comp = document.getElementById("comprimento").value.toUpperCase();
+    const tecido = document.getElementById("tecido").value.toUpperCase();
+    const cor = document.getElementById("cor").value.toUpperCase();
+    const marca = document.getElementById("marca").value.toUpperCase();
+    const codigoBase = document.getElementById("codigoManual").value.toUpperCase();
+    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
+    const fim = document.getElementById("gradeFim").value.toUpperCase();
+
+    if (!cat || !tecido || !cor || !marca) {
+      showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800);
+      return;
+    }
+    if (!codigoBase) {
+      showToast("Preencha o Código da Peça (ex: SA006VD).", 1800);
+      return;
+    }
+
+    const base = comp ? `${cat} ${comp}` : cat;
+    const tituloPai = `${base} EM ${tecido} ${cor} - ${marca}`;
+
+    const inicioIndex = tamanhos.indexOf(inicio);
+    const fimIndex = tamanhos.indexOf(fim);
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
+      showToast("Selecione uma grade válida.", 1800);
+      return;
+    }
+
+    const catNorm = norm(cat);
+    const chave = (catNorm.includes("SHIRT")) ? "T-SHIRT" : (catNorm.split(" ")[0] || catNorm);
+    const ncm = obterNcm(chave, tecido);
+
+    const linhas = [];
+    linhas.push(`PAI`);
+    linhas.push(`SKU: ${codigoBase}`);
+    linhas.push(`TÍTULO: ${tituloPai}`);
+    linhas.push(`NCM: ${ncm}`);
+    linhas.push(``);
+    linhas.push(`FILHOS`);
+
+    for (let i = inicioIndex; i <= fimIndex; i++) {
+      const tam = tamanhos[i];
+      const skuFilho = `${codigoBase}-${tam}`;
+      const tituloFilho = `${tituloPai} - ${tam}`;
+      linhas.push(`${skuFilho} | ${tituloFilho} | NCM: ${ncm}`);
+    }
+
+    document.getElementById("tituloSkuOutput").innerText = linhas.join("\n");
+  }
+
+  // ===== Section 2 =====
+  function capitalizarTitulo(texto) {
+    return texto
+      .toLowerCase()
+      .split(' ')
+      .filter(Boolean)
+      .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ');
+  }
+
+  function gerarTituloSEO() {
+    const cat = document.getElementById("categoria2").value.trim();
+    const comp = document.getElementById("comprimento2").value.trim();
+    const tecido = document.getElementById("tecido2").value.trim();
+    const cor = document.getElementById("cor2").value.trim();
+    const marca = document.getElementById("marca2").value.trim();
+    const finalTitulo = document.getElementById("finalTitulo").value;
+
+    if (!cat || !tecido || !cor || !marca) {
+      showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800);
+      return;
+    }
+
+    const base = comp ? `${cat} ${comp}` : cat;
+    const tituloBase = `${base} em ${tecido} ${cor} ${marca}`;
+    const tituloCompleto = `${capitalizarTitulo(tituloBase)} ${finalTitulo}`.replace(/\s+/g, " ").trim();
+
+    document.getElementById("outputTitulo").innerText = tituloCompleto;
+  }
+
+  function gerarMetaDescription() {
+    const cat = document.getElementById("categoria2").value.toLowerCase();
+    const comp = document.getElementById("comprimento2").value.toLowerCase();
+    const tecido = document.getElementById("tecido2").value.toLowerCase();
+    const cor = document.getElementById("cor2").value.toLowerCase();
+    const marca = document.getElementById("marca2").value;
+
+    if (!cat || !cor) {
+      showToast("Preencha pelo menos Categoria e Cor.", 1800);
+      return;
+    }
+
+    const titulo = `${cat} ${comp} em ${tecido} ${cor} ${marca}`.replace(/\b\w/g, l => l.toUpperCase());
+    const desc = `Compre ${cat.charAt(0).toUpperCase() + cat.slice(1)} ${cor.charAt(0).toUpperCase() + cor.slice(1)} em até 10x sem juros na QVestido! Moda Evangélica Premium. Confira ${titulo} na Loja oficial da QVestido - Moda Executiva Feminina`;
+
+    document.getElementById("outputMetaTag").innerText = desc;
+  }
+
+  function gerarURL() {
+    const cat = document.getElementById("categoria2").value.toLowerCase().replace(/\s+/g, "-");
+    const comp = document.getElementById("comprimento2").value.toLowerCase().replace(/\s+/g, "-");
+    const tecido = document.getElementById("tecido2").value.toLowerCase().replace(/\s+/g, "-");
+    const cor = document.getElementById("cor2").value.toLowerCase().replace(/\s+/g, "-");
+    const marca = document.getElementById("marca2").value.toLowerCase().replace(/\s+/g, "-");
+
+    const parts = [];
+    if (cat) parts.push(cat);
+    if (comp) parts.push(comp);
+    if (tecido) parts.push(tecido);
+    if (cor) parts.push(cor);
+    if (marca) parts.push(marca);
+
+    document.getElementById("urlOutput").innerText = parts.join("-");
+  }
+
+  // ===== Section 3: Imagens -> ZIP =====
+  function limparParaNomeDeArquivo(str) {
+    return (str || "")
+      .replace(/[\\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function letraPorIndice(i) { return String.fromCharCode(65 + i); }
+
+  async function gerarZipImagens() {
+    const codigo = limparParaNomeDeArquivo(document.getElementById("imgCodigo").value);
+    const nomeProduto = limparParaNomeDeArquivo(document.getElementById("imgNome").value);
+    const grupoId = limparParaNomeDeArquivo(document.getElementById("imgGrupoId").value);
+    const forceJpg = document.getElementById("forceJpg").checked;
+    const usarGrade = document.getElementById("zipPorGrade").checked;
+
+    const files = Array.from(document.getElementById("imgFiles").files || []);
+    const preview = document.getElementById("zipPreview");
+
+    if (!codigo || !nomeProduto || !grupoId) {
+      showToast("Preencha Código, Nome do produto e ID do grupo.", 2000);
+      return;
+    }
+    if (files.length === 0) {
+      showToast("Selecione pelo menos 1 imagem.", 1800);
+      return;
+    }
+
+    const inicio = (document.getElementById("gradeInicio")?.value || "").toUpperCase();
+    const fim = (document.getElementById("gradeFim")?.value || "").toUpperCase();
+    const inicioIndex = tamanhos.indexOf(inicio);
+    const fimIndex = tamanhos.indexOf(fim);
+
+    if (usarGrade) {
+      if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
+        showToast("Selecione uma grade válida (Grade Inicial e Final).", 2000);
+        return;
+      }
+    }
+
+    const zip = new JSZip();
+    const nomesGerados = [];
+
+    let listaSkus = [];
+    if (usarGrade) {
+      for (let i = inicioIndex; i <= fimIndex; i++) {
+        const tam = tamanhos[i];
+        listaSkus.push({ sku: `${codigo}-${tam}`, nome: `${nomeProduto} - ${tam}` });
+      }
+    } else {
+      listaSkus.push({ sku: codigo, nome: nomeProduto });
+    }
+
+    for (const itemSku of listaSkus) {
+      for (let idx = 0; idx < files.length; idx++) {
+        const file = files[idx];
+        const extOriginal = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const ext = forceJpg ? "jpg" : extOriginal;
+
+        let sufixo = "";
+        if (files.length > 1) sufixo = `_${letraPorIndice(idx)}`;
+
+        const newName = `${itemSku.sku}${sufixo}_${itemSku.nome}.${ext}`;
+        const buffer = await file.arrayBuffer();
+        zip.file(newName, buffer);
+        nomesGerados.push(`• ${newName}`);
+      }
+    }
+
+    preview.innerText =
+      `📦 ZIP: ${grupoId}.zip\n\nArquivos:\n${nomesGerados.join("\n")}\n\nObs: o label ficará vazio (como o sistema pede).`;
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${grupoId}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+
+    showToast("ZIP gerado! 📦✅", 1600);
+  }
+</script>
+
+</body>
+</html>

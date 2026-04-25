@@ -474,16 +474,10 @@
   <option value="generico" selected>Genérica</option>
 </select>
 
-        <label for="descImagem">Foto do produto (opcional — envia para a IA analisar)</label>
-        <input type="file" id="descImagem" accept="image/*">
-        <div id="descImagePreview" style="margin-top:8px;display:none;">
-          <img id="descThumb" style="max-height:120px;border-radius:10px;border:1px solid var(--border);" alt="preview">
-        </div>
-
-        <button class="btn" id="btnGerarDesc" onclick="gerarDescricaoIA()">✨ Gerar Descrição com IA</button>
+        <button class="btn" id="btnGerarDesc" onclick="gerarDescricaoIA()">Gerar Descrição</button>
 
         <div id="descLoading" style="display:none;margin-top:12px;text-align:center;color:var(--muted);font-size:13px;font-weight:700;">
-          ⏳ Gerando descrição com IA...
+          ⏳ Gerando descrição...
         </div>
 
         <div class="divider" style="margin-top:14px;"></div>

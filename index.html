@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QVestido | Gerador de Títulos</title>
 
-  <!-- ✅ JSZip (gera .zip no navegador) -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-
   <style>
     :root{
       --bg: #ffffff;
@@ -196,7 +193,7 @@
       letter-spacing: .2px;
     }
 
-    input[type="text"], select, input[type="file"]{
+    input[type="text"], input[type="number"], select, input[type="file"]{
       width: 100%;
       padding: 12px 14px;
       border-radius: var(--radius-sm);
@@ -207,7 +204,7 @@
       transition: box-shadow .2s ease, border-color .2s ease, transform .15s ease;
       outline: none;
     }
-    input[type="text"]:focus, select:focus, input[type="file"]:focus{
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="file"]:focus{
       border-color: var(--accent);
       box-shadow: var(--focus);
     }
@@ -312,7 +309,7 @@
         <img src="https://recursos.qvestido.com.br/i/SVG-diversos/logo.svg" alt="QVestido" />
         <div class="titlewrap">
           <p class="title">Gerador de Cadastro</p>
-          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • ZIP de Imagens</p>
+          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • Descrições IA • Markup</p>
         </div>
       </div>
 
@@ -457,39 +454,96 @@
 
       <!-- ===================== Section 3 ===================== -->
       <section class="card" id="section3">
-        <h2>Renomear Imagens + Baixar ZIP</h2>
+        <h2>Gerar Descrição do Produto ✨</h2>
         <p class="desc">
-          Padrão aceito:
-          1 imagem: <b>SKU_Nome do produto.jpg</b> • várias: <b>SKU_A_Nome.jpg</b>, <b>SKU_B_Nome.jpg</b> • ZIP: <b>ID_DO_GRUPO.zip</b><br>
-          Se marcar “por grade”, gera cópia por SKU/tamanho.
+          O título pai gerado na Seção 1 é aproveitado automaticamente. Informe a composição e, opcionalmente, anexe uma foto — a IA gera uma descrição completa em HTML, pronta para usar.
         </p>
 
-        <label for="imgCodigo">Código / SKU base</label>
-        <input type="text" id="imgCodigo" placeholder="Ex: SA006VD (ou 998234)">
+        <label for="descTitulo">Título do produto (preenchido automaticamente da Seção 1)</label>
+        <input type="text" id="descTitulo" placeholder="Preencha os campos na Seção 1 e clique em Gerar Títulos..." readonly style="opacity:.7;cursor:default;">
 
-        <label for="imgNome">Nome do produto</label>
-        <input type="text" id="imgNome" placeholder="Ex: SAIA MIDI EM ALFAIATARIA PRETO - LEKAZIS">
+        <label for="descComposicao">Composição do produto</label>
+        <input type="text" id="descComposicao" placeholder="Ex: 98% Algodão e 2% Elastano">
 
-        <label for="imgGrupoId">ID do grupo de imagens (nome do .zip)</label>
-        <input type="text" id="imgGrupoId" placeholder="Ex: 12345">
+<label for="tipoTecido">Tipo de descrição</label>
+<select id="tipoTecido">
+  <option value="viscose">Viscose</option>
+  <option value="algodao">Algodão</option>
+  <option value="poliamida">Poliamida/Elastano</option>
+  <option value="jeans">Jeans</option>
+  <option value="generico" selected>Genérica</option>
+</select>
 
-        <label for="imgFiles">Selecione as imagens</label>
-        <input type="file" id="imgFiles" accept="image/*" multiple />
-
-        <div class="inline-row">
-          <input type="checkbox" id="zipPorGrade" />
-          <label for="zipPorGrade">Gerar imagens por grade (1 imagem por SKU/tamanho)</label>
+        <label for="descImagem">Foto do produto (opcional — envia para a IA analisar)</label>
+        <input type="file" id="descImagem" accept="image/*">
+        <div id="descImagePreview" style="margin-top:8px;display:none;">
+          <img id="descThumb" style="max-height:120px;border-radius:10px;border:1px solid var(--border);" alt="preview">
         </div>
 
-        <div class="inline-row">
-          <input type="checkbox" id="forceJpg" />
-          <label for="forceJpg">Forçar extensão .jpg (apenas renomeia, não converte)</label>
+        <button class="btn" id="btnGerarDesc" onclick="gerarDescricaoIA()">✨ Gerar Descrição com IA</button>
+
+        <div id="descLoading" style="display:none;margin-top:12px;text-align:center;color:var(--muted);font-size:13px;font-weight:700;">
+          ⏳ Gerando descrição com IA...
         </div>
 
-        <button class="btn" onclick="gerarZipImagens()">Gerar ZIP para o grupo</button>
+        <div class="divider" style="margin-top:14px;"></div>
 
-        <div class="output" id="zipPreview"></div>
-        <button class="btn secondary" onclick="copiarTexto('zipPreview')">Copiar Lista Gerada</button>
+        <h3>Resultado — HTML da Descrição</h3>
+        <div class="output" id="descHtmlOutput" style="min-height:80px;white-space:pre-wrap;"></div>
+        <button class="btn secondary" onclick="copiarTexto('descHtmlOutput')">Copiar HTML</button>
+
+        <div class="divider"></div>
+
+        <h3>Prévia visual</h3>
+        <div id="descPreview" style="
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:var(--radius-sm);
+          padding:14px 16px;
+          min-height:48px;
+          font-size:14px;
+          color:var(--text);
+          line-height:1.6;
+        "></div>
+      </section>
+
+
+      <!-- ===================== Section 4 ===================== -->
+      <section class="card" id="section4">
+        <h2>Calculadora de Markup 🏷️</h2>
+        <p class="desc">Calcule o preço de venda com base no custo e no markup da marca. O preço final é arredondado para o padrão de precificação.</p>
+
+        <label for="mkMarca">Marca</label>
+        <select id="mkMarca">
+          <option value="">Selecione a marca</option>
+          <option value="2.1">Luzia Fazzolli</option>
+          <option value="2.0">Lekazis</option>
+        </select>
+
+        <label for="mkMarkup">Markup</label>
+        <input type="number" step="0.01" id="mkMarkup" placeholder="Ex: 2.1">
+
+        <label for="mkCusto">Preço de Custo (R$)</label>
+        <input type="number" step="0.01" id="mkCusto" placeholder="Ex: 577.80">
+
+        <button class="btn" onclick="calcularMarkup()">Calcular Preço de Venda</button>
+
+        <div id="mkResultadoWrap" style="display:none;margin-top:14px;">
+          <div style="
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:var(--radius-sm);
+            padding:18px;
+            text-align:center;
+          ">
+            <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.3px;margin-bottom:6px;">PREÇO DE VENDA</div>
+            <div id="mkResultado" style="font-size:28px;font-weight:900;letter-spacing:-.5px;"></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button class="btn secondary" style="margin-top:0;" onclick="copiarMarkup()">Copiar Valor</button>
+            <button class="btn secondary" style="margin-top:0;" onclick="limparMarkup()">Limpar</button>
+          </div>
+        </div>
       </section>
 
     </div>
@@ -824,89 +878,253 @@
     document.getElementById("urlOutput").innerText = parts.join("-");
   }
 
-  // ===== Section 3: Imagens -> ZIP =====
-  function limparParaNomeDeArquivo(str) {
-    return (str || "")
-      .replace(/[\\\/:*?"<>|]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
+  // ===== Section 3: Gerar Descrição com IA =====
+
+  // Auto-preenche o título quando gerado na seção 1
+  const _origGerarTituloCompleto = window.gerarTituloCompleto;
+  document.addEventListener('DOMContentLoaded', () => {
+    // hook via MutationObserver no output de título
+    const tituloOutput = document.getElementById('tituloOutput');
+    if (tituloOutput) {
+      const obs = new MutationObserver(() => {
+        const linhas = (tituloOutput.innerText || '').split('\n').filter(Boolean);
+        if (linhas.length > 0) {
+          document.getElementById('descTitulo').value = linhas[0];
+        }
+      });
+      obs.observe(tituloOutput, { childList: true, subtree: true, characterData: true });
+    }
+  });
+
+  // Preview da imagem ao selecionar
+  document.addEventListener('DOMContentLoaded', () => {
+    const imgInput = document.getElementById('descImagem');
+    if (imgInput) {
+      imgInput.addEventListener('change', () => {
+        const file = imgInput.files[0];
+        const preview = document.getElementById('descImagePreview');
+        const thumb = document.getElementById('descThumb');
+        if (file) {
+          const url = URL.createObjectURL(file);
+          thumb.src = url;
+          preview.style.display = 'block';
+        } else {
+          preview.style.display = 'none';
+          thumb.src = '';
+        }
+      });
+    }
+  });
+
+  // Também atualiza o título quando gerarTituloCompleto ou gerarTitulosESkus rodar
+  const _patchTitulo = () => {
+    const cat = (document.getElementById('categoria')?.value || '').toUpperCase();
+    const comp = (document.getElementById('comprimento')?.value || '').toUpperCase();
+    const tecido = (document.getElementById('tecido')?.value || '').toUpperCase();
+    const cor = (document.getElementById('cor')?.value || '').toUpperCase();
+    const marca = (document.getElementById('marca')?.value || '').toUpperCase();
+    if (cat && tecido && cor && marca) {
+      const base = comp ? `${cat} ${comp}` : cat;
+      document.getElementById('descTitulo').value = `${base} EM ${tecido} ${cor} - ${marca}`;
+    }
+  };
+
+  // Hook nos botões da seção 1 para sincronizar título automaticamente
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#section1 .btn').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(_patchTitulo, 50));
+    });
+    // Também sincroniza ao digitar
+    ['categoria','comprimento','tecido','cor','marca'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => setTimeout(_patchTitulo, 10));
+    });
+  });
+
+  async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
-  function letraPorIndice(i) { return String.fromCharCode(65 + i); }
+  function gerarDescricaoIA() {
+  const titulo = document.getElementById('descTitulo').value.trim();
+  const composicao = document.getElementById('descComposicao').value.trim();
+  const tipoSelecionado = document.getElementById("tipoTecido").value;
 
-  async function gerarZipImagens() {
-    const codigo = limparParaNomeDeArquivo(document.getElementById("imgCodigo").value);
-    const nomeProduto = limparParaNomeDeArquivo(document.getElementById("imgNome").value);
-    const grupoId = limparParaNomeDeArquivo(document.getElementById("imgGrupoId").value);
-    const forceJpg = document.getElementById("forceJpg").checked;
-    const usarGrade = document.getElementById("zipPorGrade").checked;
+  if (!titulo) {
+    showToast('Preencha os campos na Seção 1 primeiro.', 2000);
+    return;
+  }
 
-    const files = Array.from(document.getElementById("imgFiles").files || []);
-    const preview = document.getElementById("zipPreview");
+  if (!composicao) {
+    showToast('Informe a composição do produto.', 1800);
+    return;
+  }
 
-    if (!codigo || !nomeProduto || !grupoId) {
-      showToast("Preencha Código, Nome do produto e ID do grupo.", 2000);
+  const outputEl = document.getElementById('descHtmlOutput');
+  const previewEl = document.getElementById('descPreview');
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // 🎯 BANCO DE BENEFÍCIOS
+  const banco = {
+    viscose: [
+      "toque extremamente macio, leveza no uso e um caimento fluido que valoriza o corpo com naturalidade",
+      "sensação suave ao toque, frescor ao vestir e um caimento elegante que acompanha os movimentos",
+      "leveza, conforto prolongado e um caimento solto que traz sofisticação ao visual",
+      "toque delicado, fluidez no tecido e uma sensação agradável ao longo do dia",
+      "caimento leve, frescor ao vestir e conforto ideal para uso contínuo"
+    ],
+
+    algodao: [
+      "respirabilidade natural, conforto térmico e toque suave que proporciona bem-estar no uso diário",
+      "maciez ao toque, durabilidade e uma sensação agradável na pele durante todo o dia",
+      "conforto prolongado, leveza e ótima adaptação ao corpo",
+      "tecido leve, respirável e ideal para quem busca conforto no dia a dia",
+      "toque macio, frescor e praticidade para diferentes ocasiões"
+    ],
+
+    poliamida: [
+      "elasticidade, ajuste perfeito ao corpo e conforto durante todo o uso",
+      "flexibilidade, resistência e um caimento que valoriza a silhueta com elegância",
+      "toque leve, alta durabilidade e excelente adaptação ao corpo",
+      "conforto, mobilidade e ajuste que acompanha os movimentos com naturalidade",
+      "tecido tecnológico, leve e ideal para um caimento mais estruturado"
+    ],
+
+    jeans: [
+      "resistência, estilo atemporal e versatilidade para diferentes combinações",
+      "estrutura firme, durabilidade e um visual moderno que nunca sai de moda",
+      "caimento estruturado, resistência e um toque urbano ao visual",
+      "tecido encorpado, estiloso e ideal para looks versáteis",
+      "visual marcante, durabilidade e personalidade na composição"
+    ],
+
+    generico: [
+      "conforto no uso, versatilidade e um caimento que valoriza o visual",
+      "leveza, praticidade e um estilo moderno para diversas ocasiões",
+      "conforto prolongado, elegância e facilidade na composição de looks",
+      "praticidade no dia a dia e um visual sempre atual",
+      "equilíbrio entre conforto, estilo e versatilidade"
+    ]
+  };
+
+  const beneficio1 = pick(banco[tipoSelecionado]);
+  const beneficio2 = pick(banco[tipoSelecionado]);
+
+  // 🎯 ABERTURAS (variação maior)
+  const aberturas = [
+    `A <b>${titulo}</b> é uma escolha elegante que une ${beneficio1}.`,
+    `Pensada para o dia a dia, a <b>${titulo}</b> oferece ${beneficio1}.`,
+    `Com design atemporal, a <b>${titulo}</b> proporciona ${beneficio1}.`,
+    `A <b>${titulo}</b> se destaca por entregar ${beneficio1}.`,
+    `Versátil e sofisticada, a <b>${titulo}</b> garante ${beneficio1}.`,
+    `Perfeita para diferentes ocasiões, a <b>${titulo}</b> traz ${beneficio1}.`,
+    `Com um acabamento refinado, a <b>${titulo}</b> oferece ${beneficio1}.`,
+    `A <b>${titulo}</b> combina estilo e ${beneficio1}.`
+  ];
+
+  // 🎯 PARÁGRAFO EXTRA (deixa mais "IA real")
+  const meio = [
+    `Além disso, se destaca por ${beneficio2}, tornando a peça ainda mais versátil para diferentes ocasiões.`,
+    `Outro ponto forte é ${beneficio2}, garantindo praticidade e elegância no uso.`,
+    `Seu diferencial está em ${beneficio2}, ideal para quem valoriza conforto aliado ao estilo.`,
+    `Isso sem contar ${beneficio2}, que faz toda a diferença no caimento da peça.`,
+    `Com ${beneficio2}, ela se adapta perfeitamente ao dia a dia e também a momentos especiais.`
+  ];
+
+  // 🎯 FECHAMENTOS
+  const fechamentos = [
+    "Uma peça que se adapta facilmente a diferentes propostas de look.",
+    "Ideal para compor produções elegantes e modernas com praticidade.",
+    "Perfeita para quem busca estilo sem abrir mão do conforto no dia a dia.",
+    "Uma escolha versátil que acompanha diversas ocasiões.",
+    "Modelo pensado para valorizar o visual com naturalidade.",
+    "Combina facilmente com diferentes estilos e ocasiões.",
+    "Um item essencial para um guarda-roupa funcional e atual.",
+    "Perfeita para criar composições equilibradas e sofisticadas."
+  ];
+
+  const descricaoHTML = `
+<div style="font-size: 14px; text-align: justify;">
+${pick(aberturas)}
+
+${pick(meio)}
+
+${pick(fechamentos)}
+<br><br>
+• <b>Composição:</b> ${composicao}
+</div>
+  `.trim();
+
+  outputEl.innerText = descricaoHTML;
+  previewEl.innerHTML = descricaoHTML;
+
+  showToast('Descrição gerada! ✨', 1500);
+}
+  // ===== Section 4: Calculadora de Markup =====
+  document.getElementById('mkMarca').addEventListener('change', function() {
+    if (this.value) document.getElementById('mkMarkup').value = this.value;
+  });
+
+  ['mkMarkup', 'mkCusto'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') calcularMarkup();
+    });
+  });
+
+  let _mkPrecoAtual = '';
+
+  function calcularMarkup() {
+    const markup = parseFloat(document.getElementById('mkMarkup').value);
+    const custo = parseFloat(document.getElementById('mkCusto').value);
+
+    if (isNaN(markup) || isNaN(custo) || markup <= 0 || custo <= 0) {
+      showToast('Preencha o markup e o custo corretamente.', 2000);
       return;
     }
-    if (files.length === 0) {
-      showToast("Selecione pelo menos 1 imagem.", 1800);
-      return;
+
+    const bruto = custo * markup;
+    const base = Math.floor(bruto / 10) * 10;
+    const resto = bruto - base;
+    const precoFinal = resto < 5 ? base - 0.10 : base + 9.90;
+
+    _mkPrecoAtual = precoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('mkResultado').textContent = _mkPrecoAtual;
+    document.getElementById('mkResultadoWrap').style.display = 'block';
+    showToast('Preço calculado! ✅', 1400);
+  }
+
+  function copiarMarkup() {
+    if (!_mkPrecoAtual) { showToast('Nada para copiar 😅', 1500); return; }
+    try {
+      navigator.clipboard.writeText(_mkPrecoAtual).then(() => showToast('Copiado! ✅', 1400)).catch(() => {
+        const tmp = document.createElement('textarea');
+        tmp.value = _mkPrecoAtual;
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        tmp.remove();
+        showToast('Copiado! ✅', 1400);
+      });
+    } catch(e) {
+      showToast('Erro ao copiar', 1800);
     }
+  }
 
-    const inicio = (document.getElementById("gradeInicio")?.value || "").toUpperCase();
-    const fim = (document.getElementById("gradeFim")?.value || "").toUpperCase();
-    const inicioIndex = tamanhos.indexOf(inicio);
-    const fimIndex = tamanhos.indexOf(fim);
-
-    if (usarGrade) {
-      if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
-        showToast("Selecione uma grade válida (Grade Inicial e Final).", 2000);
-        return;
-      }
-    }
-
-    const zip = new JSZip();
-    const nomesGerados = [];
-
-    let listaSkus = [];
-    if (usarGrade) {
-      for (let i = inicioIndex; i <= fimIndex; i++) {
-        const tam = tamanhos[i];
-        listaSkus.push({ sku: `${codigo}-${tam}`, nome: `${nomeProduto} - ${tam}` });
-      }
-    } else {
-      listaSkus.push({ sku: codigo, nome: nomeProduto });
-    }
-
-    for (const itemSku of listaSkus) {
-      for (let idx = 0; idx < files.length; idx++) {
-        const file = files[idx];
-        const extOriginal = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const ext = forceJpg ? "jpg" : extOriginal;
-
-        let sufixo = "";
-        if (files.length > 1) sufixo = `_${letraPorIndice(idx)}`;
-
-        const newName = `${itemSku.sku}${sufixo}_${itemSku.nome}.${ext}`;
-        const buffer = await file.arrayBuffer();
-        zip.file(newName, buffer);
-        nomesGerados.push(`• ${newName}`);
-      }
-    }
-
-    preview.innerText =
-      `📦 ZIP: ${grupoId}.zip\n\nArquivos:\n${nomesGerados.join("\n")}\n\nObs: o label ficará vazio (como o sistema pede).`;
-
-    const blob = await zip.generateAsync({ type: "blob" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${grupoId}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-
-    showToast("ZIP gerado! 📦✅", 1600);
+  function limparMarkup() {
+    _mkPrecoAtual = '';
+    document.getElementById('mkMarca').value = '';
+    document.getElementById('mkMarkup').value = '';
+    document.getElementById('mkCusto').value = '';
+    document.getElementById('mkResultado').textContent = '';
+    document.getElementById('mkResultadoWrap').style.display = 'none';
   }
 </script>
 

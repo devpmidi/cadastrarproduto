@@ -537,6 +537,26 @@
         </div>
       </section>
 
+      <!-- ===================== Section 5: Categorização ===================== -->
+      <section class="card" id="section5">
+        <h2>Categorização do Produto 🏷️</h2>
+        <p class="desc">Detecta automaticamente as categorizações disponíveis com base no título digitado na Seção 1. Clique em uma categoria para selecioná-la e depois copie.</p>
+
+        <div id="catDetectada" style="margin-bottom:10px;font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.2px;min-height:18px;"></div>
+
+        <div id="catChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:40px;"></div>
+
+        <div id="catSelecionadaWrap" style="display:none;">
+          <label style="margin-top:0;">Categorização selecionada</label>
+          <div class="output small" id="catSelecionadaOutput" style="min-height:34px;cursor:pointer;"></div>
+          <button class="btn secondary" style="margin-top:8px;" onclick="copiarTexto('catSelecionadaOutput')">Copiar Categorização</button>
+        </div>
+
+        <div id="catVazio" style="color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;padding:12px 0;">
+          <span>⬆️ Preencha o campo <b>Categoria</b> na Seção 1 para ver as opções</span>
+        </div>
+      </section>
+
     </div>
   </div>
 
@@ -1117,6 +1137,195 @@ ${pick(fechamentos)}
     document.getElementById('mkResultado').textContent = '';
     document.getElementById('mkResultadoWrap').style.display = 'none';
   }
+
+  // ===== Section 5: Categorização =====
+  const _catDb = [
+    {
+      chaves: ["VESTIDO", "VESTIDOS"],
+      label: "Vestidos",
+      opcoes: [
+        "Vestidos>Vestidos Curto",
+        "Vestidos>Vestidos Longo",
+        "Vestidos>Vestidos Midi",
+        "Vestidos>Vestidos Longuete",
+        "Vestidos>Vestidos Jeans"
+      ]
+    },
+    {
+      chaves: ["CONJUNTO", "CONJUNTOS"],
+      label: "Conjuntos",
+      opcoes: [
+        "Conjuntos>Conjuntos Longos",
+        "Conjuntos>Conjuntos Midi",
+        "Conjuntos>Conjuntos Jeans",
+        "Conjuntos>Conjuntos Curto"
+      ]
+    },
+    {
+      chaves: ["MODA PRAIA", "MAIO", "MAIÔ", "BIQUINI", "BIQUÍNI"],
+      label: "Moda Praia",
+      opcoes: [
+        "Moda Praia>Maiôs",
+        "Moda Praia>Shorts Saia",
+        "Moda Praia>Biquinis"
+      ]
+    },
+    {
+      chaves: ["BLUSA", "BLUSAS"],
+      label: "Blusas",
+      opcoes: [
+        "Roupas>Blusas e Camisas",
+        "Roupas>Blusas Jeans"
+      ]
+    },
+    {
+      chaves: ["CAMISA", "CAMISAS"],
+      label: "Camisas",
+      opcoes: [
+        "Roupas>Blusas e Camisas",
+        "Roupas>Camisas Jeans"
+      ]
+    },
+    {
+      chaves: ["T-SHIRT", "TSHIRT", "CAMISETA"],
+      label: "T-Shirts",
+      opcoes: [
+        "Roupas>T-shirts"
+      ]
+    },
+    {
+      chaves: ["BLAZER", "BLAZERS", "CASACO", "CASACOS", "CASAQUETO"],
+      label: "Blazers e Casacos",
+      opcoes: [
+        "Roupas>Blazers e Casacos"
+      ]
+    },
+    {
+      chaves: ["JAQUETA", "JAQUETAS"],
+      label: "Jaquetas",
+      opcoes: [
+        "Roupas>Jaquetas Jeans"
+      ]
+    },
+    {
+      chaves: ["CALCA", "CALCAS", "CALÇA", "CALÇAS"],
+      label: "Calças",
+      opcoes: [
+        "Roupas>Calças",
+        "Jeans>Calças Jeans"
+      ]
+    },
+    {
+      chaves: ["MACACAO", "MACACÃO", "MACACOES"],
+      label: "Macacão",
+      opcoes: [
+        "Roupas>Macacão",
+        "Jeans>Salopete Jeans"
+      ]
+    },
+    {
+      chaves: ["SAIA", "SAIAS"],
+      label: "Saias",
+      opcoes: [
+        "Roupas>Saias>Saias Midi",
+        "Roupas>Saias>Saias Longa",
+        "Roupas>Saias>Saias Curta",
+        "Roupas>Saias Jeans",
+        "Jeans>Saias Jeans"
+      ]
+    },
+    {
+      chaves: ["SHORT", "SHORTS", "BERMUDA", "BERMUDAS"],
+      label: "Shorts e Bermudas",
+      opcoes: [
+        "Roupas>Bermudas e Shorts",
+        "Moda Praia>Shorts Saia"
+      ]
+    },
+    {
+      chaves: ["FITNESS", "LEGGING", "LEGGINGS"],
+      label: "Fitness",
+      opcoes: [
+        "Roupas>Fitness"
+      ]
+    }
+  ];
+
+  function _normCat(str) {
+    return (str || "")
+      .toUpperCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function _buscarCat(input) {
+    const val = _normCat(input);
+    if (!val) return null;
+    for (const grupo of _catDb) {
+      if (grupo.chaves.some(k => val.includes(_normCat(k)) || _normCat(k).includes(val))) {
+        return grupo;
+      }
+    }
+    return null;
+  }
+
+  function _renderCat(grupo) {
+    const chips = document.getElementById('catChips');
+    const vazio = document.getElementById('catVazio');
+    const detectada = document.getElementById('catDetectada');
+    const selecionadaWrap = document.getElementById('catSelecionadaWrap');
+    const selecionadaOut = document.getElementById('catSelecionadaOutput');
+
+    chips.innerHTML = '';
+    selecionadaWrap.style.display = 'none';
+    selecionadaOut.innerText = '';
+
+    if (!grupo) {
+      detectada.innerText = '';
+      vazio.style.display = 'flex';
+      return;
+    }
+
+    vazio.style.display = 'none';
+    detectada.innerText = `Categoria detectada: ${grupo.label}`;
+
+    grupo.opcoes.forEach(op => {
+      const btn = document.createElement('button');
+      btn.className = 'icon-btn';
+      btn.style.cssText = 'font-size:12px;padding:8px 14px;font-weight:700;border-radius:999px;';
+      btn.textContent = op;
+      btn.addEventListener('click', () => {
+        // Remover seleção anterior
+        chips.querySelectorAll('button').forEach(b => {
+          b.style.background = '';
+          b.style.color = '';
+          b.style.borderColor = '';
+        });
+        // Marcar selecionado
+        btn.style.background = 'var(--accent)';
+        btn.style.color = 'var(--bg)';
+        btn.style.borderColor = 'var(--accent)';
+
+        selecionadaOut.innerText = op;
+        selecionadaWrap.style.display = 'block';
+        showToast('Selecionado! Clique em Copiar ✅', 1400);
+      });
+      chips.appendChild(btn);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const catInput = document.getElementById('categoria');
+    if (catInput) {
+      catInput.addEventListener('input', () => {
+        const grupo = _buscarCat(catInput.value);
+        _renderCat(grupo);
+      });
+    }
+  });
 </script>
 
 </body>

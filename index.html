@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QVestido | Gerador de Títulos</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
   <style>
     :root{
@@ -498,7 +499,7 @@
         </div>
 
         <div class="export-bar">
-          <button class="btn" onclick="exportarCSV()">⬇️ Exportar CSV (planilha completa)</button>
+          <button class="btn" onclick="exportarCSV()">⬇️ Exportar Planilha .xlsx (Excel)</button>
           <button class="btn danger" onclick="limparTodosProdutos()">🗑️ Limpar todos os produtos</button>
         </div>
       </section>
@@ -1113,6 +1114,15 @@
     });
   }
 
+  // Aa: Primeira letra maiúscula de cada palavra (Title Case)
+  function toTitleCase(str) {
+    if (!str) return '';
+    return String(str).toLowerCase().split(/(\s+|-)/).map(w => {
+      if (!w || /^\s+$/.test(w) || w === '-') return w;
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join('');
+  }
+
   // Gera as linhas da planilha (PAI + filhos) para um produto
   function gerarLinhasPlanilha(p, idNumerico) {
     const linhas = [];
@@ -1151,9 +1161,9 @@
       '',                 // Peso Bruto (PAI vazio)
       p.categorizacao,    // Categorizacao
       BENEFICIOS_HTML,    // Benefícios
-      p.cor,              // Cor
+      toTitleCase(p.cor),              // Cor
       '',                 // Detalhes (vazio)
-      p.marca,            // Marca
+      toTitleCase(p.marca),            // Marca
       loja,               // Produto vendido na loja virtual
       p.tituloSEO,        // Título para a pagina
       p.metaDesc,         // Metatag Description
@@ -1188,14 +1198,14 @@
         precoNum,
         custoNum,
         peso,                       // Peso Bruto (filho) — texto 0,200
-        '',                         // Categorizacao (vazio no filho)
+        p.categorizacao,            // Categorizacao (igual ao pai)
         '',                         // Benefícios (vazio no filho)
-        p.cor,
+        toTitleCase(p.cor),
         '',                         // Detalhes (vazio)
-        p.marca,
+        toTitleCase(p.marca),
         loja,
-        '',                         // Título SEO (vazio no filho)
-        '',                         // Meta Description (vazio no filho)
+        p.tituloSEO,                // Título SEO (igual ao pai)
+        p.metaDesc,                 // Meta Description (igual ao pai)
         compCm,
         largCm,
         altCm,
@@ -1213,6 +1223,7 @@
   function exportarCSV() {
     const lista = carregarProdutos();
     if (lista.length === 0) { showToast('Nenhum produto para exportar.', 1800); return; }
+    if (typeof XLSX === 'undefined') { showToast('Biblioteca XLSX não carregada. Verifique a internet.', 2500); return; }
 
     const colunas = [
       'ID','Codigo SKU','Descricao','Unidade','Cod do fabricante','Classificação fiscal',
@@ -1222,37 +1233,34 @@
       'Descricao para E-commerce','Descricao detalhada do produto','URL','Tamanho','Guia de Medidas'
     ];
 
-    const csvEscape = (val) => {
-      const s = String(val === null || val === undefined ? '' : val);
-      if (s.includes('"') || s.includes(',') || s.includes('\n') || s.includes(';')) {
-        return '"' + s.replace(/"/g, '""') + '"';
-      }
-      return s;
-    };
-
-    const linhasCSV = [colunas.map(csvEscape).join(';')];
-
+    // Monta matriz: cabeçalho + linhas
+    const aoa = [colunas];
     lista.forEach((p, idx) => {
       const rows = gerarLinhasPlanilha(p, idx + 1);
-      rows.forEach(row => linhasCSV.push(row.map(csvEscape).join(';')));
+      rows.forEach(row => aoa.push(row.map(v => v === null || v === undefined ? '' : v)));
     });
 
-    const bom = '\uFEFF'; // BOM para UTF-8 (abre certo no Excel)
-    const csvContent = bom + linhasCSV.join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
+    // Cria worksheet (todas as células como string p/ preservar zeros à esquerda e vírgulas)
+    const ws = XLSX.utils.aoa_to_sheet(aoa.map(r => r.map(v => String(v))));
+
+    // Define largura padrão das colunas
+    ws['!cols'] = colunas.map(c => ({ wch: Math.min(Math.max(c.length + 4, 14), 40) }));
+
+    // Cria workbook e adiciona a aba
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
+
+    // Nome do arquivo
     const agora = new Date();
     const dataStr = `${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}`;
     const marcaInput = (document.getElementById('marca')?.value || document.getElementById('marca2')?.value || (lista[0] && lista[0].marca) || 'SEM-MARCA');
     const marcaSan = String(marcaInput).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'SEM-MARCA';
-    a.download = `PLANILHA_CADASTRO_${marcaSan}_${dataStr}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast(`CSV exportado! ${lista.length} produto(s). ✅`, 2000);
+    const filename = `PLANILHA_CADASTRO_${marcaSan}_${dataStr}.xlsx`;
+
+    // Gera e baixa o .xlsx real
+    XLSX.writeFile(wb, filename, { bookType: 'xlsx', compression: true });
+
+    showToast(`Planilha .xlsx exportada! ${lista.length} produto(s). ✅`, 2000);
   }
 
   // Inicialização

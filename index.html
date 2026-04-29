@@ -1244,8 +1244,10 @@
     const a = document.createElement('a');
     a.href = url;
     const agora = new Date();
-    const dataStr = `${agora.getFullYear()}${String(agora.getMonth()+1).padStart(2,'0')}${String(agora.getDate()).padStart(2,'0')}`;
-    a.download = `qvestido_cadastro_${dataStr}_${lista.length}produtos.csv`;
+    const dataStr = `${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}`;
+    const marcaInput = (document.getElementById('marca')?.value || document.getElementById('marca2')?.value || (lista[0] && lista[0].marca) || 'SEM-MARCA');
+    const marcaSan = String(marcaInput).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'SEM-MARCA';
+    a.download = `PLANILHA_CADASTRO_${marcaSan}_${dataStr}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

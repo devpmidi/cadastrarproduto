@@ -15,12 +15,16 @@
       --border: #e6e6e6;
       --shadow: 0 14px 40px rgba(0,0,0,.08);
       --shadow-soft: 0 10px 24px rgba(0,0,0,.06);
-      --accent: #0f0f0f; /* preto */
+      --accent: #0f0f0f;
       --accent-2: #2a2a2a;
       --focus: 0 0 0 4px rgba(0,0,0,.12);
       --radius: 18px;
       --radius-sm: 12px;
       --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --red: #dc2626;
+      --red-light: #fee2e2;
     }
 
     body.dark-mode{
@@ -32,9 +36,11 @@
       --border: #252525;
       --shadow: 0 16px 46px rgba(0,0,0,.6);
       --shadow-soft: 0 10px 26px rgba(0,0,0,.45);
-      --accent: #f1f1f1; /* branco */
+      --accent: #f1f1f1;
       --accent-2: #d8d8d8;
       --focus: 0 0 0 4px rgba(255,255,255,.14);
+      --green-light: #14532d;
+      --red-light: #450a0a;
     }
 
     *{ box-sizing: border-box; }
@@ -48,256 +54,167 @@
       transition: background-color .25s ease, color .25s ease;
     }
 
-    .page{
-      max-width: 980px;
-      margin: 0 auto;
-    }
+    .page{ max-width: 980px; margin: 0 auto; }
 
-    /* Header */
     .topbar{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 18px;
-      padding: 14px 16px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; margin-bottom: 18px; padding: 14px 16px;
+      border: 1px solid var(--border); border-radius: var(--radius);
       background: linear-gradient(180deg, var(--surface), var(--surface-2));
       box-shadow: var(--shadow-soft);
     }
-
-    .brand{
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 0;
-    }
-
-    .brand img{
-      height: 26px;
-      width: auto;
-      display: block;
-      filter: none;
-    }
-
-    body.dark-mode .brand img{
-      /* deixa o SVG “branco” quando possível (depende do SVG). Se não funcionar, ele fica normal mesmo. */
-      filter: invert(1) grayscale(1) contrast(1.1);
-    }
-
-    .brand .titlewrap{
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-      min-width: 0;
-    }
-
-    .brand .title{
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: .2px;
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .brand .subtitle{
-      font-size: 12px;
-      color: var(--muted);
-      margin: 2px 0 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .actions{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .brand{ display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .brand img{ height: 26px; width: auto; display: block; }
+    body.dark-mode .brand img{ filter: invert(1) grayscale(1) contrast(1.1); }
+    .brand .titlewrap{ display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
+    .brand .title{ font-size: 14px; font-weight: 800; letter-spacing: .2px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand .subtitle{ font-size: 12px; color: var(--muted); margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .actions{ display: flex; align-items: center; gap: 10px; }
 
     .icon-btn{
-      appearance: none;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 10px 12px;
-      cursor: pointer;
-      font-weight: 800;
-      box-shadow: var(--shadow-soft);
+      appearance: none; border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); border-radius: 999px; padding: 10px 12px; cursor: pointer;
+      font-weight: 800; box-shadow: var(--shadow-soft);
       transition: transform .15s ease, background-color .2s ease, border-color .2s ease;
-      white-space: nowrap;
+      white-space: nowrap; font-family: var(--font); font-size: 13px;
     }
     .icon-btn:hover{ transform: translateY(-1px); border-color: var(--accent); }
     .icon-btn:active{ transform: translateY(0px); }
     .icon-btn:focus{ outline: none; box-shadow: var(--shadow-soft), var(--focus); }
 
-    /* Cards */
-    .grid{
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
+    .grid{ display: grid; grid-template-columns: 1fr; gap: 14px; }
 
     .card{
       background: linear-gradient(180deg, var(--surface), var(--surface-2));
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 18px;
       transition: border-color .2s ease, background-color .2s ease;
     }
+    .card h2{ margin: 0 0 10px 0; font-size: 18px; font-weight: 900; letter-spacing: .2px; }
+    .card h3{ margin: 16px 0 10px 0; font-size: 14px; font-weight: 900; letter-spacing: .2px; color: var(--text); opacity: .92; }
 
-    .card h2{
-      margin: 0 0 10px 0;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: .2px;
-    }
+    .desc{ margin: 0 0 14px 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
 
-    .card h3{
-      margin: 16px 0 10px 0;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: .2px;
-      color: var(--text);
-      opacity: .92;
-    }
+    .row{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 720px){ .row{ grid-template-columns: 1fr; } }
 
-    .desc{
-      margin: 0 0 14px 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    @media (max-width: 720px){
-      .row{ grid-template-columns: 1fr; }
-    }
-
-    label{
-      display: block;
-      margin: 12px 0 6px;
-      font-weight: 800;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .2px;
-    }
+    label{ display: block; margin: 12px 0 6px; font-weight: 800; font-size: 12px; color: var(--muted); letter-spacing: .2px; }
 
     input[type="text"], input[type="number"], select, input[type="file"]{
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-size: 14px;
-      transition: box-shadow .2s ease, border-color .2s ease, transform .15s ease;
-      outline: none;
+      width: 100%; padding: 12px 14px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      font-size: 14px; transition: box-shadow .2s ease, border-color .2s ease, transform .15s ease;
+      outline: none; font-family: var(--font);
     }
     input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="file"]:focus{
-      border-color: var(--accent);
-      box-shadow: var(--focus);
+      border-color: var(--accent); box-shadow: var(--focus);
     }
 
     .btn{
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--accent);
-      background: var(--accent);
-      color: var(--bg);
-      font-weight: 900;
-      font-size: 14px;
-      cursor: pointer;
+      width: 100%; padding: 12px 14px; border-radius: var(--radius-sm);
+      border: 1px solid var(--accent); background: var(--accent); color: var(--bg);
+      font-weight: 900; font-size: 14px; cursor: pointer;
       transition: transform .15s ease, opacity .2s ease, background-color .2s ease;
-      margin-top: 10px;
+      margin-top: 10px; font-family: var(--font);
     }
     .btn:hover{ transform: translateY(-1px); opacity: .92; }
     .btn:active{ transform: translateY(0px); }
     .btn:focus{ outline: none; box-shadow: var(--focus); }
 
-    .btn.secondary{
-      background: transparent;
-      color: var(--text);
-      border-color: var(--border);
-    }
+    .btn.secondary{ background: transparent; color: var(--text); border-color: var(--border); }
     .btn.secondary:hover{ border-color: var(--accent); }
 
+    .btn.success{ background: var(--green); border-color: var(--green); color: #fff; }
+    .btn.danger{ background: var(--red); border-color: var(--red); color: #fff; }
+
     .output{
-      margin-top: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      white-space: pre-line;
+      margin-top: 10px; background: var(--surface); border: 1px solid var(--border);
+      padding: 12px 14px; border-radius: var(--radius-sm); white-space: pre-line;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12.5px;
-      color: var(--text);
-      min-height: 54px;
+      font-size: 12.5px; color: var(--text); min-height: 54px;
     }
     .output.small{ min-height: 34px; }
 
-    .divider{
-      height: 1px;
-      background: var(--border);
-      margin: 16px 0;
-    }
+    .divider{ height: 1px; background: var(--border); margin: 16px 0; }
 
     .inline-row{
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-top: 10px;
-      flex-wrap: wrap;
+      display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap;
     }
-    .inline-row input[type="checkbox"]{
-      width: auto;
-      margin: 0;
-      transform: scale(1.05);
-      accent-color: var(--accent);
-    }
-    .inline-row label{
-      margin: 0;
-      font-weight: 800;
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .inline-row input[type="checkbox"]{ width: auto; margin: 0; transform: scale(1.05); accent-color: var(--accent); }
+    .inline-row label{ margin: 0; font-weight: 800; font-size: 12px; color: var(--muted); }
 
-    /* ✅ Toast popup */
+    /* Toast */
     .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
+      position: fixed; left: 50%; bottom: 22px;
       transform: translateX(-50%) translateY(20px);
-      background: var(--accent);
-      color: var(--bg);
-      padding: 12px 16px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 13px;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      pointer-events: none;
+      background: var(--accent); color: var(--bg); padding: 12px 16px;
+      border-radius: 999px; font-weight: 900; font-size: 13px;
+      box-shadow: var(--shadow); opacity: 0; pointer-events: none;
       transition: opacity 220ms ease, transform 220ms ease;
-      max-width: 92vw;
-      text-align: center;
-      z-index: 9999;
+      max-width: 92vw; text-align: center; z-index: 9999;
       border: 1px solid var(--border);
     }
-    .toast.show{
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* === Section 6 - Produtos Salvos === */
+    .badge{
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--accent); color: var(--bg); border-radius: 999px;
+      font-size: 11px; font-weight: 900; padding: 2px 8px; min-width: 22px;
+      vertical-align: middle; margin-left: 6px;
     }
+
+    .produto-card{
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px;
+      display: flex; align-items: flex-start; gap: 12px;
+      animation: fadeIn .25s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+    .produto-card-info{ flex: 1; min-width: 0; }
+    .produto-card-titulo{ font-size: 13px; font-weight: 800; margin: 0 0 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .produto-card-meta{ font-size: 11px; color: var(--muted); }
+
+    .produto-card-actions{ display: flex; gap: 6px; flex-shrink: 0; }
+    .mini-btn{
+      appearance: none; border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); border-radius: 8px; padding: 5px 10px; cursor: pointer;
+      font-size: 11px; font-weight: 800; font-family: var(--font);
+      transition: border-color .15s, background .15s;
+    }
+    .mini-btn:hover{ border-color: var(--accent); }
+    .mini-btn.danger:hover{ border-color: var(--red); color: var(--red); }
+
+    .empty-state{
+      text-align: center; padding: 32px 16px; color: var(--muted);
+      font-size: 13px; border: 2px dashed var(--border);
+      border-radius: var(--radius-sm); margin-top: 10px;
+    }
+    .empty-state .icon{ font-size: 32px; margin-bottom: 8px; }
+
+    .export-bar{
+      display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;
+    }
+    .export-bar .btn{ margin-top: 0; flex: 1; min-width: 140px; }
+
+    /* Contador no cabeçalho da seção */
+    .section-header{ display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+    .section-header h2{ margin: 0; }
+
+    /* Preview dos dados gerados antes de salvar */
+    .preview-grid{
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px; margin: 12px 0;
+    }
+    .preview-item{
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 10px;
+    }
+    .preview-item .key{ font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
+    .preview-item .val{ font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preview-item .val.ok{ color: var(--green); }
+    .preview-item .val.missing{ color: var(--red); }
   </style>
 </head>
 
@@ -309,16 +226,14 @@
         <img src="https://recursos.qvestido.com.br/i/SVG-diversos/logo.svg" alt="QVestido" />
         <div class="titlewrap">
           <p class="title">Gerador de Cadastro</p>
-          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • Descrições IA • Markup</p>
+          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • Descrições IA • Markup • Exportar Planilha</p>
         </div>
       </div>
-
       <div class="actions">
         <button class="icon-btn" id="darkModeToggle" type="button">Modo Escuro</button>
       </div>
     </header>
 
-    <!-- ✅ Toast -->
     <div id="toast" class="toast" aria-live="polite"></div>
 
     <div class="grid">
@@ -348,6 +263,10 @@
           <div>
             <label for="marca">Marca</label>
             <input type="text" id="marca" placeholder="Ex: LEKAZIS">
+          </div>
+          <div>
+            <label for="pesoBase">Peso Bruto base — 1º tamanho (kg)</label>
+            <input type="number" step="0.001" id="pesoBase" placeholder="Ex: 0.200">
           </div>
         </div>
 
@@ -462,14 +381,14 @@
         <label for="descComposicao">Composição do produto</label>
         <input type="text" id="descComposicao" placeholder="Ex: 98% Algodão e 2% Elastano">
 
-<label for="tipoTecido">Tipo de descrição</label>
-<select id="tipoTecido">
-  <option value="viscose">Viscose</option>
-  <option value="algodao">Algodão</option>
-  <option value="poliamida">Poliamida/Elastano</option>
-  <option value="jeans">Jeans</option>
-  <option value="generico" selected>Genérica</option>
-</select>
+        <label for="tipoTecido">Tipo de descrição</label>
+        <select id="tipoTecido">
+          <option value="viscose">Viscose</option>
+          <option value="algodao">Algodão</option>
+          <option value="poliamida">Poliamida/Elastano</option>
+          <option value="jeans">Jeans</option>
+          <option value="generico" selected>Genérica</option>
+        </select>
 
         <button class="btn" id="btnGerarDesc" onclick="gerarDescricaoIA()">Gerar Descrição</button>
 
@@ -486,18 +405,8 @@
         <div class="divider"></div>
 
         <h3>Prévia visual</h3>
-        <div id="descPreview" style="
-          background:var(--surface);
-          border:1px solid var(--border);
-          border-radius:var(--radius-sm);
-          padding:14px 16px;
-          min-height:48px;
-          font-size:14px;
-          color:var(--text);
-          line-height:1.6;
-        "></div>
+        <div id="descPreview" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;min-height:48px;font-size:14px;color:var(--text);line-height:1.6;"></div>
       </section>
-
 
       <!-- ===================== Section 4 ===================== -->
       <section class="card" id="section4">
@@ -520,13 +429,7 @@
         <button class="btn" onclick="calcularMarkup()">Calcular Preço de Venda</button>
 
         <div id="mkResultadoWrap" style="display:none;margin-top:14px;">
-          <div style="
-            background:var(--surface);
-            border:1px solid var(--border);
-            border-radius:var(--radius-sm);
-            padding:18px;
-            text-align:center;
-          ">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;text-align:center;">
             <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.3px;margin-bottom:6px;">PREÇO DE VENDA</div>
             <div id="mkResultado" style="font-size:28px;font-weight:900;letter-spacing:-.5px;"></div>
           </div>
@@ -543,7 +446,6 @@
         <p class="desc">Detecta automaticamente as categorizações disponíveis com base no título digitado na Seção 1. Clique em uma categoria para selecioná-la e depois copie.</p>
 
         <div id="catDetectada" style="margin-bottom:10px;font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.2px;min-height:18px;"></div>
-
         <div id="catChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:40px;"></div>
 
         <div id="catSelecionadaWrap" style="display:none;">
@@ -554,6 +456,50 @@
 
         <div id="catVazio" style="color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;padding:12px 0;">
           <span>⬆️ Preencha o campo <b>Categoria</b> na Seção 1 para ver as opções</span>
+        </div>
+      </section>
+
+      <!-- ===================== Section 6: Produtos Salvos ===================== -->
+      <section class="card" id="section6">
+        <div class="section-header">
+          <h2>📦 Produtos Salvos <span class="badge" id="contadorProdutos">0</span></h2>
+        </div>
+        <p class="desc">Salve cada produto gerado nas seções acima. Os dados ficam armazenados no navegador e podem ser exportados como CSV no formato exato da planilha base.</p>
+
+        <!-- Preview do que será salvo -->
+        <h3>Preview do produto atual</h3>
+        <div class="preview-grid" id="previewGrid">
+          <div class="preview-item"><div class="key">SKU</div><div class="val missing" id="prv-sku">—</div></div>
+          <div class="preview-item"><div class="key">Descrição (Pai)</div><div class="val missing" id="prv-desc">—</div></div>
+          <div class="preview-item"><div class="key">NCM</div><div class="val missing" id="prv-ncm">—</div></div>
+          <div class="preview-item"><div class="key">Preço de Venda</div><div class="val missing" id="prv-preco">—</div></div>
+          <div class="preview-item"><div class="key">Preço de Custo</div><div class="val missing" id="prv-custo">—</div></div>
+          <div class="preview-item"><div class="key">Cor</div><div class="val missing" id="prv-cor">—</div></div>
+          <div class="preview-item"><div class="key">Marca</div><div class="val missing" id="prv-marca">—</div></div>
+          <div class="preview-item"><div class="key">Grade</div><div class="val missing" id="prv-grade">—</div></div>
+          <div class="preview-item"><div class="key">Categorização</div><div class="val missing" id="prv-cat">—</div></div>
+          <div class="preview-item"><div class="key">Título SEO</div><div class="val missing" id="prv-seo">—</div></div>
+          <div class="preview-item"><div class="key">Meta Description</div><div class="val missing" id="prv-meta">—</div></div>
+          <div class="preview-item"><div class="key">URL</div><div class="val missing" id="prv-url">—</div></div>
+          <div class="preview-item"><div class="key">Descrição E-commerce</div><div class="val missing" id="prv-desc-ec">—</div></div>
+          <div class="preview-item"><div class="key">Peso Base (kg)</div><div class="val missing" id="prv-peso">—</div></div>
+        </div>
+
+        <button class="btn success" onclick="salvarProduto()">💾 Salvar produto atual na lista</button>
+
+        <div class="divider"></div>
+
+        <h3>Lista de produtos salvos</h3>
+        <div id="listaProdutos">
+          <div class="empty-state">
+            <div class="icon">📂</div>
+            <div>Nenhum produto salvo ainda.<br>Gere os dados nas seções acima e clique em <b>Salvar produto atual</b>.</div>
+          </div>
+        </div>
+
+        <div class="export-bar">
+          <button class="btn" onclick="exportarCSV()">⬇️ Exportar CSV (planilha completa)</button>
+          <button class="btn danger" onclick="limparTodosProdutos()">🗑️ Limpar todos os produtos</button>
         </div>
       </section>
 
@@ -570,31 +516,33 @@
 
   const tamanhos = ["XPP","PP","P","M","G","GG","G1","G2","G3","G4","34","36","38","40","42","44","46","48","50","52"];
 
-  // ✅ Toast (entra e sai sozinho)
+  // Mapeamento de tamanho para label da planilha (ex: P -> P/38)
+  const tamanhoLabel = {
+    "XPP":"XPP/34","PP":"PP/36","P":"P/38","M":"M/40","G":"G/42","GG":"GG/44",
+    "G1":"G1/46","G2":"G2/48","G3":"G3/50","G4":"G4/52",
+    "34":"34","36":"36","38":"38","40":"40","42":"42","44":"44",
+    "46":"46","48":"48","50":"50","52":"52"
+  };
+
+  // Toast
   let toastTimer = null;
   function showToast(msg, ms = 1600) {
     const el = document.getElementById("toast");
     if (!el) return;
     el.textContent = msg;
-
     el.classList.remove("show");
     void el.offsetWidth;
     el.classList.add("show");
-
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove("show"), ms);
   }
 
-  // ✅ copiar com toast (sem OK)
   function copiarTexto(id) {
     const texto = (document.getElementById(id).innerText || "").trim();
-    if (!texto) {
-      showToast("Nada para copiar 😅", 1500);
-      return;
-    }
+    if (!texto) { showToast("Nada para copiar 😅", 1500); return; }
     navigator.clipboard.writeText(texto).then(() => {
       showToast("Copiado! ✅", 1400);
-    }).catch(err => {
+    }).catch(() => {
       try {
         const temp = document.createElement("textarea");
         temp.value = texto;
@@ -605,12 +553,10 @@
         showToast("Copiado! ✅", 1400);
       } catch (e) {
         showToast("Não consegui copiar 😭", 1800);
-        console.error(err);
       }
     });
   }
 
-  // ✅ NCM: normalização
   function norm(str) {
     return (str || "")
       .toUpperCase()
@@ -623,79 +569,52 @@
 
   function tecidoEhMalha(tecidoRaw) {
     const t = norm(tecidoRaw);
-    const chavesMalha = [
-      "MALHA", "CANELADO", "RIBANA", "TRICOT", "TRICO", "MOLETOM",
-      "JERSEY", "JERSEI", "PONTO ROMA", "PONTO-ROMA", "FLAME", "FLAMÊ",
-      "VISCOLYCRA", "VISCO LYCRA", "POLIAMIDA", "LYCRA", "ELASTANO"
-    ];
+    const chavesMalha = ["MALHA","CANELADO","RIBANA","TRICOT","TRICO","MOLETOM","JERSEY","JERSEI","PONTO ROMA","PONTO-ROMA","FLAME","FLAMÊ","VISCOLYCRA","VISCO LYCRA","POLIAMIDA","LYCRA","ELASTANO"];
     return chavesMalha.some(k => t.includes(k));
   }
 
   function obterNcm(categoriaPrimeiraPalavra, tecidoRaw) {
     const cat = norm(categoriaPrimeiraPalavra);
     const ehMalha = tecidoEhMalha(tecidoRaw);
-
     if (cat === "T-SHIRT" || cat === "TSHIRT" || cat === "CAMISETA") return "6109.90.00";
     if (ehMalha && (cat === "BLUSA" || cat === "BLUSAS")) return "6109.90.00";
-
     const mapa = {
-      "BLUSA": "6206.40.00",
-      "BLUSAS": "6206.40.00",
-      "CAMISA": "6206.40.00",
-      "CAMISAS": "6206.40.00",
-      "VESTIDO": "6204.43.00",
-      "VESTIDOS": "6204.43.00",
-      "SAIA": "6204.53.00",
-      "SAIAS": "6204.53.00",
-      "CONJUNTO": "6204.23.00",
-      "CONJUNTOS": "6204.23.00",
-      "CALCA": "6204.63.00",
-      "CALCAS": "6204.63.00",
-      "SHORT": "6204.63.00",
-      "SHORTS": "6204.63.00",
-      "JAQUETA": "6202.93.00",
-      "JAQUETAS": "6202.93.00",
-      "CASACO": "6202.93.00",
-      "CASACOS": "6202.93.00",
-      "CASAQUETO": "6202.93.00",
-      "CASAQUETOS": "6202.93.00",
-      "BLAZER": "6204.33.00",
-      "BLAZERS": "6204.33.00",
-      "MACACAO": "6204.23.00",
-      "MACACOES": "6204.23.00"
+      "BLUSA":"6206.40.00","BLUSAS":"6206.40.00","CAMISA":"6206.40.00","CAMISAS":"6206.40.00",
+      "VESTIDO":"6204.43.00","VESTIDOS":"6204.43.00","SAIA":"6204.53.00","SAIAS":"6204.53.00",
+      "CONJUNTO":"6204.23.00","CONJUNTOS":"6204.23.00","CALCA":"6204.63.00","CALCAS":"6204.63.00",
+      "SHORT":"6204.63.00","SHORTS":"6204.63.00","JAQUETA":"6202.93.00","JAQUETAS":"6202.93.00",
+      "CASACO":"6202.93.00","CASACOS":"6202.93.00","CASAQUETO":"6202.93.00","CASAQUETOS":"6202.93.00",
+      "BLAZER":"6204.33.00","BLAZERS":"6204.33.00","MACACAO":"6204.23.00","MACACOES":"6204.23.00"
     };
-
     return mapa[cat] || "6206.40.00";
   }
 
   function gerarNcmDoTitulo() {
     const catRaw = document.getElementById("categoria").value;
     const tecidoRaw = document.getElementById("tecido").value;
-
-    if (!catRaw || !tecidoRaw) {
-      showToast("Preencha Categoria e Tecido para gerar o NCM.", 1800);
-      return;
-    }
-
+    if (!catRaw || !tecidoRaw) { showToast("Preencha Categoria e Tecido para gerar o NCM.", 1800); return; }
     const catNorm = norm(catRaw);
     let chaveCategoria = catNorm.split(" ")[0] || catNorm;
-
     if (catNorm.includes("SHIRT")) chaveCategoria = "T-SHIRT";
     if (catNorm.includes("CAMISETA")) chaveCategoria = "CAMISETA";
-
     const ncm = obterNcm(chaveCategoria, tecidoRaw);
-
     const comp = norm(document.getElementById("comprimento").value);
     const cor = norm(document.getElementById("cor").value);
     const marca = norm(document.getElementById("marca").value);
     const base = comp ? `${catNorm} ${comp}` : catNorm;
     const tituloPrev = `${base} EM ${norm(tecidoRaw)} ${cor} - ${marca}`.replace(/\s+/g, " ").trim();
-
     document.getElementById("ncmOutput").innerText =
       `NCM: ${ncm}\nTítulo lido: ${tituloPrev}\nRegra: ${tecidoEhMalha(tecidoRaw) ? "MALHA (6109 quando aplicável)" : "TECIDO PLANO (620x)"}`;
   }
 
-  // === Espelhamento de campos (Section1 -> Section2) ===
+  // Extrai só o código NCM da string do output
+  function extrairNcm() {
+    const txt = document.getElementById("ncmOutput").innerText || "";
+    const m = txt.match(/NCM:\s*([\d.]+)/);
+    return m ? m[1] : "";
+  }
+
+  // Espelhamento de campos (Section1 -> Section2)
   function sincronizarCampos() {
     const mapeamento = [
       { origem: "categoria", destino: "categoria2" },
@@ -704,7 +623,6 @@
       { origem: "cor", destino: "cor2" },
       { origem: "marca", destino: "marca2" },
     ];
-
     mapeamento.forEach(par => {
       const origemEl = document.getElementById(par.origem);
       const destinoEl = document.getElementById(par.destino);
@@ -722,55 +640,31 @@
     const marca = document.getElementById("marca").value.toUpperCase();
     const inicio = document.getElementById("gradeInicio").value.toUpperCase();
     const fim = document.getElementById("gradeFim").value.toUpperCase();
-
-    if (!cat || !tecido || !cor || !marca) {
-      showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800);
-      return;
-    }
-
+    if (!cat || !tecido || !cor || !marca) { showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800); return; }
     const base = comp ? `${cat} ${comp}` : cat;
     const tituloPai = `${base} EM ${tecido} ${cor} - ${marca}`;
-
     const inicioIndex = tamanhos.indexOf(inicio);
     const fimIndex = tamanhos.indexOf(fim);
-
-    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
-      showToast("Selecione uma grade válida.", 1800);
-      return;
-    }
-
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) { showToast("Selecione uma grade válida.", 1800); return; }
     let titulos = [tituloPai];
-    for (let i = inicioIndex; i <= fimIndex; i++) {
-      titulos.push(`${tituloPai} - ${tamanhos[i]}`);
-    }
-
+    for (let i = inicioIndex; i <= fimIndex; i++) titulos.push(`${tituloPai} - ${tamanhos[i]}`);
     document.getElementById("tituloOutput").innerText = titulos.join("\n");
     try { gerarNcmDoTitulo(); } catch(e) {}
+    atualizarPreview();
   }
 
   function gerarCodigo() {
     const codigoBase = document.getElementById("codigoManual").value.toUpperCase();
     const inicio = document.getElementById("gradeInicio").value.toUpperCase();
     const fim = document.getElementById("gradeFim").value.toUpperCase();
-
     const inicioIndex = tamanhos.indexOf(inicio);
     const fimIndex = tamanhos.indexOf(fim);
-
-    if (!codigoBase) {
-      showToast("Digite o código da peça.", 1700);
-      return;
-    }
-    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
-      showToast("Selecione uma grade válida.", 1800);
-      return;
-    }
-
+    if (!codigoBase) { showToast("Digite o código da peça.", 1700); return; }
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) { showToast("Selecione uma grade válida.", 1800); return; }
     let codigos = [codigoBase];
-    for (let i = inicioIndex; i <= fimIndex; i++) {
-      codigos.push(`${codigoBase}-${tamanhos[i]}`);
-    }
-
+    for (let i = inicioIndex; i <= fimIndex; i++) codigos.push(`${codigoBase}-${tamanhos[i]}`);
     document.getElementById("codigoOutput").innerText = codigos.join("\n");
+    atualizarPreview();
   }
 
   function gerarTitulosESkus() {
@@ -782,30 +676,16 @@
     const codigoBase = document.getElementById("codigoManual").value.toUpperCase();
     const inicio = document.getElementById("gradeInicio").value.toUpperCase();
     const fim = document.getElementById("gradeFim").value.toUpperCase();
-
-    if (!cat || !tecido || !cor || !marca) {
-      showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800);
-      return;
-    }
-    if (!codigoBase) {
-      showToast("Preencha o Código da Peça (ex: SA006VD).", 1800);
-      return;
-    }
-
+    if (!cat || !tecido || !cor || !marca) { showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800); return; }
+    if (!codigoBase) { showToast("Preencha o Código da Peça (ex: SA006VD).", 1800); return; }
     const base = comp ? `${cat} ${comp}` : cat;
     const tituloPai = `${base} EM ${tecido} ${cor} - ${marca}`;
-
     const inicioIndex = tamanhos.indexOf(inicio);
     const fimIndex = tamanhos.indexOf(fim);
-    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) {
-      showToast("Selecione uma grade válida.", 1800);
-      return;
-    }
-
+    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) { showToast("Selecione uma grade válida.", 1800); return; }
     const catNorm = norm(cat);
     const chave = (catNorm.includes("SHIRT")) ? "T-SHIRT" : (catNorm.split(" ")[0] || catNorm);
     const ncm = obterNcm(chave, tecido);
-
     const linhas = [];
     linhas.push(`PAI`);
     linhas.push(`SKU: ${codigoBase}`);
@@ -813,25 +693,16 @@
     linhas.push(`NCM: ${ncm}`);
     linhas.push(``);
     linhas.push(`FILHOS`);
-
     for (let i = inicioIndex; i <= fimIndex; i++) {
       const tam = tamanhos[i];
-      const skuFilho = `${codigoBase}-${tam}`;
-      const tituloFilho = `${tituloPai} - ${tam}`;
-      linhas.push(`${skuFilho} | ${tituloFilho} | NCM: ${ncm}`);
+      linhas.push(`${codigoBase}-${tam} | ${tituloPai} - ${tam} | NCM: ${ncm}`);
     }
-
     document.getElementById("tituloSkuOutput").innerText = linhas.join("\n");
   }
 
   // ===== Section 2 =====
   function capitalizarTitulo(texto) {
-    return texto
-      .toLowerCase()
-      .split(' ')
-      .filter(Boolean)
-      .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-      .join(' ');
+    return texto.toLowerCase().split(' ').filter(Boolean).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
   }
 
   function gerarTituloSEO() {
@@ -841,17 +712,12 @@
     const cor = document.getElementById("cor2").value.trim();
     const marca = document.getElementById("marca2").value.trim();
     const finalTitulo = document.getElementById("finalTitulo").value;
-
-    if (!cat || !tecido || !cor || !marca) {
-      showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800);
-      return;
-    }
-
+    if (!cat || !tecido || !cor || !marca) { showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800); return; }
     const base = comp ? `${cat} ${comp}` : cat;
     const tituloBase = `${base} em ${tecido} ${cor} ${marca}`;
     const tituloCompleto = `${capitalizarTitulo(tituloBase)} ${finalTitulo}`.replace(/\s+/g, " ").trim();
-
     document.getElementById("outputTitulo").innerText = tituloCompleto;
+    atualizarPreview();
   }
 
   function gerarMetaDescription() {
@@ -860,16 +726,11 @@
     const tecido = document.getElementById("tecido2").value.toLowerCase();
     const cor = document.getElementById("cor2").value.toLowerCase();
     const marca = document.getElementById("marca2").value;
-
-    if (!cat || !cor) {
-      showToast("Preencha pelo menos Categoria e Cor.", 1800);
-      return;
-    }
-
+    if (!cat || !cor) { showToast("Preencha pelo menos Categoria e Cor.", 1800); return; }
     const titulo = `${cat} ${comp} em ${tecido} ${cor} ${marca}`.replace(/\b\w/g, l => l.toUpperCase());
     const desc = `Compre ${cat.charAt(0).toUpperCase() + cat.slice(1)} ${cor.charAt(0).toUpperCase() + cor.slice(1)} em até 10x sem juros na QVestido! Moda Evangélica Premium. Confira ${titulo} na Loja oficial da QVestido - Moda Executiva Feminina`;
-
     document.getElementById("outputMetaTag").innerText = desc;
+    atualizarPreview();
   }
 
   function gerarURL() {
@@ -878,56 +739,28 @@
     const tecido = document.getElementById("tecido2").value.toLowerCase().replace(/\s+/g, "-");
     const cor = document.getElementById("cor2").value.toLowerCase().replace(/\s+/g, "-");
     const marca = document.getElementById("marca2").value.toLowerCase().replace(/\s+/g, "-");
-
     const parts = [];
     if (cat) parts.push(cat);
     if (comp) parts.push(comp);
     if (tecido) parts.push(tecido);
     if (cor) parts.push(cor);
     if (marca) parts.push(marca);
-
     document.getElementById("urlOutput").innerText = parts.join("-");
+    atualizarPreview();
   }
 
-  // ===== Section 3: Gerar Descrição com IA =====
-
-  // Auto-preenche o título quando gerado na seção 1
-  const _origGerarTituloCompleto = window.gerarTituloCompleto;
+  // ===== Section 3 =====
   document.addEventListener('DOMContentLoaded', () => {
-    // hook via MutationObserver no output de título
     const tituloOutput = document.getElementById('tituloOutput');
     if (tituloOutput) {
       const obs = new MutationObserver(() => {
         const linhas = (tituloOutput.innerText || '').split('\n').filter(Boolean);
-        if (linhas.length > 0) {
-          document.getElementById('descTitulo').value = linhas[0];
-        }
+        if (linhas.length > 0) document.getElementById('descTitulo').value = linhas[0];
       });
       obs.observe(tituloOutput, { childList: true, subtree: true, characterData: true });
     }
   });
 
-  // Preview da imagem ao selecionar
-  document.addEventListener('DOMContentLoaded', () => {
-    const imgInput = document.getElementById('descImagem');
-    if (imgInput) {
-      imgInput.addEventListener('change', () => {
-        const file = imgInput.files[0];
-        const preview = document.getElementById('descImagePreview');
-        const thumb = document.getElementById('descThumb');
-        if (file) {
-          const url = URL.createObjectURL(file);
-          thumb.src = url;
-          preview.style.display = 'block';
-        } else {
-          preview.style.display = 'none';
-          thumb.src = '';
-        }
-      });
-    }
-  });
-
-  // Também atualiza o título quando gerarTituloCompleto ou gerarTitulosESkus rodar
   const _patchTitulo = () => {
     const cat = (document.getElementById('categoria')?.value || '').toUpperCase();
     const comp = (document.getElementById('comprimento')?.value || '').toUpperCase();
@@ -938,195 +771,109 @@
       const base = comp ? `${cat} ${comp}` : cat;
       document.getElementById('descTitulo').value = `${base} EM ${tecido} ${cor} - ${marca}`;
     }
+    atualizarPreview();
   };
 
-  // Hook nos botões da seção 1 para sincronizar título automaticamente
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#section1 .btn').forEach(btn => {
       btn.addEventListener('click', () => setTimeout(_patchTitulo, 50));
     });
-    // Também sincroniza ao digitar
-    ['categoria','comprimento','tecido','cor','marca'].forEach(id => {
+    ['categoria','comprimento','tecido','cor','marca','pesoBase','codigoManual'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', () => setTimeout(_patchTitulo, 10));
     });
   });
 
-  async function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
   function gerarDescricaoIA() {
-  const titulo = document.getElementById('descTitulo').value.trim();
-  const composicao = document.getElementById('descComposicao').value.trim();
-  const tipoSelecionado = document.getElementById("tipoTecido").value;
-
-  if (!titulo) {
-    showToast('Preencha os campos na Seção 1 primeiro.', 2000);
-    return;
+    const titulo = document.getElementById('descTitulo').value.trim();
+    const composicao = document.getElementById('descComposicao').value.trim();
+    const tipoSelecionado = document.getElementById("tipoTecido").value;
+    if (!titulo) { showToast('Preencha os campos na Seção 1 primeiro.', 2000); return; }
+    if (!composicao) { showToast('Informe a composição do produto.', 1800); return; }
+    const outputEl = document.getElementById('descHtmlOutput');
+    const previewEl = document.getElementById('descPreview');
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    const banco = {
+      viscose: ["toque extremamente macio, leveza no uso e um caimento fluido que valoriza o corpo com naturalidade","sensação suave ao toque, frescor ao vestir e um caimento elegante que acompanha os movimentos","leveza, conforto prolongado e um caimento solto que traz sofisticação ao visual","toque delicado, fluidez no tecido e uma sensação agradável ao longo do dia","caimento leve, frescor ao vestir e conforto ideal para uso contínuo"],
+      algodao: ["respirabilidade natural, conforto térmico e toque suave que proporciona bem-estar no uso diário","maciez ao toque, durabilidade e uma sensação agradável na pele durante todo o dia","conforto prolongado, leveza e ótima adaptação ao corpo","tecido leve, respirável e ideal para quem busca conforto no dia a dia","toque macio, frescor e praticidade para diferentes ocasiões"],
+      poliamida: ["elasticidade, ajuste perfeito ao corpo e conforto durante todo o uso","flexibilidade, resistência e um caimento que valoriza a silhueta com elegância","toque leve, alta durabilidade e excelente adaptação ao corpo","conforto, mobilidade e ajuste que acompanha os movimentos com naturalidade","tecido tecnológico, leve e ideal para um caimento mais estruturado"],
+      jeans: ["resistência, estilo atemporal e versatilidade para diferentes combinações","estrutura firme, durabilidade e um visual moderno que nunca sai de moda","caimento estruturado, resistência e um toque urbano ao visual","tecido encorpado, estiloso e ideal para looks versáteis","visual marcante, durabilidade e personalidade na composição"],
+      generico: ["conforto no uso, versatilidade e um caimento que valoriza o visual","leveza, praticidade e um estilo moderno para diversas ocasiões","conforto prolongado, elegância e facilidade na composição de looks","praticidade no dia a dia e um visual sempre atual","equilíbrio entre conforto, estilo e versatilidade"]
+    };
+    const beneficio1 = pick(banco[tipoSelecionado]);
+    const beneficio2 = pick(banco[tipoSelecionado]);
+    const aberturas = [
+      `A <b>${titulo}</b> é uma escolha elegante que une ${beneficio1}.`,
+      `Pensada para o dia a dia, a <b>${titulo}</b> oferece ${beneficio1}.`,
+      `Com design atemporal, a <b>${titulo}</b> proporciona ${beneficio1}.`,
+      `A <b>${titulo}</b> se destaca por entregar ${beneficio1}.`,
+      `Versátil e sofisticada, a <b>${titulo}</b> garante ${beneficio1}.`,
+      `Perfeita para diferentes ocasiões, a <b>${titulo}</b> traz ${beneficio1}.`,
+      `Com um acabamento refinado, a <b>${titulo}</b> oferece ${beneficio1}.`,
+      `A <b>${titulo}</b> combina estilo e ${beneficio1}.`
+    ];
+    const meio = [
+      `Além disso, se destaca por ${beneficio2}, tornando a peça ainda mais versátil para diferentes ocasiões.`,
+      `Outro ponto forte é ${beneficio2}, garantindo praticidade e elegância no uso.`,
+      `Seu diferencial está em ${beneficio2}, ideal para quem valoriza conforto aliado ao estilo.`,
+      `Isso sem contar ${beneficio2}, que faz toda a diferença no caimento da peça.`,
+      `Com ${beneficio2}, ela se adapta perfeitamente ao dia a dia e também a momentos especiais.`
+    ];
+    const fechamentos = [
+      "Uma peça que se adapta facilmente a diferentes propostas de look.",
+      "Ideal para compor produções elegantes e modernas com praticidade.",
+      "Perfeita para quem busca estilo sem abrir mão do conforto no dia a dia.",
+      "Uma escolha versátil que acompanha diversas ocasiões.",
+      "Modelo pensado para valorizar o visual com naturalidade.",
+      "Combina facilmente com diferentes estilos e ocasiões.",
+      "Um item essencial para um guarda-roupa funcional e atual.",
+      "Perfeita para criar composições equilibradas e sofisticadas."
+    ];
+    const descricaoHTML = `<div style="font-size: 14px; text-align: justify;">\n${pick(aberturas)}\n\n${pick(meio)}\n\n${pick(fechamentos)}\n<br><br>\n• <b>Composição:</b> ${composicao}\n</div>`.trim();
+    outputEl.innerText = descricaoHTML;
+    previewEl.innerHTML = descricaoHTML;
+    showToast('Descrição gerada! ✨', 1500);
+    atualizarPreview();
   }
 
-  if (!composicao) {
-    showToast('Informe a composição do produto.', 1800);
-    return;
-  }
-
-  const outputEl = document.getElementById('descHtmlOutput');
-  const previewEl = document.getElementById('descPreview');
-
-  function pick(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-  }
-
-  // 🎯 BANCO DE BENEFÍCIOS
-  const banco = {
-    viscose: [
-      "toque extremamente macio, leveza no uso e um caimento fluido que valoriza o corpo com naturalidade",
-      "sensação suave ao toque, frescor ao vestir e um caimento elegante que acompanha os movimentos",
-      "leveza, conforto prolongado e um caimento solto que traz sofisticação ao visual",
-      "toque delicado, fluidez no tecido e uma sensação agradável ao longo do dia",
-      "caimento leve, frescor ao vestir e conforto ideal para uso contínuo"
-    ],
-
-    algodao: [
-      "respirabilidade natural, conforto térmico e toque suave que proporciona bem-estar no uso diário",
-      "maciez ao toque, durabilidade e uma sensação agradável na pele durante todo o dia",
-      "conforto prolongado, leveza e ótima adaptação ao corpo",
-      "tecido leve, respirável e ideal para quem busca conforto no dia a dia",
-      "toque macio, frescor e praticidade para diferentes ocasiões"
-    ],
-
-    poliamida: [
-      "elasticidade, ajuste perfeito ao corpo e conforto durante todo o uso",
-      "flexibilidade, resistência e um caimento que valoriza a silhueta com elegância",
-      "toque leve, alta durabilidade e excelente adaptação ao corpo",
-      "conforto, mobilidade e ajuste que acompanha os movimentos com naturalidade",
-      "tecido tecnológico, leve e ideal para um caimento mais estruturado"
-    ],
-
-    jeans: [
-      "resistência, estilo atemporal e versatilidade para diferentes combinações",
-      "estrutura firme, durabilidade e um visual moderno que nunca sai de moda",
-      "caimento estruturado, resistência e um toque urbano ao visual",
-      "tecido encorpado, estiloso e ideal para looks versáteis",
-      "visual marcante, durabilidade e personalidade na composição"
-    ],
-
-    generico: [
-      "conforto no uso, versatilidade e um caimento que valoriza o visual",
-      "leveza, praticidade e um estilo moderno para diversas ocasiões",
-      "conforto prolongado, elegância e facilidade na composição de looks",
-      "praticidade no dia a dia e um visual sempre atual",
-      "equilíbrio entre conforto, estilo e versatilidade"
-    ]
-  };
-
-  const beneficio1 = pick(banco[tipoSelecionado]);
-  const beneficio2 = pick(banco[tipoSelecionado]);
-
-  // 🎯 ABERTURAS (variação maior)
-  const aberturas = [
-    `A <b>${titulo}</b> é uma escolha elegante que une ${beneficio1}.`,
-    `Pensada para o dia a dia, a <b>${titulo}</b> oferece ${beneficio1}.`,
-    `Com design atemporal, a <b>${titulo}</b> proporciona ${beneficio1}.`,
-    `A <b>${titulo}</b> se destaca por entregar ${beneficio1}.`,
-    `Versátil e sofisticada, a <b>${titulo}</b> garante ${beneficio1}.`,
-    `Perfeita para diferentes ocasiões, a <b>${titulo}</b> traz ${beneficio1}.`,
-    `Com um acabamento refinado, a <b>${titulo}</b> oferece ${beneficio1}.`,
-    `A <b>${titulo}</b> combina estilo e ${beneficio1}.`
-  ];
-
-  // 🎯 PARÁGRAFO EXTRA (deixa mais "IA real")
-  const meio = [
-    `Além disso, se destaca por ${beneficio2}, tornando a peça ainda mais versátil para diferentes ocasiões.`,
-    `Outro ponto forte é ${beneficio2}, garantindo praticidade e elegância no uso.`,
-    `Seu diferencial está em ${beneficio2}, ideal para quem valoriza conforto aliado ao estilo.`,
-    `Isso sem contar ${beneficio2}, que faz toda a diferença no caimento da peça.`,
-    `Com ${beneficio2}, ela se adapta perfeitamente ao dia a dia e também a momentos especiais.`
-  ];
-
-  // 🎯 FECHAMENTOS
-  const fechamentos = [
-    "Uma peça que se adapta facilmente a diferentes propostas de look.",
-    "Ideal para compor produções elegantes e modernas com praticidade.",
-    "Perfeita para quem busca estilo sem abrir mão do conforto no dia a dia.",
-    "Uma escolha versátil que acompanha diversas ocasiões.",
-    "Modelo pensado para valorizar o visual com naturalidade.",
-    "Combina facilmente com diferentes estilos e ocasiões.",
-    "Um item essencial para um guarda-roupa funcional e atual.",
-    "Perfeita para criar composições equilibradas e sofisticadas."
-  ];
-
-  const descricaoHTML = `
-<div style="font-size: 14px; text-align: justify;">
-${pick(aberturas)}
-
-${pick(meio)}
-
-${pick(fechamentos)}
-<br><br>
-• <b>Composição:</b> ${composicao}
-</div>
-  `.trim();
-
-  outputEl.innerText = descricaoHTML;
-  previewEl.innerHTML = descricaoHTML;
-
-  showToast('Descrição gerada! ✨', 1500);
-}
-  // ===== Section 4: Calculadora de Markup =====
+  // ===== Section 4 =====
   document.getElementById('mkMarca').addEventListener('change', function() {
     if (this.value) document.getElementById('mkMarkup').value = this.value;
   });
-
   ['mkMarkup', 'mkCusto'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') calcularMarkup();
-    });
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') calcularMarkup(); });
   });
+  document.getElementById('mkCusto').addEventListener('input', atualizarPreview);
+  document.getElementById('mkMarkup').addEventListener('input', atualizarPreview);
 
   let _mkPrecoAtual = '';
 
   function calcularMarkup() {
     const markup = parseFloat(document.getElementById('mkMarkup').value);
     const custo = parseFloat(document.getElementById('mkCusto').value);
-
-    if (isNaN(markup) || isNaN(custo) || markup <= 0 || custo <= 0) {
-      showToast('Preencha o markup e o custo corretamente.', 2000);
-      return;
-    }
-
+    if (isNaN(markup) || isNaN(custo) || markup <= 0 || custo <= 0) { showToast('Preencha o markup e o custo corretamente.', 2000); return; }
     const bruto = custo * markup;
     const base = Math.floor(bruto / 10) * 10;
     const resto = bruto - base;
     const precoFinal = resto < 5 ? base - 0.10 : base + 9.90;
-
     _mkPrecoAtual = precoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.getElementById('mkResultado').textContent = _mkPrecoAtual;
     document.getElementById('mkResultadoWrap').style.display = 'block';
     showToast('Preço calculado! ✅', 1400);
+    atualizarPreview();
   }
 
   function copiarMarkup() {
     if (!_mkPrecoAtual) { showToast('Nada para copiar 😅', 1500); return; }
-    try {
-      navigator.clipboard.writeText(_mkPrecoAtual).then(() => showToast('Copiado! ✅', 1400)).catch(() => {
-        const tmp = document.createElement('textarea');
-        tmp.value = _mkPrecoAtual;
-        document.body.appendChild(tmp);
-        tmp.select();
-        document.execCommand('copy');
-        tmp.remove();
-        showToast('Copiado! ✅', 1400);
-      });
-    } catch(e) {
-      showToast('Erro ao copiar', 1800);
-    }
+    navigator.clipboard.writeText(_mkPrecoAtual).then(() => showToast('Copiado! ✅', 1400)).catch(() => {
+      const tmp = document.createElement('textarea');
+      tmp.value = _mkPrecoAtual;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      tmp.remove();
+      showToast('Copiado! ✅', 1400);
+    });
   }
 
   function limparMarkup() {
@@ -1136,182 +883,63 @@ ${pick(fechamentos)}
     document.getElementById('mkCusto').value = '';
     document.getElementById('mkResultado').textContent = '';
     document.getElementById('mkResultadoWrap').style.display = 'none';
+    atualizarPreview();
   }
 
   // ===== Section 5: Categorização =====
   const _catDb = [
-    {
-      chaves: ["VESTIDO", "VESTIDOS"],
-      label: "Vestidos",
-      opcoes: [
-        "Vestidos>Vestidos Curto",
-        "Vestidos>Vestidos Longo",
-        "Vestidos>Vestidos Midi",
-        "Vestidos>Vestidos Longuete",
-        "Vestidos>Vestidos Jeans"
-      ]
-    },
-    {
-      chaves: ["CONJUNTO", "CONJUNTOS"],
-      label: "Conjuntos",
-      opcoes: [
-        "Conjuntos>Conjuntos Longos",
-        "Conjuntos>Conjuntos Midi",
-        "Conjuntos>Conjuntos Jeans",
-        "Conjuntos>Conjuntos Curto"
-      ]
-    },
-    {
-      chaves: ["MODA PRAIA", "MAIO", "MAIÔ", "BIQUINI", "BIQUÍNI"],
-      label: "Moda Praia",
-      opcoes: [
-        "Moda Praia>Maiôs",
-        "Moda Praia>Shorts Saia",
-        "Moda Praia>Biquinis"
-      ]
-    },
-    {
-      chaves: ["BLUSA", "BLUSAS"],
-      label: "Blusas",
-      opcoes: [
-        "Roupas>Blusas e Camisas",
-        "Roupas>Blusas Jeans"
-      ]
-    },
-    {
-      chaves: ["CAMISA", "CAMISAS"],
-      label: "Camisas",
-      opcoes: [
-        "Roupas>Blusas e Camisas",
-        "Roupas>Camisas Jeans"
-      ]
-    },
-    {
-      chaves: ["T-SHIRT", "TSHIRT", "CAMISETA"],
-      label: "T-Shirts",
-      opcoes: [
-        "Roupas>T-shirts"
-      ]
-    },
-    {
-      chaves: ["BLAZER", "BLAZERS", "CASACO", "CASACOS", "CASAQUETO"],
-      label: "Blazers e Casacos",
-      opcoes: [
-        "Roupas>Blazers e Casacos"
-      ]
-    },
-    {
-      chaves: ["JAQUETA", "JAQUETAS"],
-      label: "Jaquetas",
-      opcoes: [
-        "Roupas>Jaquetas Jeans"
-      ]
-    },
-    {
-      chaves: ["CALCA", "CALCAS", "CALÇA", "CALÇAS"],
-      label: "Calças",
-      opcoes: [
-        "Roupas>Calças",
-        "Jeans>Calças Jeans"
-      ]
-    },
-    {
-      chaves: ["MACACAO", "MACACÃO", "MACACOES"],
-      label: "Macacão",
-      opcoes: [
-        "Roupas>Macacão",
-        "Jeans>Salopete Jeans"
-      ]
-    },
-    {
-      chaves: ["SAIA", "SAIAS"],
-      label: "Saias",
-      opcoes: [
-        "Roupas>Saias>Saias Midi",
-        "Roupas>Saias>Saias Longa",
-        "Roupas>Saias>Saias Curta",
-        "Roupas>Saias Jeans",
-        "Jeans>Saias Jeans"
-      ]
-    },
-    {
-      chaves: ["SHORT", "SHORTS", "BERMUDA", "BERMUDAS"],
-      label: "Shorts e Bermudas",
-      opcoes: [
-        "Roupas>Bermudas e Shorts",
-        "Moda Praia>Shorts Saia"
-      ]
-    },
-    {
-      chaves: ["FITNESS", "LEGGING", "LEGGINGS"],
-      label: "Fitness",
-      opcoes: [
-        "Roupas>Fitness"
-      ]
-    }
+    { chaves:["VESTIDO","VESTIDOS"], label:"Vestidos", opcoes:["Vestidos>Vestidos Curto","Vestidos>Vestidos Longo","Vestidos>Vestidos Midi","Vestidos>Vestidos Longuete","Vestidos>Vestidos Jeans"] },
+    { chaves:["CONJUNTO","CONJUNTOS"], label:"Conjuntos", opcoes:["Conjuntos>Conjuntos Longos","Conjuntos>Conjuntos Midi","Conjuntos>Conjuntos Jeans","Conjuntos>Conjuntos Curto"] },
+    { chaves:["MODA PRAIA","MAIO","MAIÔ","BIQUINI","BIQUÍNI"], label:"Moda Praia", opcoes:["Moda Praia>Maiôs","Moda Praia>Shorts Saia","Moda Praia>Biquinis"] },
+    { chaves:["BLUSA","BLUSAS"], label:"Blusas", opcoes:["Roupas>Blusas e Camisas","Roupas>Blusas Jeans"] },
+    { chaves:["CAMISA","CAMISAS"], label:"Camisas", opcoes:["Roupas>Blusas e Camisas","Roupas>Camisas Jeans"] },
+    { chaves:["T-SHIRT","TSHIRT","CAMISETA"], label:"T-Shirts", opcoes:["Roupas>T-shirts"] },
+    { chaves:["BLAZER","BLAZERS","CASACO","CASACOS","CASAQUETO"], label:"Blazers e Casacos", opcoes:["Roupas>Blazers e Casacos"] },
+    { chaves:["JAQUETA","JAQUETAS"], label:"Jaquetas", opcoes:["Roupas>Jaquetas Jeans"] },
+    { chaves:["CALCA","CALCAS","CALÇA","CALÇAS"], label:"Calças", opcoes:["Roupas>Calças","Jeans>Calças Jeans"] },
+    { chaves:["MACACAO","MACACÃO","MACACOES"], label:"Macacão", opcoes:["Roupas>Macacão","Jeans>Salopete Jeans"] },
+    { chaves:["SAIA","SAIAS"], label:"Saias", opcoes:["Roupas>Saias>Saias Midi","Roupas>Saias>Saias Longa","Roupas>Saias>Saias Curta","Roupas>Saias Jeans","Jeans>Saias Jeans"] },
+    { chaves:["SHORT","SHORTS","BERMUDA","BERMUDAS"], label:"Shorts e Bermudas", opcoes:["Roupas>Bermudas e Shorts","Moda Praia>Shorts Saia"] },
+    { chaves:["FITNESS","LEGGING","LEGGINGS"], label:"Fitness", opcoes:["Roupas>Fitness"] }
   ];
 
   function _normCat(str) {
-    return (str || "")
-      .toUpperCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+    return (str || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s-]/g," ").replace(/\s+/g," ").trim();
   }
-
   function _buscarCat(input) {
     const val = _normCat(input);
     if (!val) return null;
     for (const grupo of _catDb) {
-      if (grupo.chaves.some(k => val.includes(_normCat(k)) || _normCat(k).includes(val))) {
-        return grupo;
-      }
+      if (grupo.chaves.some(k => val.includes(_normCat(k)) || _normCat(k).includes(val))) return grupo;
     }
     return null;
   }
-
   function _renderCat(grupo) {
     const chips = document.getElementById('catChips');
     const vazio = document.getElementById('catVazio');
     const detectada = document.getElementById('catDetectada');
     const selecionadaWrap = document.getElementById('catSelecionadaWrap');
     const selecionadaOut = document.getElementById('catSelecionadaOutput');
-
     chips.innerHTML = '';
     selecionadaWrap.style.display = 'none';
     selecionadaOut.innerText = '';
-
-    if (!grupo) {
-      detectada.innerText = '';
-      vazio.style.display = 'flex';
-      return;
-    }
-
+    if (!grupo) { detectada.innerText = ''; vazio.style.display = 'flex'; return; }
     vazio.style.display = 'none';
     detectada.innerText = `Categoria detectada: ${grupo.label}`;
-
     grupo.opcoes.forEach(op => {
       const btn = document.createElement('button');
       btn.className = 'icon-btn';
       btn.style.cssText = 'font-size:12px;padding:8px 14px;font-weight:700;border-radius:999px;';
       btn.textContent = op;
       btn.addEventListener('click', () => {
-        // Remover seleção anterior
-        chips.querySelectorAll('button').forEach(b => {
-          b.style.background = '';
-          b.style.color = '';
-          b.style.borderColor = '';
-        });
-        // Marcar selecionado
+        chips.querySelectorAll('button').forEach(b => { b.style.background=''; b.style.color=''; b.style.borderColor=''; });
         btn.style.background = 'var(--accent)';
         btn.style.color = 'var(--bg)';
         btn.style.borderColor = 'var(--accent)';
-
         selecionadaOut.innerText = op;
         selecionadaWrap.style.display = 'block';
         showToast('Selecionado! Clique em Copiar ✅', 1400);
+        atualizarPreview();
       });
       chips.appendChild(btn);
     });
@@ -1326,7 +954,316 @@ ${pick(fechamentos)}
       });
     }
   });
-</script>
 
+  // =====================================================
+  // ===== Section 6: Armazenamento e Exportação =====
+  // =====================================================
+
+  const STORAGE_KEY = 'qvestido_produtos_v1';
+  const BENEFICIOS_HTML = '<ul><li><strong>Frete fixo</strong> para todo o Brasil.</li><li><strong>Entrega rápida</strong>. Atendemos todo o Brasil com agilidade.</li><li><strong>7 dias para troca ou devolução</strong> após o recebimento. Fácil e rápido, até para produtos da Outlet!</li></ul>';
+
+  function carregarProdutos() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch(e) { return []; }
+  }
+
+  function salvarProdutosStorage(lista) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+  }
+
+  // Coleta todos os dados gerados das seções
+  function coletarDadosAtuais() {
+    const cat = document.getElementById("categoria").value.toUpperCase();
+    const comp = document.getElementById("comprimento").value.toUpperCase();
+    const tecido = document.getElementById("tecido").value.toUpperCase();
+    const cor = document.getElementById("cor").value.toUpperCase();
+    const marca = document.getElementById("marca").value.toUpperCase();
+    const inicio = document.getElementById("gradeInicio").value;
+    const fim = document.getElementById("gradeFim").value;
+    const skuBase = document.getElementById("codigoManual").value.toUpperCase();
+    const pesoBase = parseFloat(document.getElementById("pesoBase").value) || 0;
+
+    const base = comp ? `${cat} ${comp}` : cat;
+    const tituloPai = cat && tecido && cor && marca ? `${base} EM ${tecido} ${cor} - ${marca}` : '';
+
+    const ncm = extrairNcm();
+    const preco = _mkPrecoAtual;
+    const custo = document.getElementById("mkCusto").value || '';
+    const categorizacao = document.getElementById("catSelecionadaOutput").innerText || '';
+    const tituloSEO = document.getElementById("outputTitulo").innerText || '';
+    const metaDesc = document.getElementById("outputMetaTag").innerText || '';
+    const url = document.getElementById("urlOutput").innerText || '';
+    const descEc = document.getElementById("descHtmlOutput").innerText || '';
+
+    const inicioIndex = tamanhos.indexOf(inicio);
+    const fimIndex = tamanhos.indexOf(fim);
+    const gradeValida = inicioIndex !== -1 && fimIndex !== -1 && inicioIndex <= fimIndex;
+    const grade = gradeValida ? `${inicio} → ${fim}` : '';
+
+    return {
+      id: Date.now(),
+      dataSalvo: new Date().toLocaleString('pt-BR'),
+      categoria: cat,
+      comprimento: comp,
+      tecido,
+      cor,
+      marca,
+      skuBase,
+      tituloPai,
+      ncm,
+      preco,
+      custo,
+      pesoBase,
+      categorizacao,
+      tituloSEO,
+      metaDesc,
+      url,
+      descEc,
+      gradeInicio: inicio,
+      gradeFim: fim,
+      grade,
+      gradeValida,
+      inicioIndex,
+      fimIndex
+    };
+  }
+
+  // Atualiza o preview em tempo real na Section 6
+  function atualizarPreview() {
+    const d = coletarDadosAtuais();
+    const set = (id, val, campo) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const v = val || '';
+      el.textContent = v ? (v.length > 28 ? v.substring(0,28)+'…' : v) : '—';
+      el.className = 'val ' + (v ? 'ok' : 'missing');
+    };
+    set('prv-sku', d.skuBase);
+    set('prv-desc', d.tituloPai);
+    set('prv-ncm', d.ncm);
+    set('prv-preco', d.preco ? 'R$ ' + d.preco : '');
+    set('prv-custo', d.custo ? 'R$ ' + d.custo : '');
+    set('prv-cor', d.cor);
+    set('prv-marca', d.marca);
+    set('prv-grade', d.grade);
+    set('prv-cat', d.categorizacao);
+    set('prv-seo', d.tituloSEO);
+    set('prv-meta', d.metaDesc);
+    set('prv-url', d.url);
+    set('prv-desc-ec', d.descEc ? 'Gerada ✓' : '');
+    set('prv-peso', d.pesoBase ? d.pesoBase + ' kg' : '');
+  }
+
+  function salvarProduto() {
+    const d = coletarDadosAtuais();
+
+    // Validações mínimas
+    if (!d.skuBase) { showToast('⚠️ Preencha o Código da Peça (SKU base) na Seção 1.', 2200); return; }
+    if (!d.tituloPai) { showToast('⚠️ Gere o título na Seção 1 primeiro.', 2000); return; }
+    if (!d.gradeValida) { showToast('⚠️ Selecione uma grade válida na Seção 1.', 2000); return; }
+
+    const lista = carregarProdutos();
+    lista.push(d);
+    salvarProdutosStorage(lista);
+    renderizarLista();
+    showToast(`✅ Produto "${d.skuBase}" salvo! (${lista.length} no total)`, 2000);
+  }
+
+  function removerProduto(id) {
+    const lista = carregarProdutos().filter(p => p.id !== id);
+    salvarProdutosStorage(lista);
+    renderizarLista();
+    showToast('Produto removido.', 1400);
+  }
+
+  function limparTodosProdutos() {
+    const lista = carregarProdutos();
+    if (lista.length === 0) { showToast('Nenhum produto para limpar.', 1500); return; }
+    if (!confirm(`Tem certeza? Isso vai apagar ${lista.length} produto(s) salvos.`)) return;
+    salvarProdutosStorage([]);
+    renderizarLista();
+    showToast('Lista limpa! 🗑️', 1400);
+  }
+
+  function renderizarLista() {
+    const lista = carregarProdutos();
+    const container = document.getElementById('listaProdutos');
+    const contador = document.getElementById('contadorProdutos');
+    contador.textContent = lista.length;
+
+    if (lista.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">📂</div><div>Nenhum produto salvo ainda.<br>Gere os dados nas seções acima e clique em <b>Salvar produto atual</b>.</div></div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    lista.forEach((p, idx) => {
+      const card = document.createElement('div');
+      card.className = 'produto-card';
+      card.innerHTML = `
+        <div class="produto-card-info">
+          <div class="produto-card-titulo">${p.tituloPai || p.skuBase}</div>
+          <div class="produto-card-meta">SKU: ${p.skuBase} &nbsp;|&nbsp; Grade: ${p.grade} &nbsp;|&nbsp; NCM: ${p.ncm || '—'} &nbsp;|&nbsp; Salvo: ${p.dataSalvo}</div>
+        </div>
+        <div class="produto-card-actions">
+          <button class="mini-btn danger" onclick="removerProduto(${p.id})">🗑️ Remover</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // Gera as linhas da planilha (PAI + filhos) para um produto
+  function gerarLinhasPlanilha(p, idNumerico) {
+    const linhas = [];
+    const origem = 'Nacional, exceto as indicadas nos códigos 3, 4, 5 e 8';
+    const situacao = 'Ativo';
+    const unidade = 'Un';
+    const loja = 'S';
+    const compCm = '26,00';
+    const largCm = '29,00';
+    const altCm = '7,00';
+
+    // Preço sem formatação pt-BR (substitui vírgula por ponto para a planilha)
+    const precoNum = p.preco ? p.preco.replace(/\./g,'').replace(',','.') : '';
+    const custoNum = p.custo ? p.custo.replace(',','.') : '';
+
+    // Regra Peso Bruto: blusa/camisa/colete inicia em 0,100; demais em 0,200
+    // Incremento de 0,020 por SKU (somente filhos). Código pai não tem peso.
+    const catLower = String(p.categoria || '').toLowerCase();
+    const pesoInicial = /(blusa|camisa|colete)/i.test(catLower) ? 0.100 : 0.200;
+
+    // Descrição: a mesma para "Descricao para E-commerce" e "Descricao detalhada do produto"
+    const descCompleta = p.descEc || '';
+
+    // Linha PAI
+    linhas.push([
+      idNumerico,         // ID
+      p.skuBase,          // Codigo SKU
+      p.tituloPai,        // Descricao
+      unidade,            // Unidade
+      p.skuBase,          // Cod do fabricante = Código Pai
+      p.ncm,              // Classificação fiscal (NCM)
+      origem,             // Origem
+      situacao,           // Situacao
+      precoNum,           // Preco
+      custoNum,           // Preco de custo
+      '',                 // Peso Bruto (PAI vazio)
+      p.categorizacao,    // Categorizacao
+      BENEFICIOS_HTML,    // Benefícios
+      p.cor,              // Cor
+      '',                 // Detalhes (vazio)
+      p.marca,            // Marca
+      loja,               // Produto vendido na loja virtual
+      p.tituloSEO,        // Título para a pagina
+      p.metaDesc,         // Metatag Description
+      compCm,             // Comprimento (Cm)
+      largCm,             // Largura (Cm)
+      altCm,              // Altura (Cm)
+      descCompleta,       // Descricao para E-commerce
+      descCompleta,       // Descricao detalhada do produto (mesma)
+      p.url,              // URL
+      '',                 // Tamanho (PAI vazio)
+      ''                  // Guia de Medidas
+    ]);
+
+    // Linhas FILHOS
+    let skuIdx = 0;
+    for (let i = p.inicioIndex; i <= p.fimIndex; i++) {
+      const tam = tamanhos[i];
+      const tamLabel = tamanhoLabel[tam] || tam;
+      // Peso conforme regra: inicial + 0,020 * posição. Forçado como texto "0,200".
+      const pesoNum = pesoInicial + skuIdx * 0.020;
+      const peso = pesoNum.toFixed(3).replace('.', ',');
+      skuIdx++;
+      linhas.push([
+        idNumerico,                 // ID (mesmo do PAI)
+        `${p.skuBase}-${tam}`,      // Codigo SKU filho
+        `${p.tituloPai} - ${tam}`,  // Descricao filho
+        unidade,
+        p.skuBase,                  // Cod do fabricante = Código Pai
+        p.ncm,                      // Classificação fiscal (NCM)
+        origem,
+        situacao,
+        precoNum,
+        custoNum,
+        peso,                       // Peso Bruto (filho) — texto 0,200
+        '',                         // Categorizacao (vazio no filho)
+        '',                         // Benefícios (vazio no filho)
+        p.cor,
+        '',                         // Detalhes (vazio)
+        p.marca,
+        loja,
+        '',                         // Título SEO (vazio no filho)
+        '',                         // Meta Description (vazio no filho)
+        compCm,
+        largCm,
+        altCm,
+        descCompleta,               // Descricao para E-commerce (mesma)
+        descCompleta,               // Descricao detalhada do produto (mesma)
+        '',                         // URL (vazio no filho)
+        tamLabel,                   // Tamanho — formato P/38
+        ''
+      ]);
+    }
+
+    return linhas;
+  }
+
+  function exportarCSV() {
+    const lista = carregarProdutos();
+    if (lista.length === 0) { showToast('Nenhum produto para exportar.', 1800); return; }
+
+    const colunas = [
+      'ID','Codigo SKU','Descricao','Unidade','Cod do fabricante','Classificação fiscal',
+      'Origem','Situacao','Preco','Preco de custo','Peso Bruto','Categorizacao','Benefícios',
+      'Cor','Detalhes','Marca','Produto vendido na loja virtual','Título para a pagina',
+      'Metatag Description','Comprimento (Cm)','Largura (Cm)','Altura (Cm)',
+      'Descricao para E-commerce','Descricao detalhada do produto','URL','Tamanho','Guia de Medidas'
+    ];
+
+    const csvEscape = (val) => {
+      const s = String(val === null || val === undefined ? '' : val);
+      if (s.includes('"') || s.includes(',') || s.includes('\n') || s.includes(';')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    };
+
+    const linhasCSV = [colunas.map(csvEscape).join(';')];
+
+    lista.forEach((p, idx) => {
+      const rows = gerarLinhasPlanilha(p, idx + 1);
+      rows.forEach(row => linhasCSV.push(row.map(csvEscape).join(';')));
+    });
+
+    const bom = '\uFEFF'; // BOM para UTF-8 (abre certo no Excel)
+    const csvContent = bom + linhasCSV.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const agora = new Date();
+    const dataStr = `${agora.getFullYear()}${String(agora.getMonth()+1).padStart(2,'0')}${String(agora.getDate()).padStart(2,'0')}`;
+    a.download = `qvestido_cadastro_${dataStr}_${lista.length}produtos.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(`CSV exportado! ${lista.length} produto(s). ✅`, 2000);
+  }
+
+  // Inicialização
+  document.addEventListener('DOMContentLoaded', () => {
+    renderizarLista();
+    atualizarPreview();
+  });
+
+  // Atualiza preview sempre que campos relevantes mudarem
+  ['categoria','comprimento','tecido','cor','marca','pesoBase','codigoManual'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', atualizarPreview);
+  });
+</script>
 </body>
 </html>

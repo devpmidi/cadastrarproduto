@@ -2,11 +2,92 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QVestido | Gerador de Títulos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="QVestido" />
+  <title>QVestido | Gerador de Cadastro</title>
+  <link rel="manifest" href="#" />
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
   <style>
+    /* ================================================
+       CONFIGURAÇÃO DO GOOGLE APPS SCRIPT
+       ================================================
+       Para conectar ao banco de dados da planilha Google Sheets:
+
+       1. Abra sua planilha: https://docs.google.com/spreadsheets/d/10naJcBNIzrXMMwVQt1nAU5RlCCw4wCFyhQ-TdkJ6Dyw
+       2. Clique em Extensões > Apps Script
+       3. Apague o código existente e cole o código abaixo:
+
+       ─────────────────────────────────────────────
+       const SHEET_ID = '10naJcBNIzrXMMwVQt1nAU5RlCCw4wCFyhQ-TdkJ6Dyw';
+
+       function doGet(e) {
+         return doPost(e);
+       }
+
+       function doPost(e) {
+         const params = e.parameter;
+         const action = params.action;
+         const ss = SpreadsheetApp.openById(SHEET_ID);
+         const sheet = ss.getSheets()[0];
+         const data = sheet.getDataRange().getValues();
+
+         if (action === 'login') {
+           const login = params.login ? params.login.trim().toLowerCase() : '';
+           const senha = params.senha ? params.senha.trim() : '';
+           for (let i = 1; i < data.length; i++) {
+             if (String(data[i][0]).trim().toLowerCase() === login && String(data[i][1]).trim() === senha) {
+               return ContentService.createTextOutput(JSON.stringify({ok: true, login: data[i][0]})).setMimeType(ContentService.MimeType.JSON);
+             }
+           }
+           return ContentService.createTextOutput(JSON.stringify({ok: false, msg: 'Login ou senha incorretos.'})).setMimeType(ContentService.MimeType.JSON);
+         }
+
+         if (action === 'reset') {
+           const login = params.login ? params.login.trim().toLowerCase() : '';
+           const novaSenha = params.novaSenha ? params.novaSenha.trim() : '';
+           for (let i = 1; i < data.length; i++) {
+             if (String(data[i][0]).trim().toLowerCase() === login) {
+               sheet.getRange(i + 1, 2).setValue(novaSenha);
+               return ContentService.createTextOutput(JSON.stringify({ok: true})).setMimeType(ContentService.MimeType.JSON);
+             }
+           }
+           return ContentService.createTextOutput(JSON.stringify({ok: false, msg: 'Usuário não encontrado.'})).setMimeType(ContentService.MimeType.JSON);
+         }
+
+         if (action === 'adduser') {
+           const login = params.login ? params.login.trim().toLowerCase() : '';
+           const senha = params.senha ? params.senha.trim() : '';
+           const adminKey = params.adminKey || '';
+           if (adminKey !== 'QVESTIDO2025') {
+             return ContentService.createTextOutput(JSON.stringify({ok: false, msg: 'Chave administrativa incorreta.'})).setMimeType(ContentService.MimeType.JSON);
+           }
+           for (let i = 1; i < data.length; i++) {
+             if (String(data[i][0]).trim().toLowerCase() === login) {
+               return ContentService.createTextOutput(JSON.stringify({ok: false, msg: 'Usuário já existe.'})).setMimeType(ContentService.MimeType.JSON);
+             }
+           }
+           sheet.appendRow([login, senha]);
+           return ContentService.createTextOutput(JSON.stringify({ok: true})).setMimeType(ContentService.MimeType.JSON);
+         }
+
+         return ContentService.createTextOutput(JSON.stringify({ok: false, msg: 'Ação desconhecida.'})).setMimeType(ContentService.MimeType.JSON);
+       }
+       ─────────────────────────────────────────────
+
+       4. Clique em Implantar > Nova implantação
+       5. Tipo: Aplicativo da Web
+       6. Executar como: Você (sua conta Google)
+       7. Quem tem acesso: Qualquer pessoa
+       8. Copie a URL gerada e cole na variável APPS_SCRIPT_URL abaixo (linha ~30 do JS)
+
+       CHAVE ADMIN para criar usuários: QVESTIDO2025
+       (você pode alterar no código Apps Script acima)
+    */
+
     :root{
       --bg: #ffffff;
       --surface: #ffffff;
@@ -21,7 +102,7 @@
       --focus: 0 0 0 4px rgba(0,0,0,.12);
       --radius: 18px;
       --radius-sm: 12px;
-      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
       --green: #16a34a;
       --green-light: #dcfce7;
       --red: #dc2626;
@@ -57,8 +138,193 @@
       font-family: var(--font);
       background: radial-gradient(1200px 500px at 50% -120px, rgba(0,0,0,.06), transparent 60%), var(--bg);
       color: var(--text);
-      padding: 26px 18px 60px;
       transition: background-color .25s ease, color .25s ease;
+    }
+
+    /* ==================== LOGIN ==================== */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: radial-gradient(ellipse 800px 600px at 50% 0%, rgba(0,0,0,.07), transparent 70%), var(--bg);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 36px 32px 32px;
+      animation: loginIn .4s cubic-bezier(.22,1,.36,1);
+    }
+
+    @keyframes loginIn {
+      from { opacity: 0; transform: translateY(24px) scale(.97); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .login-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+      gap: 10px;
+    }
+
+    .login-logo img {
+      height: 32px;
+      width: auto;
+    }
+
+    body.dark-mode .login-logo img { filter: invert(1) grayscale(1) contrast(1.1); }
+
+    .login-logo .login-title {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: .3px;
+      margin: 0;
+      text-align: center;
+    }
+
+    .login-logo .login-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+      text-align: center;
+    }
+
+    .login-tab-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .login-tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: var(--font);
+      transition: background .2s, color .2s;
+    }
+
+    .login-tab.active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .login-panel { display: none; }
+    .login-panel.active { display: block; }
+
+    .login-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: .3px;
+      margin: 14px 0 5px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .login-input:focus {
+      border-color: var(--accent);
+      box-shadow: var(--focus);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 18px;
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 900;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+
+    .login-btn:hover { opacity: .88; transform: translateY(-1px); }
+    .login-btn:active { transform: none; }
+    .login-btn:disabled { opacity: .5; cursor: default; transform: none; }
+
+    .login-btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+      margin-top: 8px;
+    }
+
+    .login-msg {
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      padding: 9px 12px;
+      border-radius: 9px;
+      display: none;
+    }
+
+    .login-msg.error { background: var(--red-light); color: var(--red); display: block; }
+    .login-msg.success { background: var(--green-light); color: var(--green); display: block; }
+
+    .login-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .login-admin-toggle {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      cursor: pointer;
+      margin-top: 14px;
+      text-decoration: underline;
+    }
+
+    .login-admin-toggle:hover { color: var(--text); }
+
+    /* ==================== APP ==================== */
+    #appScreen { display: none; }
+
+    #appScreen.visible {
+      display: block;
+      padding: 26px 18px 60px;
+      animation: appIn .35s cubic-bezier(.22,1,.36,1);
+    }
+
+    @keyframes appIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: none; }
     }
 
     .page{ max-width: 980px; margin: 0 auto; }
@@ -76,7 +342,7 @@
     .brand .titlewrap{ display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
     .brand .title{ font-size: 14px; font-weight: 800; letter-spacing: .2px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .brand .subtitle{ font-size: 12px; color: var(--muted); margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .actions{ display: flex; align-items: center; gap: 10px; }
+    .actions{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
     .icon-btn{
       appearance: none; border: 1px solid var(--border); background: var(--surface);
@@ -88,6 +354,18 @@
     .icon-btn:hover{ transform: translateY(-1px); border-color: var(--accent); }
     .icon-btn:active{ transform: translateY(0px); }
     .icon-btn:focus{ outline: none; box-shadow: var(--shadow-soft), var(--focus); }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 7px 12px;
+      font-size: 12px; font-weight: 800; color: var(--muted);
+    }
+
+    .user-chip .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+    }
 
     .grid{ display: grid; grid-template-columns: 1fr; gap: 14px; }
 
@@ -128,10 +406,8 @@
     .btn:hover{ transform: translateY(-1px); opacity: .92; }
     .btn:active{ transform: translateY(0px); }
     .btn:focus{ outline: none; box-shadow: var(--focus); }
-
     .btn.secondary{ background: transparent; color: var(--text); border-color: var(--border); }
     .btn.secondary:hover{ border-color: var(--accent); }
-
     .btn.success{ background: var(--green); border-color: var(--green); color: #fff; }
     .btn.danger{ background: var(--red); border-color: var(--red); color: #fff; }
     .btn.amber{ background: var(--amber); border-color: var(--amber); color: #fff; }
@@ -146,12 +422,6 @@
 
     .divider{ height: 1px; background: var(--border); margin: 16px 0; }
 
-    .inline-row{
-      display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap;
-    }
-    .inline-row input[type="checkbox"]{ width: auto; margin: 0; transform: scale(1.05); accent-color: var(--accent); }
-    .inline-row label{ margin: 0; font-weight: 800; font-size: 12px; color: var(--muted); }
-
     /* Toast */
     .toast{
       position: fixed; left: 50%; bottom: 22px;
@@ -165,7 +435,7 @@
     }
     .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* === Section 6 - Produtos Salvos === */
+    /* Badges e misc */
     .badge{
       display: inline-flex; align-items: center; justify-content: center;
       background: var(--accent); color: var(--bg); border-radius: 999px;
@@ -180,11 +450,9 @@
       animation: fadeIn .25s ease;
     }
     @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
-
     .produto-card-info{ flex: 1; min-width: 0; }
     .produto-card-titulo{ font-size: 13px; font-weight: 800; margin: 0 0 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .produto-card-meta{ font-size: 11px; color: var(--muted); }
-
     .produto-card-actions{ display: flex; gap: 6px; flex-shrink: 0; }
     .mini-btn{
       appearance: none; border: 1px solid var(--border); background: var(--surface);
@@ -194,959 +462,694 @@
     }
     .mini-btn:hover{ border-color: var(--accent); }
     .mini-btn.danger:hover{ border-color: var(--red); color: var(--red); }
-
     .empty-state{
       text-align: center; padding: 32px 16px; color: var(--muted);
       font-size: 13px; border: 2px dashed var(--border);
       border-radius: var(--radius-sm); margin-top: 10px;
     }
     .empty-state .icon{ font-size: 32px; margin-bottom: 8px; }
-
-    .export-bar{
-      display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;
-    }
+    .export-bar{ display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
     .export-bar .btn{ margin-top: 0; flex: 1; min-width: 140px; }
-
-    /* Contador no cabeçalho da seção */
     .section-header{ display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
     .section-header h2{ margin: 0; }
-
-    /* Preview dos dados gerados antes de salvar */
-    .preview-grid{
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 8px; margin: 12px 0;
-    }
-    .preview-item{
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 8px 10px;
-    }
+    .preview-grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 12px 0; }
+    .preview-item{ background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; }
     .preview-item .key{ font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
     .preview-item .val{ font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .preview-item .val.ok{ color: var(--green); }
     .preview-item .val.missing{ color: var(--red); }
-
-    /* === Keywords Table === */
-    .kw-table{
-      width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px;
-    }
-    .kw-table th{
-      text-align: left; padding: 8px 10px; font-weight: 800; font-size: 11px;
-      color: var(--muted); letter-spacing: .3px; border-bottom: 1px solid var(--border);
-      background: var(--surface-2);
-    }
-    .kw-table td{
-      padding: 8px 10px; border-bottom: 1px solid var(--border);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
+    .kw-table{ width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    .kw-table th{ text-align: left; padding: 8px 10px; font-weight: 800; font-size: 11px; color: var(--muted); letter-spacing: .3px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+    .kw-table td{ padding: 8px 10px; border-bottom: 1px solid var(--border); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     .kw-table tr:last-child td{ border-bottom: none; }
     .kw-table tr:hover td{ background: var(--surface-2); }
-    .kw-tag{
-      display: inline-block; background: var(--blue-light); color: var(--blue);
-      border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700;
-      font-family: ui-monospace, monospace; letter-spacing: .3px;
-    }
+    .kw-tag{ display: inline-block; background: var(--blue-light); color: var(--blue); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; font-family: ui-monospace, monospace; letter-spacing: .3px; }
     body.dark-mode .kw-tag{ color: #93c5fd; }
-    .kw-detected-banner{
-      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
-      background: var(--green-light); border: 1px solid var(--green);
-      border-radius: var(--radius-sm); margin-bottom: 14px;
-      font-size: 13px; font-weight: 700;
-    }
-    .kw-detected-banner.none{
-      background: var(--surface-2); border-color: var(--border); color: var(--muted);
-    }
+    .kw-detected-banner{ display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--green-light); border: 1px solid var(--green); border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 13px; font-weight: 700; }
+    .kw-detected-banner.none{ background: var(--surface-2); border-color: var(--border); color: var(--muted); }
     .kw-detected-banner .kw-name{ font-size: 14px; font-weight: 900; }
-    .kw-detected-banner .kw-code{
-      font-family: ui-monospace, monospace; font-size: 13px;
-      background: var(--green); color: #fff; border-radius: 6px;
-      padding: 2px 10px; letter-spacing: .3px;
-    }
-
-    /* === Cat custom items === */
-    .cat-custom-item{
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); margin-bottom: 6px; animation: fadeIn .2s ease;
-    }
+    .kw-detected-banner .kw-code{ font-family: ui-monospace, monospace; font-size: 13px; background: var(--green); color: #fff; border-radius: 6px; padding: 2px 10px; letter-spacing: .3px; }
+    .cat-custom-item{ display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; animation: fadeIn .2s ease; }
     .cat-custom-info{ flex: 1; min-width: 0; }
     .cat-custom-label{ font-size: 13px; font-weight: 800; margin-bottom: 3px; }
     .cat-custom-keys{ font-size: 11px; color: var(--muted); margin-bottom: 3px; }
     .cat-custom-opcoes{ font-size: 11px; color: var(--blue); font-family: ui-monospace, monospace; }
     body.dark-mode .cat-custom-opcoes{ color: #93c5fd; }
-    .custom-badge{
-      display: inline-block; background: var(--amber-light); color: var(--amber);
-      border-radius: 999px; font-size: 10px; font-weight: 900; padding: 1px 8px;
-      vertical-align: middle; margin-left: 6px; letter-spacing: .2px;
-    }
+    .custom-badge{ display: inline-block; background: var(--amber-light); color: var(--amber); border-radius: 999px; font-size: 10px; font-weight: 900; padding: 1px 8px; vertical-align: middle; margin-left: 6px; letter-spacing: .2px; }
     body.dark-mode .custom-badge{ color: #fcd34d; }
+    .inline-row{ display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .inline-row input[type="checkbox"]{ width: auto; margin: 0; transform: scale(1.05); accent-color: var(--accent); }
+    .inline-row label{ margin: 0; font-weight: 800; font-size: 12px; color: var(--muted); }
+
+    /* PWA install banner */
+    .pwa-banner {
+      display: none;
+      align-items: center; gap: 12px;
+      background: var(--blue-light); border: 1px solid var(--blue);
+      border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 14px;
+      font-size: 12px; font-weight: 700;
+    }
+    .pwa-banner.show { display: flex; }
+    .pwa-banner button { appearance: none; border: 1px solid var(--blue); background: var(--blue); color: #fff; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 12px; font-weight: 800; font-family: var(--font); flex-shrink: 0; }
+
+    @media (max-width: 480px) {
+      .login-card { padding: 28px 20px 24px; }
+      .actions { gap: 6px; }
+      .user-chip span { display: none; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="page">
 
-    <header class="topbar">
-      <div class="brand">
+  <!-- ==================== TELA DE LOGIN ==================== -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">
         <img src="https://recursos.qvestido.com.br/i/SVG-diversos/logo.svg" alt="QVestido" />
-        <div class="titlewrap">
-          <p class="title">Gerador de Cadastro</p>
-          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • Descrições IA • Markup • Keywords • Exportar Planilha</p>
-        </div>
+        <p class="login-title">Gerador de Cadastro</p>
+        <p class="login-sub">Acesse com seu login e senha</p>
       </div>
-      <div class="actions">
-        <button class="icon-btn" id="darkModeToggle" type="button">Modo Escuro</button>
+
+      <div class="login-tab-row">
+        <button class="login-tab active" onclick="trocarAba('entrar')">Entrar</button>
+        <button class="login-tab" onclick="trocarAba('reset')">Esqueci a senha</button>
+        <button class="login-tab" id="tabAdmin" onclick="trocarAba('admin')" style="display:none;">Admin</button>
       </div>
-    </header>
 
-    <div id="toast" class="toast" aria-live="polite"></div>
+      <!-- Painel: Entrar -->
+      <div class="login-panel active" id="panelEntrar">
+        <label class="login-label">Login (usuário)</label>
+        <input class="login-input" type="text" id="loginUser" placeholder="seu.login" autocomplete="username" />
 
-    <div class="grid">
+        <label class="login-label">Senha</label>
+        <input class="login-input" type="password" id="loginSenha" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') fazerLogin()" />
 
-      <!-- ===================== Section 1 ===================== -->
-      <section class="card" id="section1">
-        <h2>Gerador de Títulos para Roupas</h2>
-        <p class="desc">Preencha os campos e gere títulos (pai e filhos), SKUs linkados e NCM padrão automaticamente.</p>
+        <button class="login-btn" onclick="fazerLogin()" id="btnLogin">Entrar</button>
+        <div class="login-msg" id="loginMsg"></div>
 
-        <div class="row">
-          <div>
-            <label for="categoria">Categoria</label>
-            <input type="text" id="categoria" placeholder="Ex: SAIA">
-          </div>
-          <div>
-            <label for="comprimento">Comprimento / Modelagem (opcional)</label>
-            <input type="text" id="comprimento" placeholder="Ex: MIDI / EVASÊ">
-          </div>
-          <div>
-            <label for="tecido">Tecido</label>
-            <input type="text" id="tecido" placeholder="Ex: ALFAIATARIA">
-          </div>
-          <div>
-            <label for="cor">Cor</label>
-            <input type="text" id="cor" placeholder="Ex: PRETO">
-          </div>
-          <div>
-            <label for="marca">Marca</label>
-            <input type="text" id="marca" placeholder="Ex: LEKAZIS">
-          </div>
-          <div>
-            <label for="pesoBase">Peso Bruto base — 1º tamanho (kg)</label>
-            <input type="number" step="0.001" id="pesoBase" placeholder="Ex: 0.200">
-          </div>
-        </div>
+        <div class="login-divider"></div>
+        <div class="login-admin-toggle" onclick="toggleAdmin()">⚙️ Acesso administrativo</div>
+      </div>
 
-        <div class="row">
-          <div>
-            <label for="gradeInicio">Grade Inicial</label>
-            <select id="gradeInicio">
-              <option value="XPP">XPP</option><option value="PP">PP</option><option value="P">P</option><option value="M">M</option>
-              <option value="G">G</option><option value="GG">GG</option><option value="G1">G1</option><option value="G2">G2</option>
-              <option value="G3">G3</option><option value="G4">G4</option><option value="34">34</option><option value="36">36</option>
-              <option value="38">38</option><option value="40">40</option><option value="42">42</option><option value="44">44</option>
-              <option value="46">46</option><option value="48">48</option><option value="50">50</option><option value="52">52</option>
-            </select>
-          </div>
-          <div>
-            <label for="gradeFim">Grade Final</label>
-            <select id="gradeFim">
-              <option value="XPP">XPP</option><option value="PP">PP</option><option value="P">P</option><option value="M">M</option>
-              <option value="G">G</option><option value="GG">GG</option><option value="G1">G1</option><option value="G2">G2</option>
-              <option value="G3">G3</option><option value="G4">G4</option><option value="34">34</option><option value="36">36</option>
-              <option value="38">38</option><option value="40">40</option><option value="42">42</option><option value="44">44</option>
-              <option value="46">46</option><option value="48">48</option><option value="50">50</option><option value="52">52</option>
-            </select>
-          </div>
-        </div>
+      <!-- Painel: Reset de senha -->
+      <div class="login-panel" id="panelReset">
+        <p style="font-size:12px;color:var(--muted);margin:0 0 16px;line-height:1.5;">
+          Digite seu login para redefinir a senha. O administrador do sistema terá que confirmar a alteração na planilha.
+        </p>
 
-        <button class="btn" onclick="gerarTituloCompleto()">Gerar Títulos (Pai + Filhos)</button>
-        <div class="output" id="tituloOutput"></div>
-        <button class="btn secondary" onclick="copiarTexto('tituloOutput')">Copiar Títulos</button>
+        <label class="login-label">Login (usuário)</label>
+        <input class="login-input" type="text" id="resetUser" placeholder="seu.login" />
 
-        <div class="divider"></div>
+        <label class="login-label">Nova senha</label>
+        <input class="login-input" type="password" id="resetSenha" placeholder="Nova senha" />
 
-        <h3>Gerador de Código / SKU Base</h3>
-        <label for="codigoManual">Código da Peça</label>
-        <input type="text" id="codigoManual" placeholder="Ex: SA006VD">
-        <button class="btn" onclick="gerarCodigo()">Gerar Códigos (Pai + Filhos)</button>
-        <div class="output" id="codigoOutput"></div>
-        <button class="btn secondary" onclick="copiarTexto('codigoOutput')">Copiar Códigos</button>
+        <label class="login-label">Confirmar nova senha</label>
+        <input class="login-input" type="password" id="resetSenha2" placeholder="Repetir nova senha"
+          onkeydown="if(event.key==='Enter') fazerReset()" />
 
-        <div class="divider"></div>
+        <button class="login-btn" onclick="fazerReset()" id="btnReset">Redefinir senha</button>
+        <div class="login-msg" id="resetMsg"></div>
+      </div>
 
-        <h3>Títulos + SKUs (Pai e Filhos) • Linkado</h3>
-        <button class="btn" onclick="gerarTitulosESkus()">Gerar Títulos + SKUs</button>
-        <div class="output" id="tituloSkuOutput"></div>
-        <button class="btn secondary" onclick="copiarTexto('tituloSkuOutput')">Copiar Títulos + SKUs</button>
+      <!-- Painel: Admin (criar usuário) -->
+      <div class="login-panel" id="panelAdmin">
+        <p style="font-size:12px;color:var(--muted);margin:0 0 16px;line-height:1.5;">
+          Crie novos usuários no banco de dados. Requer a chave administrativa.
+        </p>
 
-        <div class="divider"></div>
+        <label class="login-label">Novo login (usuário)</label>
+        <input class="login-input" type="text" id="adminUser" placeholder="novo.usuario" />
 
-        <h3>NCM (padrão)</h3>
-        <button class="btn" onclick="gerarNcmDoTitulo()">Gerar NCM do Título</button>
-        <div class="output small" id="ncmOutput"></div>
-        <button class="btn secondary" onclick="copiarTexto('ncmOutput')">Copiar NCM</button>
-      </section>
+        <label class="login-label">Senha do novo usuário</label>
+        <input class="login-input" type="password" id="adminSenha" placeholder="Senha" />
 
-      <!-- ===================== Section 2 ===================== -->
-      <section class="card" id="section2">
-        <h2>Gerador de Título Completo + Meta Description</h2>
-        <p class="desc">Use para SEO: título final + meta description + URL amigável.</p>
+        <label class="login-label">Chave administrativa</label>
+        <input class="login-input" type="password" id="adminKey" placeholder="Chave secreta"
+          onkeydown="if(event.key==='Enter') criarUsuario()" />
 
-        <div class="row">
-          <div>
-            <label for="categoria2">Categoria</label>
-            <input type="text" id="categoria2" placeholder="Ex: SAIA">
-          </div>
-          <div>
-            <label for="comprimento2">Comprimento / Modelagem (opcional)</label>
-            <input type="text" id="comprimento2" placeholder="Ex: MIDI">
-          </div>
-          <div>
-            <label for="tecido2">Tecido</label>
-            <input type="text" id="tecido2" placeholder="Ex: ALFAIATARIA">
-          </div>
-          <div>
-            <label for="cor2">Cor</label>
-            <input type="text" id="cor2" placeholder="Ex: PRETO">
-          </div>
-          <div>
-            <label for="marca2">Marca</label>
-            <input type="text" id="marca2" placeholder="Ex: LEKAZIS">
+        <button class="login-btn" onclick="criarUsuario()" id="btnAdmin">Criar usuário</button>
+        <div class="login-msg" id="adminMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APP PRINCIPAL ==================== -->
+  <div id="appScreen">
+    <div class="page">
+
+      <div id="toast" class="toast" aria-live="polite"></div>
+
+      <header class="topbar">
+        <div class="brand">
+          <img src="https://recursos.qvestido.com.br/i/SVG-diversos/logo.svg" alt="QVestido" />
+          <div class="titlewrap">
+            <p class="title">Gerador de Cadastro</p>
+            <p class="subtitle">Títulos • SKU • SEO • URL • NCM • Descrições IA • Markup • Keywords • Exportar Planilha</p>
           </div>
         </div>
-
-        <label for="finalTitulo">Final do título</label>
-        <select id="finalTitulo">
-          <option value="QVestido - Moda Evangélica">QVestido - Moda Evangélica Feminina</option>
-          <option value="QVestido - Moda Executiva Feminina" selected>QVestido - Moda Executiva Feminina</option>
-        </select>
-
-        <button class="btn" onclick="gerarTituloSEO()">Gerar Título SEO</button>
-        <div class="output" id="outputTitulo"></div>
-        <button class="btn secondary" onclick="copiarTexto('outputTitulo')">Copiar Título SEO</button>
-
-        <button class="btn" onclick="gerarMetaDescription()">Gerar Meta Description</button>
-        <div class="output" id="outputMetaTag"></div>
-        <button class="btn secondary" onclick="copiarTexto('outputMetaTag')">Copiar Meta Description</button>
-
-        <div class="divider"></div>
-
-        <h3>Gerador de URL</h3>
-        <button class="btn" onclick="gerarURL()">Gerar URL</button>
-        <div class="output small" id="urlOutput"></div>
-        <button class="btn secondary" onclick="copiarTexto('urlOutput')">Copiar URL</button>
-      </section>
-
-      <!-- ===================== Section 3 ===================== -->
-      <section class="card" id="section3">
-        <h2>Gerar Descrição do Produto</h2>
-
-        <label for="descTitulo">Título do produto (preenchido automaticamente da Seção 1)</label>
-        <input type="text" id="descTitulo" placeholder="Preencha os campos na Seção 1 e clique em Gerar Títulos..." readonly style="opacity:.7;cursor:default;">
-
-        <label for="descComposicao">Composição do produto</label>
-        <input type="text" id="descComposicao" placeholder="Ex: 98% Algodão e 2% Elastano">
-
-        <label for="tipoTecido">Tipo de descrição</label>
-        <select id="tipoTecido">
-          <option value="viscose">Viscose</option>
-          <option value="algodao">Algodão</option>
-          <option value="poliamida">Poliamida/Elastano</option>
-          <option value="jeans">Jeans</option>
-          <option value="generico" selected>Genérica</option>
-        </select>
-
-        <button class="btn" id="btnGerarDesc" onclick="gerarDescricaoIA()">Gerar Descrição</button>
-
-        <div id="descLoading" style="display:none;margin-top:12px;text-align:center;color:var(--muted);font-size:13px;font-weight:700;">
-          ⏳ Gerando descrição...
-        </div>
-
-        <div class="divider" style="margin-top:14px;"></div>
-
-        <h3>Resultado — HTML da Descrição</h3>
-        <div class="output" id="descHtmlOutput" style="min-height:80px;white-space:pre-wrap;"></div>
-        <button class="btn secondary" onclick="copiarTexto('descHtmlOutput')">Copiar HTML</button>
-
-        <div class="divider"></div>
-
-        <h3>Prévia visual</h3>
-        <div id="descPreview" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;min-height:48px;font-size:14px;color:var(--text);line-height:1.6;"></div>
-      </section>
-
-      <!-- ===================== Section 4 ===================== -->
-      <section class="card" id="section4">
-        <h2>Calculadora de Markup 🏷️</h2>
-        <p class="desc">Calcule o preço de venda com base no custo e no markup da marca. O preço final é arredondado para o padrão de precificação.</p>
-
-        <label for="mkMarca">Marca</label>
-        <select id="mkMarca">
-          <option value="">Selecione a marca</option>
-          <option value="2.1">Luzia Fazzolli</option>
-          <option value="2.0">Lekazis</option>
-        </select>
-
-        <label for="mkMarkup">Markup</label>
-        <input type="number" step="0.01" id="mkMarkup" placeholder="Ex: 2.1">
-
-        <label for="mkCusto">Preço de Custo (R$)</label>
-        <input type="number" step="0.01" id="mkCusto" placeholder="Ex: 577.80">
-
-        <button class="btn" onclick="calcularMarkup()">Calcular Preço de Venda</button>
-
-        <div id="mkResultadoWrap" style="display:none;margin-top:14px;">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;text-align:center;">
-            <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.3px;margin-bottom:6px;">PREÇO DE VENDA</div>
-            <div id="mkResultado" style="font-size:28px;font-weight:900;letter-spacing:-.5px;"></div>
+        <div class="actions">
+          <div class="user-chip">
+            <span class="dot"></span>
+            <span id="userLabel">—</span>
           </div>
-          <div style="display:flex;gap:10px;margin-top:10px;">
-            <button class="btn secondary" style="margin-top:0;" onclick="copiarMarkup()">Copiar Valor</button>
-            <button class="btn secondary" style="margin-top:0;" onclick="limparMarkup()">Limpar</button>
+          <button class="icon-btn" id="darkModeToggle" type="button">Modo Escuro</button>
+          <button class="icon-btn" onclick="fazerLogout()" style="border-color:var(--red);color:var(--red);">Sair</button>
+        </div>
+      </header>
+
+      <!-- PWA Install Banner -->
+      <div class="pwa-banner" id="pwaBanner">
+        📱 <span>Instale como app no celular ou PC! Abra pelo Chrome e clique em <b>Instalar</b>.</span>
+        <button onclick="instalarPWA()">Instalar</button>
+        <button onclick="document.getElementById('pwaBanner').classList.remove('show')" style="background:transparent;color:var(--blue);border-color:var(--blue);">✕</button>
+      </div>
+
+      <div class="grid">
+
+        <!-- ===================== Section 1 ===================== -->
+        <section class="card" id="section1">
+          <h2>Gerador de Títulos para Roupas</h2>
+          <p class="desc">Preencha os campos e gere títulos (pai e filhos), SKUs linkados e NCM padrão automaticamente.</p>
+
+          <div class="row">
+            <div>
+              <label for="categoria">Categoria</label>
+              <input type="text" id="categoria" placeholder="Ex: SAIA">
+            </div>
+            <div>
+              <label for="comprimento">Comprimento / Modelagem (opcional)</label>
+              <input type="text" id="comprimento" placeholder="Ex: MIDI / EVASÊ">
+            </div>
+            <div>
+              <label for="tecido">Tecido</label>
+              <input type="text" id="tecido" placeholder="Ex: ALFAIATARIA">
+            </div>
+            <div>
+              <label for="cor">Cor</label>
+              <input type="text" id="cor" placeholder="Ex: PRETO">
+            </div>
+            <div>
+              <label for="marca">Marca</label>
+              <input type="text" id="marca" placeholder="Ex: LEKAZIS">
+            </div>
+            <div>
+              <label for="pesoBase">Peso Bruto base — 1º tamanho (kg)</label>
+              <input type="number" step="0.001" id="pesoBase" placeholder="Ex: 0.200">
+            </div>
           </div>
-        </div>
-      </section>
 
-      <!-- ===================== Section 5: Categorização ===================== -->
-      <section class="card" id="section5">
-        <h2>Categorização do Produto 🏷️</h2>
-        <p class="desc">Detecta automaticamente as categorizações disponíveis com base no título digitado na Seção 1. Clique em uma categoria para selecioná-la e depois copie.</p>
-
-        <div id="catDetectada" style="margin-bottom:10px;font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.2px;min-height:18px;"></div>
-        <div id="catChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:40px;"></div>
-
-        <div id="catSelecionadaWrap" style="display:none;">
-          <label style="margin-top:0;">Categorização selecionada</label>
-          <div class="output small" id="catSelecionadaOutput" style="min-height:34px;cursor:pointer;"></div>
-          <button class="btn secondary" style="margin-top:8px;" onclick="copiarTexto('catSelecionadaOutput')">Copiar Categorização</button>
-        </div>
-
-        <div id="catVazio" style="color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;padding:12px 0;">
-          <span>⬆️ Preencha o campo <b>Categoria</b> na Seção 1 para ver as opções</span>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- Nova categoria -->
-        <h3>➕ Adicionar nova categoria <span class="custom-badge" id="catCustomCount">0 custom</span></h3>
-        <p class="desc" style="margin-bottom:10px;">Crie uma nova categoria que será salva localmente e funcionará como as categorias padrão.</p>
-
-        <div class="row">
-          <div>
-            <label for="newCatLabel">Nome da categoria (display)</label>
-            <input type="text" id="newCatLabel" placeholder="Ex: Regata">
+          <div class="row">
+            <div>
+              <label for="gradeInicio">Grade Inicial</label>
+              <select id="gradeInicio">
+                <option value="XPP">XPP</option><option value="PP">PP</option><option value="P">P</option><option value="M">M</option>
+                <option value="G">G</option><option value="GG">GG</option><option value="G1">G1</option><option value="G2">G2</option>
+                <option value="G3">G3</option><option value="G4">G4</option><option value="34">34</option><option value="36">36</option>
+                <option value="38">38</option><option value="40">40</option><option value="42">42</option><option value="44">44</option>
+                <option value="46">46</option><option value="48">48</option><option value="50">50</option><option value="52">52</option>
+              </select>
+            </div>
+            <div>
+              <label for="gradeFim">Grade Final</label>
+              <select id="gradeFim">
+                <option value="XPP">XPP</option><option value="PP">PP</option><option value="P">P</option><option value="M">M</option>
+                <option value="G">G</option><option value="GG">GG</option><option value="G1">G1</option><option value="G2">G2</option>
+                <option value="G3">G3</option><option value="G4">G4</option><option value="34">34</option><option value="36">36</option>
+                <option value="38">38</option><option value="40">40</option><option value="42">42</option><option value="44">44</option>
+                <option value="46">46</option><option value="48">48</option><option value="50">50</option><option value="52">52</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label for="newCatChaves">Palavras-chave (separadas por vírgula)</label>
-            <input type="text" id="newCatChaves" placeholder="Ex: REGATA, REGATAS, TOP">
+
+          <button class="btn" onclick="gerarTituloCompleto()">Gerar Títulos (Pai + Filhos)</button>
+          <div class="output" id="tituloOutput"></div>
+          <button class="btn secondary" onclick="copiarTexto('tituloOutput')">Copiar Títulos</button>
+
+          <div class="divider"></div>
+          <h3>Gerador de Código / SKU Base</h3>
+          <label for="codigoManual">Código da Peça</label>
+          <input type="text" id="codigoManual" placeholder="Ex: SA006VD">
+          <button class="btn" onclick="gerarCodigo()">Gerar Códigos (Pai + Filhos)</button>
+          <div class="output" id="codigoOutput"></div>
+          <button class="btn secondary" onclick="copiarTexto('codigoOutput')">Copiar Códigos</button>
+
+          <div class="divider"></div>
+          <h3>Títulos + SKUs (Pai e Filhos) • Linkado</h3>
+          <button class="btn" onclick="gerarTitulosESkus()">Gerar Títulos + SKUs</button>
+          <div class="output" id="tituloSkuOutput"></div>
+          <button class="btn secondary" onclick="copiarTexto('tituloSkuOutput')">Copiar Títulos + SKUs</button>
+
+          <div class="divider"></div>
+          <h3>NCM (padrão)</h3>
+          <button class="btn" onclick="gerarNcmDoTitulo()">Gerar NCM do Título</button>
+          <div class="output small" id="ncmOutput"></div>
+          <button class="btn secondary" onclick="copiarTexto('ncmOutput')">Copiar NCM</button>
+        </section>
+
+        <!-- ===================== Section 2 ===================== -->
+        <section class="card" id="section2">
+          <h2>Gerador de Título Completo + Meta Description</h2>
+          <p class="desc">Use para SEO: título final + meta description + URL amigável.</p>
+
+          <div class="row">
+            <div>
+              <label for="categoria2">Categoria</label>
+              <input type="text" id="categoria2" placeholder="Ex: SAIA">
+            </div>
+            <div>
+              <label for="comprimento2">Comprimento / Modelagem (opcional)</label>
+              <input type="text" id="comprimento2" placeholder="Ex: MIDI">
+            </div>
+            <div>
+              <label for="tecido2">Tecido</label>
+              <input type="text" id="tecido2" placeholder="Ex: ALFAIATARIA">
+            </div>
+            <div>
+              <label for="cor2">Cor</label>
+              <input type="text" id="cor2" placeholder="Ex: PRETO">
+            </div>
+            <div>
+              <label for="marca2">Marca</label>
+              <input type="text" id="marca2" placeholder="Ex: LEKAZIS">
+            </div>
           </div>
-        </div>
 
-        <label for="newCatOpcoes">Opções de categorização (uma por linha, formato Pai>Filho)</label>
-        <textarea id="newCatOpcoes" placeholder="Ex:&#10;Roupas>Regatas&#10;Moda Praia>Regata Fitness"></textarea>
+          <label for="finalTitulo">Final do título</label>
+          <select id="finalTitulo">
+            <option value="QVestido - Moda Evangélica">QVestido - Moda Evangélica Feminina</option>
+            <option value="QVestido - Moda Executiva Feminina" selected>QVestido - Moda Executiva Feminina</option>
+          </select>
 
-        <div style="display:flex;gap:10px;">
-          <button class="btn amber" style="flex:1;" onclick="adicionarCategoriaCustom()">💾 Salvar categoria</button>
-          <button class="btn secondary" style="flex:1;margin-top:10px;" onclick="limparFormCategoria()">Limpar campos</button>
-        </div>
+          <button class="btn" onclick="gerarTituloSEO()">Gerar Título SEO</button>
+          <div class="output" id="outputTitulo"></div>
+          <button class="btn secondary" onclick="copiarTexto('outputTitulo')">Copiar Título SEO</button>
 
-        <div class="divider"></div>
+          <button class="btn" onclick="gerarMetaDescription()">Gerar Meta Description</button>
+          <div class="output" id="outputMetaTag"></div>
+          <button class="btn secondary" onclick="copiarTexto('outputMetaTag')">Copiar Meta Description</button>
 
-        <h3>📋 Categorias personalizadas</h3>
-        <div id="listaCatCustom">
-          <div class="empty-state" style="padding:18px;"><div class="icon" style="font-size:22px;">📂</div><div>Nenhuma categoria personalizada ainda.</div></div>
-        </div>
-      </section>
+          <div class="divider"></div>
+          <h3>Gerador de URL</h3>
+          <button class="btn" onclick="gerarURL()">Gerar URL</button>
+          <div class="output small" id="urlOutput"></div>
+          <button class="btn secondary" onclick="copiarTexto('urlOutput')">Copiar URL</button>
+        </section>
 
-      <!-- ===================== Section 7: Keywords ===================== -->
-      <section class="card" id="section7">
-        <h2>🔑 Keywords por Marca</h2>
-        <p class="desc">A keyword correta é detectada automaticamente a partir da marca preenchida na Seção 1 e incluída na coluna <b>Keywords</b> da planilha exportada.</p>
+        <!-- ===================== Section 3 ===================== -->
+        <section class="card" id="section3">
+          <h2>Gerar Descrição do Produto</h2>
 
-        <!-- Banner de detecção automática -->
-        <div id="kwDetectedBanner" class="kw-detected-banner none">
-          <span>⬆️ Preencha o campo <b>Marca</b> na Seção 1 para detectar a keyword automaticamente.</span>
-        </div>
+          <label for="descTitulo">Título do produto (preenchido automaticamente da Seção 1)</label>
+          <input type="text" id="descTitulo" placeholder="Preencha os campos na Seção 1 e clique em Gerar Títulos..." readonly style="opacity:.7;cursor:default;">
 
-        <div class="divider"></div>
+          <label for="descComposicao">Composição do produto</label>
+          <input type="text" id="descComposicao" placeholder="Ex: 98% Algodão e 2% Elastano">
 
-        <!-- Tabela de keywords -->
-        <h3>Tabela de keywords cadastradas <span class="badge" id="kwTotalBadge">0</span></h3>
-        <div style="overflow-x:auto;">
-          <table class="kw-table" id="kwTable">
-            <thead>
-              <tr>
-                <th>Marca</th>
-                <th>Keyword</th>
-                <th>Tipo</th>
-                <th style="width:80px;"></th>
-              </tr>
-            </thead>
-            <tbody id="kwTableBody"></tbody>
-          </table>
-        </div>
+          <label for="tipoTecido">Tipo de descrição</label>
+          <select id="tipoTecido">
+            <option value="viscose">Viscose</option>
+            <option value="algodao">Algodão</option>
+            <option value="poliamida">Poliamida/Elastano</option>
+            <option value="jeans">Jeans</option>
+            <option value="generico" selected>Genérica</option>
+          </select>
 
-        <div class="divider"></div>
+          <button class="btn" id="btnGerarDesc" onclick="gerarDescricaoIA()">Gerar Descrição</button>
+          <div id="descLoading" style="display:none;margin-top:12px;text-align:center;color:var(--muted);font-size:13px;font-weight:700;">⏳ Gerando descrição...</div>
 
-        <!-- Formulário nova keyword -->
-        <h3>➕ Cadastrar nova keyword</h3>
-        <p class="desc" style="margin-bottom:10px;">A keyword é gerada automaticamente como <b>tabela + marca</b> (sem espaços e minúsculas). Você pode editar antes de salvar.</p>
+          <div class="divider" style="margin-top:14px;"></div>
+          <h3>Resultado — HTML da Descrição</h3>
+          <div class="output" id="descHtmlOutput" style="min-height:80px;white-space:pre-wrap;"></div>
+          <button class="btn secondary" onclick="copiarTexto('descHtmlOutput')">Copiar HTML</button>
 
-        <div class="row">
-          <div>
-            <label for="newKwMarca">Nome da marca</label>
-            <input type="text" id="newKwMarca" placeholder="Ex: NOVA MARCA" oninput="sugerirKeyword()">
+          <div class="divider"></div>
+          <h3>Prévia visual</h3>
+          <div id="descPreview" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;min-height:48px;font-size:14px;color:var(--text);line-height:1.6;"></div>
+        </section>
+
+        <!-- ===================== Section 4 ===================== -->
+        <section class="card" id="section4">
+          <h2>Calculadora de Markup 🏷️</h2>
+          <p class="desc">Calcule o preço de venda com base no custo e no markup da marca.</p>
+
+          <label for="mkMarca">Marca</label>
+          <select id="mkMarca">
+            <option value="">Selecione a marca</option>
+            <option value="2.1">Luzia Fazzolli</option>
+            <option value="2.0">Lekazis</option>
+          </select>
+
+          <label for="mkMarkup">Markup</label>
+          <input type="number" step="0.01" id="mkMarkup" placeholder="Ex: 2.1">
+
+          <label for="mkCusto">Preço de Custo (R$)</label>
+          <input type="number" step="0.01" id="mkCusto" placeholder="Ex: 577.80">
+
+          <button class="btn" onclick="calcularMarkup()">Calcular Preço de Venda</button>
+
+          <div id="mkResultadoWrap" style="display:none;margin-top:14px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;text-align:center;">
+              <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.3px;margin-bottom:6px;">PREÇO DE VENDA</div>
+              <div id="mkResultado" style="font-size:28px;font-weight:900;letter-spacing:-.5px;"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:10px;">
+              <button class="btn secondary" style="margin-top:0;" onclick="copiarMarkup()">Copiar Valor</button>
+              <button class="btn secondary" style="margin-top:0;" onclick="limparMarkup()">Limpar</button>
+            </div>
           </div>
-          <div>
-            <label for="newKwKeyword">Keyword gerada (editável)</label>
-            <input type="text" id="newKwKeyword" placeholder="Ex: tabelanovamarca">
+        </section>
+
+        <!-- ===================== Section 5 ===================== -->
+        <section class="card" id="section5">
+          <h2>Categorização do Produto 🏷️</h2>
+          <p class="desc">Detecta automaticamente as categorizações disponíveis com base no título digitado na Seção 1.</p>
+
+          <div id="catDetectada" style="margin-bottom:10px;font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.2px;min-height:18px;"></div>
+          <div id="catChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:40px;"></div>
+
+          <div id="catSelecionadaWrap" style="display:none;">
+            <label style="margin-top:0;">Categorização selecionada</label>
+            <div class="output small" id="catSelecionadaOutput" style="min-height:34px;cursor:pointer;"></div>
+            <button class="btn secondary" style="margin-top:8px;" onclick="copiarTexto('catSelecionadaOutput')">Copiar Categorização</button>
           </div>
-        </div>
 
-        <div style="display:flex;gap:10px;">
-          <button class="btn amber" style="flex:1;" onclick="adicionarKeywordCustom()">💾 Salvar keyword</button>
-          <button class="btn secondary" style="flex:1;margin-top:10px;" onclick="limparFormKeyword()">Limpar</button>
-        </div>
-      </section>
-
-      <!-- ===================== Section 6: Produtos Salvos ===================== -->
-      <section class="card" id="section6">
-        <div class="section-header">
-          <h2>📦 Produtos Salvos <span class="badge" id="contadorProdutos">0</span></h2>
-        </div>
-        <p class="desc">Salve cada produto gerado nas seções acima. Os dados ficam armazenados no navegador e podem ser exportados como xlsx no formato exato da planilha base.</p>
-
-        <!-- Preview do que será salvo -->
-        <h3>Preview do produto atual</h3>
-        <div class="preview-grid" id="previewGrid">
-          <div class="preview-item"><div class="key">SKU</div><div class="val missing" id="prv-sku">—</div></div>
-          <div class="preview-item"><div class="key">Descrição (Pai)</div><div class="val missing" id="prv-desc">—</div></div>
-          <div class="preview-item"><div class="key">NCM</div><div class="val missing" id="prv-ncm">—</div></div>
-          <div class="preview-item"><div class="key">Preço de Venda</div><div class="val missing" id="prv-preco">—</div></div>
-          <div class="preview-item"><div class="key">Preço de Custo</div><div class="val missing" id="prv-custo">—</div></div>
-          <div class="preview-item"><div class="key">Cor</div><div class="val missing" id="prv-cor">—</div></div>
-          <div class="preview-item"><div class="key">Marca</div><div class="val missing" id="prv-marca">—</div></div>
-          <div class="preview-item"><div class="key">Grade</div><div class="val missing" id="prv-grade">—</div></div>
-          <div class="preview-item"><div class="key">Categorização</div><div class="val missing" id="prv-cat">—</div></div>
-          <div class="preview-item"><div class="key">Título SEO</div><div class="val missing" id="prv-seo">—</div></div>
-          <div class="preview-item"><div class="key">Meta Description</div><div class="val missing" id="prv-meta">—</div></div>
-          <div class="preview-item"><div class="key">URL</div><div class="val missing" id="prv-url">—</div></div>
-          <div class="preview-item"><div class="key">Descrição E-commerce</div><div class="val missing" id="prv-desc-ec">—</div></div>
-          <div class="preview-item"><div class="key">Peso Base (kg)</div><div class="val missing" id="prv-peso">—</div></div>
-          <div class="preview-item"><div class="key">Keywords</div><div class="val missing" id="prv-kw">—</div></div>
-        </div>
-
-        <button class="btn success" onclick="salvarProduto()">💾 Salvar produto atual na lista</button>
-
-        <div class="divider"></div>
-
-        <h3>Lista de produtos salvos</h3>
-        <div id="listaProdutos">
-          <div class="empty-state">
-            <div class="icon">📂</div>
-            <div>Nenhum produto salvo ainda.<br>Gere os dados nas seções acima e clique em <b>Salvar produto atual</b>.</div>
+          <div id="catVazio" style="color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;padding:12px 0;">
+            <span>⬆️ Preencha o campo <b>Categoria</b> na Seção 1 para ver as opções</span>
           </div>
-        </div>
 
-        <div class="export-bar">
-          <button class="btn" onclick="exportarCSV()">⬇️ Exportar Planilha .xlsx (Excel)</button>
-          <button class="btn danger" onclick="limparTodosProdutos()">🗑️ Limpar todos os produtos</button>
-        </div>
-      </section>
+          <div class="divider"></div>
+          <h3>➕ Adicionar nova categoria <span class="custom-badge" id="catCustomCount">0 custom</span></h3>
 
+          <div class="row">
+            <div>
+              <label for="newCatLabel">Nome da categoria (display)</label>
+              <input type="text" id="newCatLabel" placeholder="Ex: Regata">
+            </div>
+            <div>
+              <label for="newCatChaves">Palavras-chave (separadas por vírgula)</label>
+              <input type="text" id="newCatChaves" placeholder="Ex: REGATA, REGATAS, TOP">
+            </div>
+          </div>
+
+          <label for="newCatOpcoes">Opções de categorização (uma por linha, formato Pai>Filho)</label>
+          <textarea id="newCatOpcoes" placeholder="Ex:&#10;Roupas>Regatas&#10;Moda Praia>Regata Fitness"></textarea>
+
+          <div style="display:flex;gap:10px;">
+            <button class="btn amber" style="flex:1;" onclick="adicionarCategoriaCustom()">💾 Salvar categoria</button>
+            <button class="btn secondary" style="flex:1;margin-top:10px;" onclick="limparFormCategoria()">Limpar campos</button>
+          </div>
+
+          <div class="divider"></div>
+          <h3>📋 Categorias personalizadas</h3>
+          <div id="listaCatCustom">
+            <div class="empty-state" style="padding:18px;"><div class="icon" style="font-size:22px;">📂</div><div>Nenhuma categoria personalizada ainda.</div></div>
+          </div>
+        </section>
+
+        <!-- ===================== Section 7: Keywords ===================== -->
+        <section class="card" id="section7">
+          <h2>🔑 Keywords por Marca</h2>
+          <p class="desc">A keyword correta é detectada automaticamente a partir da marca preenchida na Seção 1.</p>
+
+          <div id="kwDetectedBanner" class="kw-detected-banner none">
+            <span>⬆️ Preencha o campo <b>Marca</b> na Seção 1 para detectar a keyword automaticamente.</span>
+          </div>
+
+          <div class="divider"></div>
+          <h3>Tabela de keywords cadastradas <span class="badge" id="kwTotalBadge">0</span></h3>
+          <div style="overflow-x:auto;">
+            <table class="kw-table" id="kwTable">
+              <thead>
+                <tr>
+                  <th>Marca</th><th>Keyword</th><th>Tipo</th><th style="width:80px;"></th>
+                </tr>
+              </thead>
+              <tbody id="kwTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="divider"></div>
+          <h3>➕ Cadastrar nova keyword</h3>
+
+          <div class="row">
+            <div>
+              <label for="newKwMarca">Nome da marca</label>
+              <input type="text" id="newKwMarca" placeholder="Ex: NOVA MARCA" oninput="sugerirKeyword()">
+            </div>
+            <div>
+              <label for="newKwKeyword">Keyword gerada (editável)</label>
+              <input type="text" id="newKwKeyword" placeholder="Ex: tabelanovamarca">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;">
+            <button class="btn amber" style="flex:1;" onclick="adicionarKeywordCustom()">💾 Salvar keyword</button>
+            <button class="btn secondary" style="flex:1;margin-top:10px;" onclick="limparFormKeyword()">Limpar</button>
+          </div>
+        </section>
+
+        <!-- ===================== Section 6 ===================== -->
+        <section class="card" id="section6">
+          <div class="section-header">
+            <h2>📦 Produtos Salvos <span class="badge" id="contadorProdutos">0</span></h2>
+          </div>
+          <p class="desc">Salve cada produto gerado. Os dados ficam armazenados no navegador e podem ser exportados como .xlsx.</p>
+
+          <h3>Preview do produto atual</h3>
+          <div class="preview-grid" id="previewGrid">
+            <div class="preview-item"><div class="key">SKU</div><div class="val missing" id="prv-sku">—</div></div>
+            <div class="preview-item"><div class="key">Descrição (Pai)</div><div class="val missing" id="prv-desc">—</div></div>
+            <div class="preview-item"><div class="key">NCM</div><div class="val missing" id="prv-ncm">—</div></div>
+            <div class="preview-item"><div class="key">Preço de Venda</div><div class="val missing" id="prv-preco">—</div></div>
+            <div class="preview-item"><div class="key">Preço de Custo</div><div class="val missing" id="prv-custo">—</div></div>
+            <div class="preview-item"><div class="key">Cor</div><div class="val missing" id="prv-cor">—</div></div>
+            <div class="preview-item"><div class="key">Marca</div><div class="val missing" id="prv-marca">—</div></div>
+            <div class="preview-item"><div class="key">Grade</div><div class="val missing" id="prv-grade">—</div></div>
+            <div class="preview-item"><div class="key">Categorização</div><div class="val missing" id="prv-cat">—</div></div>
+            <div class="preview-item"><div class="key">Título SEO</div><div class="val missing" id="prv-seo">—</div></div>
+            <div class="preview-item"><div class="key">Meta Description</div><div class="val missing" id="prv-meta">—</div></div>
+            <div class="preview-item"><div class="key">URL</div><div class="val missing" id="prv-url">—</div></div>
+            <div class="preview-item"><div class="key">Descrição E-commerce</div><div class="val missing" id="prv-desc-ec">—</div></div>
+            <div class="preview-item"><div class="key">Peso Base (kg)</div><div class="val missing" id="prv-peso">—</div></div>
+            <div class="preview-item"><div class="key">Keywords</div><div class="val missing" id="prv-kw">—</div></div>
+          </div>
+
+          <button class="btn success" onclick="salvarProduto()">💾 Salvar produto atual na lista</button>
+
+          <div class="divider"></div>
+          <h3>Lista de produtos salvos</h3>
+          <div id="listaProdutos">
+            <div class="empty-state">
+              <div class="icon">📂</div>
+              <div>Nenhum produto salvo ainda.<br>Gere os dados nas seções acima e clique em <b>Salvar produto atual</b>.</div>
+            </div>
+          </div>
+
+          <div class="export-bar">
+            <button class="btn" onclick="exportarCSV()">⬇️ Exportar Planilha .xlsx (Excel)</button>
+            <button class="btn danger" onclick="limparTodosProdutos()">🗑️ Limpar todos os produtos</button>
+          </div>
+        </section>
+
+      </div>
     </div>
   </div>
 
 <script>
-  // === Modo escuro ===
-  const toggleBtn = document.getElementById('darkModeToggle');
-  toggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-    toggleBtn.innerText = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
+  // =====================================================================
+  // ⚙️  CONFIGURAÇÃO — cole aqui a URL do seu Apps Script após implantar
+  // =====================================================================
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybdYe4kzeo-loLA0HSbjVA6e7IXSd6DTvzwfMBN3IjesFSD5Iy0COj7qfSy3SJ6s0J/exec';
+  // Exemplo: 'https://script.google.com/macros/s/AKfycbxXXX.../exec'
+  // =====================================================================
+
+  // ==================== PWA ====================
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('pwaBanner').classList.add('show');
   });
 
-  const tamanhos = ["XPP","PP","P","M","G","GG","G1","G2","G3","G4","34","36","38","40","42","44","46","48","50","52"];
-
-  const tamanhoLabel = {
-    "XPP":"XPP/34","PP":"PP/36","P":"P/38","M":"M/40","G":"G/42","GG":"GG/44",
-    "G1":"G1/46","G2":"G2/48","G3":"G3/50","G4":"G4/52",
-    "34":"XPP/34","36":"PP/36","38":"P/38","40":"M/40","42":"G/42","44":"GG/44",
-    "46":"G1/46","48":"G2/48","50":"G3/50","52":"G4/52"
-  };
-
-  // =============================================
-  // ===== KEYWORDS — banco de dados embutido =====
-  // =============================================
-
-  const KEYWORDS_STORAGE_KEY = 'qvestido_keywords_v1';
-
-  // Keywords padrão (inalterable)
-  const _keywordsBuiltin = {
-    "ARTSY":           "tabelaartsy",
-    "DOCE MARIA":      "tabeladocemaria",
-    "DOCE TRAMA":      "tabeladocetrama",
-    "HAPUK":           "tabelahapuk",
-    "JANY PIM":        "tabelajanypim",
-    "LAURA ROSA":      "tabelalaurarosa",
-    "LEKAZIS":         "tabelalekazis",
-    "LINDA DE MORRER": "tabelalindademorrer",
-    "LIZ":             "tabelaliz",
-    "LUZIA FAZZOLLI":  "tabelaluziafazzolli",
-    "PURO SHARMY":     "tabelapurosharmy",
-    "TITANIUM JEANS":  "tabelatitaniumjeans",
-    "TLI CRIO":        "tabelatlicrio",
-    "VIA TOLENTINO":   "tabelaviatolentino"
-  };
-
-  function carregarKeywordsCustom() {
-    try { return JSON.parse(localStorage.getItem(KEYWORDS_STORAGE_KEY) || '{}'); }
-    catch(e) { return {}; }
-  }
-
-  function salvarKeywordsCustomStorage(obj) {
-    localStorage.setItem(KEYWORDS_STORAGE_KEY, JSON.stringify(obj));
-  }
-
-  // Retorna objeto unificado: builtin + custom (custom pode sobrescrever)
-  function getAllKeywords() {
-    return { ..._keywordsBuiltin, ...carregarKeywordsCustom() };
-  }
-
-  // Busca keyword pela marca (tolerante a variações)
-  function obterKeyword(marcaRaw) {
-    if (!marcaRaw) return '';
-    const marcaNorm = norm(marcaRaw);
-    const all = getAllKeywords();
-    // Busca exata primeiro
-    for (const [key, val] of Object.entries(all)) {
-      if (norm(key) === marcaNorm) return val;
+  function instalarPWA() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('pwaBanner').classList.remove('show');
+      });
     }
-    // Busca parcial
-    for (const [key, val] of Object.entries(all)) {
-      const kn = norm(key);
-      if (marcaNorm.includes(kn) || kn.includes(marcaNorm)) return val;
+  }
+
+  // ==================== LOGIN ====================
+  const SESSION_KEY = 'qvestido_session_v1';
+  let _abaAtual = 'entrar';
+  let _adminVisible = false;
+
+  function trocarAba(aba) {
+    _abaAtual = aba;
+    document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.login-panel').forEach(p => p.classList.remove('active'));
+    const tabMap = { entrar: 0, reset: 1, admin: 2 };
+    const tabs = document.querySelectorAll('.login-tab');
+    tabs[tabMap[aba]]?.classList.add('active');
+    const panels = { entrar: 'panelEntrar', reset: 'panelReset', admin: 'panelAdmin' };
+    document.getElementById(panels[aba])?.classList.add('active');
+    ['loginMsg','resetMsg','adminMsg'].forEach(id => { const el=document.getElementById(id); if(el){el.className='login-msg';el.textContent='';} });
+  }
+
+  function toggleAdmin() {
+    _adminVisible = !_adminVisible;
+    const tab = document.getElementById('tabAdmin');
+    if (_adminVisible) { tab.style.display = 'block'; trocarAba('admin'); }
+    else { tab.style.display = 'none'; trocarAba('entrar'); }
+  }
+
+  function mostrarLoginMsg(id, txt, tipo) {
+    const el = document.getElementById(id);
+    el.textContent = txt;
+    el.className = 'login-msg ' + tipo;
+  }
+
+  async function chamarAPI(params) {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT') {
+      return { ok: false, msg: '⚠️ URL do Apps Script não configurada. Siga as instruções no topo do arquivo HTML.' };
     }
-    return '';
+    try {
+      const url = new URL(APPS_SCRIPT_URL);
+      Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+      const resp = await fetch(url.toString());
+      return await resp.json();
+    } catch(e) {
+      return { ok: false, msg: 'Erro de conexão. Verifique a URL do Apps Script.' };
+    }
   }
 
-  // Gera sugestão automática de keyword a partir da marca
-  function sugerirKeyword() {
-    const marca = document.getElementById('newKwMarca').value.trim();
-    if (!marca) { document.getElementById('newKwKeyword').value = ''; return; }
-    const sugestao = 'tabela' + marca.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[^a-z0-9]/g,'');
-    document.getElementById('newKwKeyword').value = sugestao;
-  }
+  async function fazerLogin() {
+    const login = document.getElementById('loginUser').value.trim();
+    const senha = document.getElementById('loginSenha').value.trim();
+    if (!login || !senha) { mostrarLoginMsg('loginMsg','Preencha login e senha.','error'); return; }
 
-  function adicionarKeywordCustom() {
-    const marca = document.getElementById('newKwMarca').value.trim().toUpperCase();
-    const keyword = document.getElementById('newKwKeyword').value.trim().toLowerCase();
-    if (!marca) { showToast('⚠️ Preencha o nome da marca.', 2000); return; }
-    if (!keyword) { showToast('⚠️ Preencha a keyword.', 2000); return; }
-    if (!keyword.startsWith('tabela')) { showToast('⚠️ A keyword deve começar com "tabela".', 2200); return; }
-    const custom = carregarKeywordsCustom();
-    custom[marca] = keyword;
-    salvarKeywordsCustomStorage(custom);
-    renderizarTabelaKeywords();
-    limparFormKeyword();
-    showToast(`✅ Keyword "${keyword}" salva para "${marca}"!`, 2000);
-    atualizarPreview();
-  }
+    const btn = document.getElementById('btnLogin');
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+    mostrarLoginMsg('loginMsg','','');
 
-  function removerKeywordCustom(marca) {
-    const custom = carregarKeywordsCustom();
-    delete custom[marca];
-    salvarKeywordsCustomStorage(custom);
-    renderizarTabelaKeywords();
-    showToast('Keyword removida.', 1400);
-    atualizarPreview();
-  }
+    const res = await chamarAPI({ action: 'login', login, senha });
 
-  function limparFormKeyword() {
-    document.getElementById('newKwMarca').value = '';
-    document.getElementById('newKwKeyword').value = '';
-  }
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
 
-  function renderizarTabelaKeywords() {
-    const tbody = document.getElementById('kwTableBody');
-    const badge = document.getElementById('kwTotalBadge');
-    const custom = carregarKeywordsCustom();
-    const all = getAllKeywords();
-    const total = Object.keys(all).length;
-    badge.textContent = total;
-    tbody.innerHTML = '';
-
-    // Builtin primeiro, depois custom
-    const builtin = _keywordsBuiltin;
-    const allEntries = [
-      ...Object.entries(builtin).map(([m,k]) => ({marca:m,keyword:k,tipo:'padrão'})),
-      ...Object.entries(custom).map(([m,k]) => ({marca:m,keyword:k,tipo:'custom'}))
-    ].sort((a,b) => a.marca.localeCompare(b.marca));
-
-    allEntries.forEach(({marca,keyword,tipo}) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="font-weight:700;">${marca}</td>
-        <td><span class="kw-tag">${keyword}</span></td>
-        <td style="font-size:11px;">
-          ${tipo === 'custom'
-            ? '<span class="custom-badge">custom</span>'
-            : '<span style="color:var(--muted);font-size:10px;font-weight:700;">padrão</span>'}
-        </td>
-        <td>
-          ${tipo === 'custom'
-            ? `<button class="mini-btn danger" onclick="removerKeywordCustom('${marca.replace(/'/g,"\\'")}')" title="Remover">🗑️</button>`
-            : ''}
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // Atualiza o banner de detecção da keyword
-  function atualizarBannerKeyword() {
-    const marcaRaw = document.getElementById('marca').value.trim();
-    const banner = document.getElementById('kwDetectedBanner');
-    const kw = obterKeyword(marcaRaw);
-    if (!marcaRaw) {
-      banner.className = 'kw-detected-banner none';
-      banner.innerHTML = '<span>⬆️ Preencha o campo <b>Marca</b> na Seção 1 para detectar a keyword automaticamente.</span>';
-    } else if (kw) {
-      banner.className = 'kw-detected-banner';
-      banner.innerHTML = `<span>✅ Keyword detectada para <span class="kw-name">${marcaRaw.toUpperCase()}</span>:</span> <span class="kw-code">${kw}</span>`;
+    if (res.ok) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ login: res.login || login }));
+      entrarNoApp(res.login || login);
     } else {
-      banner.className = 'kw-detected-banner none';
-      banner.innerHTML = `<span>⚠️ Marca "<b>${marcaRaw.toUpperCase()}</b>" não tem keyword cadastrada. Cadastre na seção acima.</span>`;
+      mostrarLoginMsg('loginMsg', res.msg || 'Erro ao fazer login.', 'error');
     }
   }
 
-  // =============================================
-  // ===== CATEGORIAS CUSTOM =====================
-  // =============================================
+  async function fazerReset() {
+    const login = document.getElementById('resetUser').value.trim();
+    const nova = document.getElementById('resetSenha').value.trim();
+    const nova2 = document.getElementById('resetSenha2').value.trim();
+    if (!login) { mostrarLoginMsg('resetMsg','Preencha o login.','error'); return; }
+    if (!nova) { mostrarLoginMsg('resetMsg','Preencha a nova senha.','error'); return; }
+    if (nova !== nova2) { mostrarLoginMsg('resetMsg','As senhas não coincidem.','error'); return; }
+    if (nova.length < 4) { mostrarLoginMsg('resetMsg','A senha deve ter pelo menos 4 caracteres.','error'); return; }
 
-  const CAT_CUSTOM_KEY = 'qvestido_categorias_v1';
+    const btn = document.getElementById('btnReset');
+    btn.disabled = true;
+    btn.textContent = 'Aguarde...';
 
-  const _catDbBuiltin = [
-    { chaves:["VESTIDO","VESTIDOS"], label:"Vestidos", opcoes:["Vestidos>Vestidos Curto","Vestidos>Vestidos Longo","Vestidos>Vestidos Midi","Vestidos>Vestidos Longuete","Vestidos>Vestidos Jeans"] },
-    { chaves:["CONJUNTO","CONJUNTOS"], label:"Conjuntos", opcoes:["Conjuntos>Conjuntos Longos","Conjuntos>Conjuntos Midi","Conjuntos>Conjuntos Jeans","Conjuntos>Conjuntos Curto"] },
-    { chaves:["MODA PRAIA","MAIO","MAIÔ","BIQUINI","BIQUÍNI"], label:"Moda Praia", opcoes:["Moda Praia>Maiôs","Moda Praia>Shorts Saia","Moda Praia>Biquinis"] },
-    { chaves:["BLUSA","BLUSAS"], label:"Blusas", opcoes:["Roupas>Blusas e Camisas","Roupas>Blusas Jeans"] },
-    { chaves:["CAMISA","CAMISAS"], label:"Camisas", opcoes:["Roupas>Blusas e Camisas","Roupas>Camisas Jeans"] },
-    { chaves:["T-SHIRT","TSHIRT","CAMISETA"], label:"T-Shirts", opcoes:["Roupas>T-shirts"] },
-    { chaves:["BLAZER","BLAZERS","CASACO","CASACOS","CASAQUETO"], label:"Blazers e Casacos", opcoes:["Roupas>Blazers e Casacos"] },
-    { chaves:["JAQUETA","JAQUETAS"], label:"Jaquetas", opcoes:["Roupas>Jaquetas Jeans"] },
-    { chaves:["CALCA","CALCAS","CALÇA","CALÇAS"], label:"Calças", opcoes:["Roupas>Calças","Jeans>Calças Jeans"] },
-    { chaves:["MACACAO","MACACÃO","MACACOES"], label:"Macacão", opcoes:["Roupas>Macacão","Jeans>Salopete Jeans"] },
-    { chaves:["SAIA","SAIAS"], label:"Saias", opcoes:["Roupas>Saias>Saias Midi","Roupas>Saias>Saias Longa","Roupas>Saias>Saias Curta","Roupas>Saias Jeans","Jeans>Saias Jeans"] },
-    { chaves:["SHORT","SHORTS","BERMUDA","BERMUDAS"], label:"Shorts e Bermudas", opcoes:["Roupas>Bermudas e Shorts","Moda Praia>Shorts Saia"] },
-    { chaves:["FITNESS","LEGGING","LEGGINGS"], label:"Fitness", opcoes:["Roupas>Fitness"] }
-  ];
+    const res = await chamarAPI({ action: 'reset', login, novaSenha: nova });
 
-  function carregarCategoriasCustom() {
-    try { return JSON.parse(localStorage.getItem(CAT_CUSTOM_KEY) || '[]'); }
-    catch(e) { return []; }
-  }
+    btn.disabled = false;
+    btn.textContent = 'Redefinir senha';
 
-  function salvarCategoriasCustomStorage(lista) {
-    localStorage.setItem(CAT_CUSTOM_KEY, JSON.stringify(lista));
-  }
-
-  // Retorna _catDb completo: builtin + custom
-  function getCatDb() {
-    return [..._catDbBuiltin, ...carregarCategoriasCustom()];
-  }
-
-  function adicionarCategoriaCustom() {
-    const label = document.getElementById('newCatLabel').value.trim();
-    const chavesRaw = document.getElementById('newCatChaves').value.trim();
-    const opcoesRaw = document.getElementById('newCatOpcoes').value.trim();
-
-    if (!label) { showToast('⚠️ Preencha o nome da categoria.', 2000); return; }
-    if (!chavesRaw) { showToast('⚠️ Preencha ao menos uma palavra-chave.', 2000); return; }
-    if (!opcoesRaw) { showToast('⚠️ Preencha ao menos uma opção de categorização.', 2000); return; }
-
-    const chaves = chavesRaw.split(',').map(s => s.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w\s-]/g,' ').trim()).filter(Boolean);
-    const opcoes = opcoesRaw.split('\n').map(s => s.trim()).filter(Boolean);
-
-    const lista = carregarCategoriasCustom();
-    // Evita duplicata de label
-    if (lista.some(c => c.label.toLowerCase() === label.toLowerCase())) {
-      showToast(`⚠️ Já existe uma categoria com o nome "${label}".`, 2200); return;
+    if (res.ok) {
+      mostrarLoginMsg('resetMsg', '✅ Senha redefinida com sucesso! Agora faça login.', 'success');
+      setTimeout(() => trocarAba('entrar'), 2000);
+    } else {
+      mostrarLoginMsg('resetMsg', res.msg || 'Erro ao redefinir senha.', 'error');
     }
-
-    lista.push({ id: Date.now(), label, chaves, opcoes, custom: true });
-    salvarCategoriasCustomStorage(lista);
-    renderizarListaCatCustom();
-    limparFormCategoria();
-    showToast(`✅ Categoria "${label}" salva!`, 1800);
   }
 
-  function removerCategoriaCustom(id) {
-    const lista = carregarCategoriasCustom().filter(c => c.id !== id);
-    salvarCategoriasCustomStorage(lista);
-    renderizarListaCatCustom();
-    showToast('Categoria removida.', 1400);
-  }
+  async function criarUsuario() {
+    const login = document.getElementById('adminUser').value.trim();
+    const senha = document.getElementById('adminSenha').value.trim();
+    const key = document.getElementById('adminKey').value.trim();
+    if (!login || !senha || !key) { mostrarLoginMsg('adminMsg','Preencha todos os campos.','error'); return; }
 
-  function limparFormCategoria() {
-    document.getElementById('newCatLabel').value = '';
-    document.getElementById('newCatChaves').value = '';
-    document.getElementById('newCatOpcoes').value = '';
-  }
+    const btn = document.getElementById('btnAdmin');
+    btn.disabled = true;
+    btn.textContent = 'Criando...';
 
-  function renderizarListaCatCustom() {
-    const lista = carregarCategoriasCustom();
-    const container = document.getElementById('listaCatCustom');
-    const badge = document.getElementById('catCustomCount');
-    badge.textContent = lista.length + ' custom';
+    const res = await chamarAPI({ action: 'adduser', login, senha, adminKey: key });
 
-    if (lista.length === 0) {
-      container.innerHTML = '<div class="empty-state" style="padding:18px;"><div class="icon" style="font-size:22px;">📂</div><div>Nenhuma categoria personalizada ainda.</div></div>';
-      return;
+    btn.disabled = false;
+    btn.textContent = 'Criar usuário';
+
+    if (res.ok) {
+      mostrarLoginMsg('adminMsg', `✅ Usuário "${login}" criado com sucesso!`, 'success');
+      document.getElementById('adminUser').value = '';
+      document.getElementById('adminSenha').value = '';
+      document.getElementById('adminKey').value = '';
+    } else {
+      mostrarLoginMsg('adminMsg', res.msg || 'Erro ao criar usuário.', 'error');
     }
-    container.innerHTML = '';
-    lista.forEach(c => {
-      const div = document.createElement('div');
-      div.className = 'cat-custom-item';
-      div.innerHTML = `
-        <div class="cat-custom-info">
-          <div class="cat-custom-label">${c.label} <span class="custom-badge">custom</span></div>
-          <div class="cat-custom-keys">Chaves: ${c.chaves.join(', ')}</div>
-          <div class="cat-custom-opcoes">${c.opcoes.join(' • ')}</div>
-        </div>
-        <button class="mini-btn danger" onclick="removerCategoriaCustom(${c.id})">🗑️</button>
-      `;
-      container.appendChild(div);
-    });
   }
 
-  // =============================================
-  // ===== Toast ===================================
-  // =============================================
-
-  let toastTimer = null;
-  function showToast(msg, ms = 1600) {
-    const el = document.getElementById("toast");
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.remove("show");
-    void el.offsetWidth;
-    el.classList.add("show");
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove("show"), ms);
+  function entrarNoApp(login) {
+    document.getElementById('loginScreen').style.display = 'none';
+    const app = document.getElementById('appScreen');
+    app.classList.add('visible');
+    document.getElementById('userLabel').textContent = login;
+    inicializarApp();
   }
 
-  function copiarTexto(id) {
-    const texto = (document.getElementById(id).innerText || "").trim();
-    if (!texto) { showToast("Nada para copiar 😅", 1500); return; }
-    navigator.clipboard.writeText(texto).then(() => {
-      showToast("Copiado! ✅", 1400);
-    }).catch(() => {
+  function fazerLogout() {
+    if (!confirm('Deseja sair?')) return;
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  }
+
+  // Verifica sessão ao carregar
+  window.addEventListener('load', () => {
+    const sess = sessionStorage.getItem(SESSION_KEY);
+    if (sess) {
       try {
-        const temp = document.createElement("textarea");
-        temp.value = texto;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        temp.remove();
-        showToast("Copiado! ✅", 1400);
-      } catch (e) {
-        showToast("Não consegui copiar 😭", 1800);
-      }
-    });
-  }
-
-  function norm(str) {
-    return (str || "")
-      .toUpperCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function tecidoEhMalha(tecidoRaw) {
-    const t = norm(tecidoRaw);
-    const chavesMalha = ["MALHA","CANELADO","RIBANA","TRICOT","TRICO","MOLETOM","JERSEY","JERSEI","PONTO ROMA","PONTO-ROMA","FLAME","FLAMÊ","VISCOLYCRA","VISCO LYCRA","POLIAMIDA","LYCRA","ELASTANO"];
-    return chavesMalha.some(k => t.includes(k));
-  }
-
-  function obterNcm(categoriaPrimeiraPalavra, tecidoRaw) {
-    const cat = norm(categoriaPrimeiraPalavra);
-    const ehMalha = tecidoEhMalha(tecidoRaw);
-    if (cat === "T-SHIRT" || cat === "TSHIRT" || cat === "CAMISETA") return "6109.90.00";
-    if (ehMalha && (cat === "BLUSA" || cat === "BLUSAS")) return "6109.90.00";
-    const mapa = {
-      "BLUSA":"6206.40.00","BLUSAS":"6206.40.00","CAMISA":"6206.40.00","CAMISAS":"6206.40.00",
-      "VESTIDO":"6204.43.00","VESTIDOS":"6204.43.00","SAIA":"6204.53.00","SAIAS":"6204.53.00",
-      "CONJUNTO":"6204.23.00","CONJUNTOS":"6204.23.00","CALCA":"6204.63.00","CALCAS":"6204.63.00",
-      "SHORT":"6204.63.00","SHORTS":"6204.63.00","JAQUETA":"6202.93.00","JAQUETAS":"6202.93.00",
-      "CASACO":"6202.93.00","CASACOS":"6202.93.00","CASAQUETO":"6202.93.00","CASAQUETOS":"6202.93.00",
-      "BLAZER":"6204.33.00","BLAZERS":"6204.33.00","MACACAO":"6204.23.00","MACACOES":"6204.23.00"
-    };
-    return mapa[cat] || "6206.40.00";
-  }
-
-  function gerarNcmDoTitulo() {
-    const catRaw = document.getElementById("categoria").value;
-    const tecidoRaw = document.getElementById("tecido").value;
-    if (!catRaw || !tecidoRaw) { showToast("Preencha Categoria e Tecido para gerar o NCM.", 1800); return; }
-    const catNorm = norm(catRaw);
-    let chaveCategoria = catNorm.split(" ")[0] || catNorm;
-    if (catNorm.includes("SHIRT")) chaveCategoria = "T-SHIRT";
-    if (catNorm.includes("CAMISETA")) chaveCategoria = "CAMISETA";
-    const ncm = obterNcm(chaveCategoria, tecidoRaw);
-    const comp = norm(document.getElementById("comprimento").value);
-    const cor = norm(document.getElementById("cor").value);
-    const marca = norm(document.getElementById("marca").value);
-    const base = comp ? `${catNorm} ${comp}` : catNorm;
-    const tituloPrev = `${base} EM ${norm(tecidoRaw)} ${cor} - ${marca}`.replace(/\s+/g, " ").trim();
-    document.getElementById("ncmOutput").innerText =
-      `NCM: ${ncm}\nTítulo lido: ${tituloPrev}\nRegra: ${tecidoEhMalha(tecidoRaw) ? "MALHA (6109 quando aplicável)" : "TECIDO PLANO (620x)"}`;
-  }
-
-  function extrairNcm() {
-    const txt = document.getElementById("ncmOutput").innerText || "";
-    const m = txt.match(/NCM:\s*([\d.]+)/);
-    return m ? m[1] : "";
-  }
-
-  // Espelhamento de campos (Section1 -> Section2)
-  function sincronizarCampos() {
-    const mapeamento = [
-      { origem: "categoria", destino: "categoria2" },
-      { origem: "comprimento", destino: "comprimento2" },
-      { origem: "tecido", destino: "tecido2" },
-      { origem: "cor", destino: "cor2" },
-      { origem: "marca", destino: "marca2" },
-    ];
-    mapeamento.forEach(par => {
-      const origemEl = document.getElementById(par.origem);
-      const destinoEl = document.getElementById(par.destino);
-      origemEl.addEventListener('input', () => { destinoEl.value = origemEl.value; });
-    });
-  }
-  sincronizarCampos();
-
-  // ===== Section 1 =====
-  function gerarTituloCompleto() {
-    const cat = document.getElementById("categoria").value.toUpperCase();
-    const comp = document.getElementById("comprimento").value.toUpperCase();
-    const tecido = document.getElementById("tecido").value.toUpperCase();
-    const cor = document.getElementById("cor").value.toUpperCase();
-    const marca = document.getElementById("marca").value.toUpperCase();
-    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
-    const fim = document.getElementById("gradeFim").value.toUpperCase();
-    if (!cat || !tecido || !cor || !marca) { showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800); return; }
-    const base = comp ? `${cat} ${comp}` : cat;
-    const tituloPai = `${base} EM ${tecido} ${cor} - ${marca}`;
-    const inicioIndex = tamanhos.indexOf(inicio);
-    const fimIndex = tamanhos.indexOf(fim);
-    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) { showToast("Selecione uma grade válida.", 1800); return; }
-    let titulos = [tituloPai];
-    for (let i = inicioIndex; i <= fimIndex; i++) titulos.push(`${tituloPai} - ${tamanhos[i]}`);
-    document.getElementById("tituloOutput").innerText = titulos.join("\n");
-    try { gerarNcmDoTitulo(); } catch(e) {}
-    atualizarPreview();
-  }
-
-  function gerarCodigo() {
-    const codigoBase = document.getElementById("codigoManual").value.toUpperCase();
-    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
-    const fim = document.getElementById("gradeFim").value.toUpperCase();
-    const inicioIndex = tamanhos.indexOf(inicio);
-    const fimIndex = tamanhos.indexOf(fim);
-    if (!codigoBase) { showToast("Digite o código da peça.", 1700); return; }
-    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) { showToast("Selecione uma grade válida.", 1800); return; }
-    let codigos = [codigoBase];
-    for (let i = inicioIndex; i <= fimIndex; i++) codigos.push(`${codigoBase}-${tamanhos[i]}`);
-    document.getElementById("codigoOutput").innerText = codigos.join("\n");
-    atualizarPreview();
-  }
-
-  function gerarTitulosESkus() {
-    const cat = document.getElementById("categoria").value.toUpperCase();
-    const comp = document.getElementById("comprimento").value.toUpperCase();
-    const tecido = document.getElementById("tecido").value.toUpperCase();
-    const cor = document.getElementById("cor").value.toUpperCase();
-    const marca = document.getElementById("marca").value.toUpperCase();
-    const codigoBase = document.getElementById("codigoManual").value.toUpperCase();
-    const inicio = document.getElementById("gradeInicio").value.toUpperCase();
-    const fim = document.getElementById("gradeFim").value.toUpperCase();
-    if (!cat || !tecido || !cor || !marca) { showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800); return; }
-    if (!codigoBase) { showToast("Preencha o Código da Peça (ex: SA006VD).", 1800); return; }
-    const base = comp ? `${cat} ${comp}` : cat;
-    const tituloPai = `${base} EM ${tecido} ${cor} - ${marca}`;
-    const inicioIndex = tamanhos.indexOf(inicio);
-    const fimIndex = tamanhos.indexOf(fim);
-    if (inicioIndex === -1 || fimIndex === -1 || inicioIndex > fimIndex) { showToast("Selecione uma grade válida.", 1800); return; }
-    const catNorm = norm(cat);
-    const chave = (catNorm.includes("SHIRT")) ? "T-SHIRT" : (catNorm.split(" ")[0] || catNorm);
-    const ncm = obterNcm(chave, tecido);
-    const linhas = [];
-    linhas.push(`PAI`);
-    linhas.push(`SKU: ${codigoBase}`);
-    linhas.push(`TÍTULO: ${tituloPai}`);
-    linhas.push(`NCM: ${ncm}`);
-    linhas.push(``);
-    linhas.push(`FILHOS`);
-    for (let i = inicioIndex; i <= fimIndex; i++) {
-      const tam = tamanhos[i];
-      linhas.push(`${codigoBase}-${tam} | ${tituloPai} - ${tam} | NCM: ${ncm}`);
+        const { login } = JSON.parse(sess);
+        if (login) { entrarNoApp(login); return; }
+      } catch(e) {}
     }
-    document.getElementById("tituloSkuOutput").innerText = linhas.join("\n");
-  }
+  });
 
-  // ===== Section 2 =====
-  function capitalizarTitulo(texto) {
-    return texto.toLowerCase().split(' ').filter(Boolean).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-  }
+  // =====================================================
+  // ==================== APP LOGIC ====================
+  // =====================================================
 
-  function gerarTituloSEO() {
-    const cat = document.getElementById("categoria2").value.trim();
-    const comp = document.getElementById("comprimento2").value.trim();
-    const tecido = document.getElementById("tecido2").value.trim();
-    const cor = document.getElementById("cor2").value.trim();
-    const marca = document.getElementById("marca2").value.trim();
-    const finalTitulo = document.getElementById("finalTitulo").value;
-    if (!cat || !tecido || !cor || !marca) { showToast("Preencha Categoria, Tecido, Cor e Marca.", 1800); return; }
-    const base = comp ? `${cat} ${comp}` : cat;
-    const tituloBase = `${base} em ${tecido} ${cor} ${marca}`;
-    const tituloCompleto = `${capitalizarTitulo(tituloBase)} ${finalTitulo}`.replace(/\s+/g, " ").trim();
-    document.getElementById("outputTitulo").innerText = tituloCompleto;
+  function inicializarApp() {
+    renderizarLista();
+    renderizarTabelaKeywords();
+    renderizarListaCatCustom();
     atualizarPreview();
-  }
+    sincronizarCampos();
 
-  function gerarMetaDescription() {
-    const cat = document.getElementById("categoria2").value.toLowerCase();
-    const comp = document.getElementById("comprimento2").value.toLowerCase();
-    const tecido = document.getElementById("tecido2").value.toLowerCase();
-    const cor = document.getElementById("cor2").value.toLowerCase();
-    const marca = document.getElementById("marca2").value;
-    if (!cat || !cor) { showToast("Preencha pelo menos Categoria e Cor.", 1800); return; }
-    const titulo = `${cat} ${comp} em ${tecido} ${cor} ${marca}`.replace(/\b\w/g, l => l.toUpperCase());
-    const desc = `Compre ${cat.charAt(0).toUpperCase() + cat.slice(1)} ${cor.charAt(0).toUpperCase() + cor.slice(1)} em até 10x sem juros na QVestido! Moda Evangélica Premium. Confira ${titulo} na Loja oficial da QVestido - Moda Executiva Feminina`;
-    document.getElementById("outputMetaTag").innerText = desc;
-    atualizarPreview();
-  }
+    const catInput = document.getElementById('categoria');
+    if (catInput) catInput.addEventListener('input', () => { const g = _buscarCat(catInput.value); _renderCat(g); });
 
-  function gerarURL() {
-    const cat = document.getElementById("categoria2").value.toLowerCase().replace(/\s+/g, "-");
-    const comp = document.getElementById("comprimento2").value.toLowerCase().replace(/\s+/g, "-");
-    const tecido = document.getElementById("tecido2").value.toLowerCase().replace(/\s+/g, "-");
-    const cor = document.getElementById("cor2").value.toLowerCase().replace(/\s+/g, "-");
-    const marca = document.getElementById("marca2").value.toLowerCase().replace(/\s+/g, "-");
-    const parts = [];
-    if (cat) parts.push(cat);
-    if (comp) parts.push(comp);
-    if (tecido) parts.push(tecido);
-    if (cor) parts.push(cor);
-    if (marca) parts.push(marca);
-    document.getElementById("urlOutput").innerText = parts.join("-");
-    atualizarPreview();
-  }
+    document.getElementById('mkMarca').addEventListener('change', function() { if(this.value) document.getElementById('mkMarkup').value = this.value; });
+    ['mkMarkup','mkCusto'].forEach(id => { document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') calcularMarkup(); }); });
+    document.getElementById('mkCusto').addEventListener('input', atualizarPreview);
+    document.getElementById('mkMarkup').addEventListener('input', atualizarPreview);
 
-  // ===== Section 3 =====
-  document.addEventListener('DOMContentLoaded', () => {
+    ['categoria','comprimento','tecido','cor','marca','pesoBase','codigoManual'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => { atualizarPreview(); atualizarBannerKeyword(); setTimeout(_patchTitulo, 10); });
+    });
+
     const tituloOutput = document.getElementById('tituloOutput');
     if (tituloOutput) {
       const obs = new MutationObserver(() => {
@@ -1155,479 +1158,605 @@
       });
       obs.observe(tituloOutput, { childList: true, subtree: true, characterData: true });
     }
-  });
 
+    document.getElementById('darkModeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      document.getElementById('darkModeToggle').innerText = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
+    });
+  }
+
+  // =============================================
+  // ===== DADOS BASE ============================
+  // =============================================
+
+  const tamanhos = ["XPP","PP","P","M","G","GG","G1","G2","G3","G4","34","36","38","40","42","44","46","48","50","52"];
+  const tamanhoLabel = {
+    "XPP":"XPP/34","PP":"PP/36","P":"P/38","M":"M/40","G":"G/42","GG":"GG/44",
+    "G1":"G1/46","G2":"G2/48","G3":"G3/50","G4":"G4/52",
+    "34":"XPP/34","36":"PP/36","38":"P/38","40":"M/40","42":"G/42","44":"GG/44",
+    "46":"G1/46","48":"G2/48","50":"G3/50","52":"G4/52"
+  };
+
+  // =============================================
+  // ===== KEYWORDS ==============================
+  // =============================================
+
+  const KEYWORDS_STORAGE_KEY = 'qvestido_keywords_v1';
+  const _keywordsBuiltin = {
+    "ARTSY":"tabelaartsy","DOCE MARIA":"tabeladocemaria","DOCE TRAMA":"tabeladocetrama",
+    "HAPUK":"tabelahapuk","JANY PIM":"tabelajanypim","LAURA ROSA":"tabelalaurarosa",
+    "LEKAZIS":"tabelalekazis","LINDA DE MORRER":"tabelalindademorrer","LIZ":"tabelaliz",
+    "LUZIA FAZZOLLI":"tabelaluziafazzolli","PURO SHARMY":"tabelapurosharmy",
+    "TITANIUM JEANS":"tabelatitaniumjeans","TLI CRIO":"tabelatlicrio","VIA TOLENTINO":"tabelaviatolentino"
+  };
+
+  function carregarKeywordsCustom() { try { return JSON.parse(localStorage.getItem(KEYWORDS_STORAGE_KEY)||'{}'); } catch(e){return{};} }
+  function salvarKeywordsCustomStorage(obj) { localStorage.setItem(KEYWORDS_STORAGE_KEY,JSON.stringify(obj)); }
+  function getAllKeywords() { return {..._keywordsBuiltin,...carregarKeywordsCustom()}; }
+
+  function obterKeyword(marcaRaw) {
+    if(!marcaRaw) return '';
+    const marcaNorm = norm(marcaRaw);
+    const all = getAllKeywords();
+    for(const[key,val] of Object.entries(all)) if(norm(key)===marcaNorm) return val;
+    for(const[key,val] of Object.entries(all)){ const kn=norm(key); if(marcaNorm.includes(kn)||kn.includes(marcaNorm)) return val; }
+    return '';
+  }
+
+  function sugerirKeyword() {
+    const marca = document.getElementById('newKwMarca').value.trim();
+    if(!marca){document.getElementById('newKwKeyword').value='';return;}
+    document.getElementById('newKwKeyword').value = 'tabela'+marca.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  }
+
+  function adicionarKeywordCustom() {
+    const marca = document.getElementById('newKwMarca').value.trim().toUpperCase();
+    const keyword = document.getElementById('newKwKeyword').value.trim().toLowerCase();
+    if(!marca){showToast('⚠️ Preencha o nome da marca.',2000);return;}
+    if(!keyword){showToast('⚠️ Preencha a keyword.',2000);return;}
+    if(!keyword.startsWith('tabela')){showToast('⚠️ A keyword deve começar com "tabela".',2200);return;}
+    const custom = carregarKeywordsCustom();
+    custom[marca] = keyword;
+    salvarKeywordsCustomStorage(custom);
+    renderizarTabelaKeywords();
+    limparFormKeyword();
+    showToast(`✅ Keyword "${keyword}" salva para "${marca}"!`,2000);
+    atualizarPreview();
+  }
+
+  function removerKeywordCustom(marca) {
+    const custom = carregarKeywordsCustom();
+    delete custom[marca];
+    salvarKeywordsCustomStorage(custom);
+    renderizarTabelaKeywords();
+    showToast('Keyword removida.',1400);
+    atualizarPreview();
+  }
+
+  function limparFormKeyword() { document.getElementById('newKwMarca').value=''; document.getElementById('newKwKeyword').value=''; }
+
+  function renderizarTabelaKeywords() {
+    const tbody = document.getElementById('kwTableBody');
+    const badge = document.getElementById('kwTotalBadge');
+    if(!tbody) return;
+    const custom = carregarKeywordsCustom();
+    const all = getAllKeywords();
+    badge.textContent = Object.keys(all).length;
+    tbody.innerHTML = '';
+    const allEntries = [
+      ...Object.entries(_keywordsBuiltin).map(([m,k])=>({marca:m,keyword:k,tipo:'padrão'})),
+      ...Object.entries(custom).map(([m,k])=>({marca:m,keyword:k,tipo:'custom'}))
+    ].sort((a,b)=>a.marca.localeCompare(b.marca));
+    allEntries.forEach(({marca,keyword,tipo})=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700;">${marca}</td>
+        <td><span class="kw-tag">${keyword}</span></td>
+        <td style="font-size:11px;">${tipo==='custom'?'<span class="custom-badge">custom</span>':'<span style="color:var(--muted);font-size:10px;font-weight:700;">padrão</span>'}</td>
+        <td>${tipo==='custom'?`<button class="mini-btn danger" onclick="removerKeywordCustom('${marca.replace(/'/g,"\\'")}')">🗑️</button>`:''}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function atualizarBannerKeyword() {
+    const marcaRaw = document.getElementById('marca')?.value.trim();
+    const banner = document.getElementById('kwDetectedBanner');
+    if(!banner) return;
+    const kw = obterKeyword(marcaRaw);
+    if(!marcaRaw){
+      banner.className='kw-detected-banner none';
+      banner.innerHTML='<span>⬆️ Preencha o campo <b>Marca</b> na Seção 1 para detectar a keyword automaticamente.</span>';
+    } else if(kw){
+      banner.className='kw-detected-banner';
+      banner.innerHTML=`<span>✅ Keyword detectada para <span class="kw-name">${marcaRaw.toUpperCase()}</span>:</span> <span class="kw-code">${kw}</span>`;
+    } else {
+      banner.className='kw-detected-banner none';
+      banner.innerHTML=`<span>⚠️ Marca "<b>${marcaRaw.toUpperCase()}</b>" não tem keyword cadastrada.</span>`;
+    }
+  }
+
+  // =============================================
+  // ===== CATEGORIAS ============================
+  // =============================================
+
+  const CAT_CUSTOM_KEY = 'qvestido_categorias_v1';
+  const _catDbBuiltin = [
+    {chaves:["VESTIDO","VESTIDOS"],label:"Vestidos",opcoes:["Vestidos>Vestidos Curto","Vestidos>Vestidos Longo","Vestidos>Vestidos Midi","Vestidos>Vestidos Longuete","Vestidos>Vestidos Jeans"]},
+    {chaves:["CONJUNTO","CONJUNTOS"],label:"Conjuntos",opcoes:["Conjuntos>Conjuntos Longos","Conjuntos>Conjuntos Midi","Conjuntos>Conjuntos Jeans","Conjuntos>Conjuntos Curto"]},
+    {chaves:["MODA PRAIA","MAIO","MAIÔ","BIQUINI","BIQUÍNI"],label:"Moda Praia",opcoes:["Moda Praia>Maiôs","Moda Praia>Shorts Saia","Moda Praia>Biquinis"]},
+    {chaves:["BLUSA","BLUSAS"],label:"Blusas",opcoes:["Roupas>Blusas e Camisas","Roupas>Blusas Jeans"]},
+    {chaves:["CAMISA","CAMISAS"],label:"Camisas",opcoes:["Roupas>Blusas e Camisas","Roupas>Camisas Jeans"]},
+    {chaves:["T-SHIRT","TSHIRT","CAMISETA"],label:"T-Shirts",opcoes:["Roupas>T-shirts"]},
+    {chaves:["BLAZER","BLAZERS","CASACO","CASACOS","CASAQUETO"],label:"Blazers e Casacos",opcoes:["Roupas>Blazers e Casacos"]},
+    {chaves:["JAQUETA","JAQUETAS"],label:"Jaquetas",opcoes:["Roupas>Jaquetas Jeans"]},
+    {chaves:["CALCA","CALCAS","CALÇA","CALÇAS"],label:"Calças",opcoes:["Roupas>Calças","Jeans>Calças Jeans"]},
+    {chaves:["MACACAO","MACACÃO","MACACOES"],label:"Macacão",opcoes:["Roupas>Macacão","Jeans>Salopete Jeans"]},
+    {chaves:["SAIA","SAIAS"],label:"Saias",opcoes:["Roupas>Saias>Saias Midi","Roupas>Saias>Saias Longa","Roupas>Saias>Saias Curta","Roupas>Saias Jeans","Jeans>Saias Jeans"]},
+    {chaves:["SHORT","SHORTS","BERMUDA","BERMUDAS"],label:"Shorts e Bermudas",opcoes:["Roupas>Bermudas e Shorts","Moda Praia>Shorts Saia"]},
+    {chaves:["FITNESS","LEGGING","LEGGINGS"],label:"Fitness",opcoes:["Roupas>Fitness"]}
+  ];
+
+  function carregarCategoriasCustom() { try { return JSON.parse(localStorage.getItem(CAT_CUSTOM_KEY)||'[]'); } catch(e){return[];} }
+  function salvarCategoriasCustomStorage(lista) { localStorage.setItem(CAT_CUSTOM_KEY,JSON.stringify(lista)); }
+  function getCatDb() { return [..._catDbBuiltin,...carregarCategoriasCustom()]; }
+
+  function adicionarCategoriaCustom() {
+    const label = document.getElementById('newCatLabel').value.trim();
+    const chavesRaw = document.getElementById('newCatChaves').value.trim();
+    const opcoesRaw = document.getElementById('newCatOpcoes').value.trim();
+    if(!label){showToast('⚠️ Preencha o nome da categoria.',2000);return;}
+    if(!chavesRaw){showToast('⚠️ Preencha ao menos uma palavra-chave.',2000);return;}
+    if(!opcoesRaw){showToast('⚠️ Preencha ao menos uma opção de categorização.',2000);return;}
+    const chaves = chavesRaw.split(',').map(s=>s.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w\s-]/g,' ').trim()).filter(Boolean);
+    const opcoes = opcoesRaw.split('\n').map(s=>s.trim()).filter(Boolean);
+    const lista = carregarCategoriasCustom();
+    if(lista.some(c=>c.label.toLowerCase()===label.toLowerCase())){showToast(`⚠️ Já existe uma categoria "${label}".`,2200);return;}
+    lista.push({id:Date.now(),label,chaves,opcoes,custom:true});
+    salvarCategoriasCustomStorage(lista);
+    renderizarListaCatCustom();
+    limparFormCategoria();
+    showToast(`✅ Categoria "${label}" salva!`,1800);
+  }
+
+  function removerCategoriaCustom(id) {
+    const lista = carregarCategoriasCustom().filter(c=>c.id!==id);
+    salvarCategoriasCustomStorage(lista);
+    renderizarListaCatCustom();
+    showToast('Categoria removida.',1400);
+  }
+
+  function limparFormCategoria() { document.getElementById('newCatLabel').value=''; document.getElementById('newCatChaves').value=''; document.getElementById('newCatOpcoes').value=''; }
+
+  function renderizarListaCatCustom() {
+    const lista = carregarCategoriasCustom();
+    const container = document.getElementById('listaCatCustom');
+    const badge = document.getElementById('catCustomCount');
+    if(!container) return;
+    badge.textContent = lista.length+' custom';
+    if(lista.length===0){ container.innerHTML='<div class="empty-state" style="padding:18px;"><div class="icon" style="font-size:22px;">📂</div><div>Nenhuma categoria personalizada ainda.</div></div>'; return; }
+    container.innerHTML='';
+    lista.forEach(c=>{
+      const div=document.createElement('div'); div.className='cat-custom-item';
+      div.innerHTML=`<div class="cat-custom-info"><div class="cat-custom-label">${c.label} <span class="custom-badge">custom</span></div><div class="cat-custom-keys">Chaves: ${c.chaves.join(', ')}</div><div class="cat-custom-opcoes">${c.opcoes.join(' • ')}</div></div><button class="mini-btn danger" onclick="removerCategoriaCustom(${c.id})">🗑️</button>`;
+      container.appendChild(div);
+    });
+  }
+
+  // =============================================
+  // ===== UTILS =================================
+  // =============================================
+
+  let toastTimer = null;
+  function showToast(msg, ms=1600) {
+    const el = document.getElementById("toast");
+    if(!el) return;
+    el.textContent = msg; el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>el.classList.remove("show"), ms);
+  }
+
+  function copiarTexto(id) {
+    const texto = (document.getElementById(id).innerText||"").trim();
+    if(!texto){showToast("Nada para copiar 😅",1500);return;}
+    navigator.clipboard.writeText(texto).then(()=>showToast("Copiado! ✅",1400)).catch(()=>{
+      try{ const t=document.createElement("textarea");t.value=texto;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();showToast("Copiado! ✅",1400); }
+      catch(e){ showToast("Não consegui copiar 😭",1800); }
+    });
+  }
+
+  function norm(str) {
+    return (str||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s-]/g," ").replace(/\s+/g," ").trim();
+  }
+
+  function tecidoEhMalha(tecidoRaw) {
+    const t = norm(tecidoRaw);
+    return ["MALHA","CANELADO","RIBANA","TRICOT","TRICO","MOLETOM","JERSEY","JERSEI","PONTO ROMA","PONTO-ROMA","FLAME","FLAMÊ","VISCOLYCRA","VISCO LYCRA","POLIAMIDA","LYCRA","ELASTANO"].some(k=>t.includes(k));
+  }
+
+  function obterNcm(cat, tecido) {
+    const c = norm(cat);
+    const ehMalha = tecidoEhMalha(tecido);
+    if(c==="T-SHIRT"||c==="TSHIRT"||c==="CAMISETA") return "6109.90.00";
+    if(ehMalha&&(c==="BLUSA"||c==="BLUSAS")) return "6109.90.00";
+    const mapa = {"BLUSA":"6206.40.00","BLUSAS":"6206.40.00","CAMISA":"6206.40.00","CAMISAS":"6206.40.00","VESTIDO":"6204.43.00","VESTIDOS":"6204.43.00","SAIA":"6204.53.00","SAIAS":"6204.53.00","CONJUNTO":"6204.23.00","CONJUNTOS":"6204.23.00","CALCA":"6204.63.00","CALCAS":"6204.63.00","SHORT":"6204.63.00","SHORTS":"6204.63.00","JAQUETA":"6202.93.00","JAQUETAS":"6202.93.00","CASACO":"6202.93.00","CASACOS":"6202.93.00","CASAQUETO":"6202.93.00","BLAZER":"6204.33.00","BLAZERS":"6204.33.00","MACACAO":"6204.23.00","MACACOES":"6204.23.00"};
+    return mapa[c]||"6206.40.00";
+  }
+
+  function gerarNcmDoTitulo() {
+    const catRaw = document.getElementById("categoria").value;
+    const tecidoRaw = document.getElementById("tecido").value;
+    if(!catRaw||!tecidoRaw){showToast("Preencha Categoria e Tecido.",1800);return;}
+    const catNorm = norm(catRaw);
+    let chave = catNorm.split(" ")[0]||catNorm;
+    if(catNorm.includes("SHIRT")) chave="T-SHIRT";
+    if(catNorm.includes("CAMISETA")) chave="CAMISETA";
+    const ncm = obterNcm(chave, tecidoRaw);
+    const comp = norm(document.getElementById("comprimento").value);
+    const cor = norm(document.getElementById("cor").value);
+    const marca = norm(document.getElementById("marca").value);
+    const base = comp?`${catNorm} ${comp}`:catNorm;
+    document.getElementById("ncmOutput").innerText = `NCM: ${ncm}\nTítulo lido: ${base} EM ${norm(tecidoRaw)} ${cor} - ${marca}\nRegra: ${tecidoEhMalha(tecidoRaw)?"MALHA (6109 quando aplicável)":"TECIDO PLANO (620x)"}`;
+  }
+
+  function extrairNcm() {
+    const txt = document.getElementById("ncmOutput").innerText||"";
+    const m = txt.match(/NCM:\s*([\d.]+)/);
+    return m?m[1]:"";
+  }
+
+  function sincronizarCampos() {
+    [["categoria","categoria2"],["comprimento","comprimento2"],["tecido","tecido2"],["cor","cor2"],["marca","marca2"]].forEach(([o,d])=>{
+      const el=document.getElementById(o);
+      if(el) el.addEventListener('input',()=>{ const dest=document.getElementById(d); if(dest) dest.value=el.value; });
+    });
+  }
+
+  // ===== Section 1 =====
+  function gerarTituloCompleto() {
+    const cat=document.getElementById("categoria").value.toUpperCase();
+    const comp=document.getElementById("comprimento").value.toUpperCase();
+    const tecido=document.getElementById("tecido").value.toUpperCase();
+    const cor=document.getElementById("cor").value.toUpperCase();
+    const marca=document.getElementById("marca").value.toUpperCase();
+    const inicio=document.getElementById("gradeInicio").value;
+    const fim=document.getElementById("gradeFim").value;
+    if(!cat||!tecido||!cor||!marca){showToast("Preencha Categoria, Tecido, Cor e Marca.",1800);return;}
+    const base=comp?`${cat} ${comp}`:cat;
+    const tituloPai=`${base} EM ${tecido} ${cor} - ${marca}`;
+    const inicioIndex=tamanhos.indexOf(inicio);
+    const fimIndex=tamanhos.indexOf(fim);
+    if(inicioIndex===-1||fimIndex===-1||inicioIndex>fimIndex){showToast("Selecione uma grade válida.",1800);return;}
+    let titulos=[tituloPai];
+    for(let i=inicioIndex;i<=fimIndex;i++) titulos.push(`${tituloPai} - ${tamanhos[i]}`);
+    document.getElementById("tituloOutput").innerText=titulos.join("\n");
+    try{gerarNcmDoTitulo();}catch(e){}
+    atualizarPreview();
+  }
+
+  function gerarCodigo() {
+    const codigoBase=document.getElementById("codigoManual").value.toUpperCase();
+    const inicio=document.getElementById("gradeInicio").value;
+    const fim=document.getElementById("gradeFim").value;
+    const inicioIndex=tamanhos.indexOf(inicio);
+    const fimIndex=tamanhos.indexOf(fim);
+    if(!codigoBase){showToast("Digite o código da peça.",1700);return;}
+    if(inicioIndex===-1||fimIndex===-1||inicioIndex>fimIndex){showToast("Selecione uma grade válida.",1800);return;}
+    let codigos=[codigoBase];
+    for(let i=inicioIndex;i<=fimIndex;i++) codigos.push(`${codigoBase}-${tamanhos[i]}`);
+    document.getElementById("codigoOutput").innerText=codigos.join("\n");
+    atualizarPreview();
+  }
+
+  function gerarTitulosESkus() {
+    const cat=document.getElementById("categoria").value.toUpperCase();
+    const comp=document.getElementById("comprimento").value.toUpperCase();
+    const tecido=document.getElementById("tecido").value.toUpperCase();
+    const cor=document.getElementById("cor").value.toUpperCase();
+    const marca=document.getElementById("marca").value.toUpperCase();
+    const codigoBase=document.getElementById("codigoManual").value.toUpperCase();
+    const inicio=document.getElementById("gradeInicio").value;
+    const fim=document.getElementById("gradeFim").value;
+    if(!cat||!tecido||!cor||!marca){showToast("Preencha Categoria, Tecido, Cor e Marca.",1800);return;}
+    if(!codigoBase){showToast("Preencha o Código da Peça.",1800);return;}
+    const base=comp?`${cat} ${comp}`:cat;
+    const tituloPai=`${base} EM ${tecido} ${cor} - ${marca}`;
+    const inicioIndex=tamanhos.indexOf(inicio);
+    const fimIndex=tamanhos.indexOf(fim);
+    if(inicioIndex===-1||fimIndex===-1||inicioIndex>fimIndex){showToast("Grade inválida.",1800);return;}
+    const catNorm=norm(cat);
+    const chave=catNorm.includes("SHIRT")?"T-SHIRT":(catNorm.split(" ")[0]||catNorm);
+    const ncm=obterNcm(chave,tecido);
+    const linhas=[`PAI`,`SKU: ${codigoBase}`,`TÍTULO: ${tituloPai}`,`NCM: ${ncm}`,``,`FILHOS`];
+    for(let i=inicioIndex;i<=fimIndex;i++) linhas.push(`${codigoBase}-${tamanhos[i]} | ${tituloPai} - ${tamanhos[i]} | NCM: ${ncm}`);
+    document.getElementById("tituloSkuOutput").innerText=linhas.join("\n");
+  }
+
+  // ===== Section 2 =====
+  function capitalizarTitulo(texto) {
+    return texto.toLowerCase().split(' ').filter(Boolean).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
+  }
+
+  function gerarTituloSEO() {
+    const cat=document.getElementById("categoria2").value.trim();
+    const comp=document.getElementById("comprimento2").value.trim();
+    const tecido=document.getElementById("tecido2").value.trim();
+    const cor=document.getElementById("cor2").value.trim();
+    const marca=document.getElementById("marca2").value.trim();
+    const finalTitulo=document.getElementById("finalTitulo").value;
+    if(!cat||!tecido||!cor||!marca){showToast("Preencha Categoria, Tecido, Cor e Marca.",1800);return;}
+    const base=comp?`${cat} ${comp}`:cat;
+    const tituloCompleto=`${capitalizarTitulo(`${base} em ${tecido} ${cor} ${marca}`)} ${finalTitulo}`.replace(/\s+/g," ").trim();
+    document.getElementById("outputTitulo").innerText=tituloCompleto;
+    atualizarPreview();
+  }
+
+  function gerarMetaDescription() {
+    const cat=document.getElementById("categoria2").value.toLowerCase();
+    const comp=document.getElementById("comprimento2").value.toLowerCase();
+    const tecido=document.getElementById("tecido2").value.toLowerCase();
+    const cor=document.getElementById("cor2").value.toLowerCase();
+    const marca=document.getElementById("marca2").value;
+    if(!cat||!cor){showToast("Preencha pelo menos Categoria e Cor.",1800);return;}
+    const titulo=`${cat} ${comp} em ${tecido} ${cor} ${marca}`.replace(/\b\w/g,l=>l.toUpperCase());
+    const desc=`Compre ${cat.charAt(0).toUpperCase()+cat.slice(1)} ${cor.charAt(0).toUpperCase()+cor.slice(1)} em até 10x sem juros na QVestido! Moda Evangélica Premium. Confira ${titulo} na Loja oficial da QVestido - Moda Executiva Feminina`;
+    document.getElementById("outputMetaTag").innerText=desc;
+    atualizarPreview();
+  }
+
+  function gerarURL() {
+    const parts=[
+      document.getElementById("categoria2").value,
+      document.getElementById("comprimento2").value,
+      document.getElementById("tecido2").value,
+      document.getElementById("cor2").value,
+      document.getElementById("marca2").value
+    ].filter(Boolean).map(v=>v.toLowerCase().replace(/\s+/g,"-"));
+    document.getElementById("urlOutput").innerText=parts.join("-");
+    atualizarPreview();
+  }
+
+  // ===== Section 3 =====
   const _patchTitulo = () => {
-    const cat = (document.getElementById('categoria')?.value || '').toUpperCase();
-    const comp = (document.getElementById('comprimento')?.value || '').toUpperCase();
-    const tecido = (document.getElementById('tecido')?.value || '').toUpperCase();
-    const cor = (document.getElementById('cor')?.value || '').toUpperCase();
-    const marca = (document.getElementById('marca')?.value || '').toUpperCase();
-    if (cat && tecido && cor && marca) {
-      const base = comp ? `${cat} ${comp}` : cat;
-      document.getElementById('descTitulo').value = `${base} EM ${tecido} ${cor} - ${marca}`;
+    const cat=(document.getElementById('categoria')?.value||'').toUpperCase();
+    const comp=(document.getElementById('comprimento')?.value||'').toUpperCase();
+    const tecido=(document.getElementById('tecido')?.value||'').toUpperCase();
+    const cor=(document.getElementById('cor')?.value||'').toUpperCase();
+    const marca=(document.getElementById('marca')?.value||'').toUpperCase();
+    if(cat&&tecido&&cor&&marca){
+      const base=comp?`${cat} ${comp}`:cat;
+      document.getElementById('descTitulo').value=`${base} EM ${tecido} ${cor} - ${marca}`;
     }
     atualizarPreview();
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#section1 .btn').forEach(btn => {
-      btn.addEventListener('click', () => setTimeout(_patchTitulo, 50));
-    });
-    ['categoria','comprimento','tecido','cor','marca','pesoBase','codigoManual'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('input', () => setTimeout(_patchTitulo, 10));
-    });
-  });
-
   function gerarDescricaoIA() {
-    const titulo = document.getElementById('descTitulo').value.trim();
-    const composicao = document.getElementById('descComposicao').value.trim();
-    const tipoSelecionado = document.getElementById("tipoTecido").value;
-    if (!titulo) { showToast('Preencha os campos na Seção 1 primeiro.', 2000); return; }
-    if (!composicao) { showToast('Informe a composição do produto.', 1800); return; }
-    const outputEl = document.getElementById('descHtmlOutput');
-    const previewEl = document.getElementById('descPreview');
-    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-    const banco = {
-      viscose: ["toque extremamente macio, leveza no uso e um caimento fluido que valoriza o corpo com naturalidade","sensação suave ao toque, frescor ao vestir e um caimento elegante que acompanha os movimentos","leveza, conforto prolongado e um caimento solto que traz sofisticação ao visual","toque delicado, fluidez no tecido e uma sensação agradável ao longo do dia","caimento leve, frescor ao vestir e conforto ideal para uso contínuo"],
-      algodao: ["respirabilidade natural, conforto térmico e toque suave que proporciona bem-estar no uso diário","maciez ao toque, durabilidade e uma sensação agradável na pele durante todo o dia","conforto prolongado, leveza e ótima adaptação ao corpo","tecido leve, respirável e ideal para quem busca conforto no dia a dia","toque macio, frescor e praticidade para diferentes ocasiões"],
-      poliamida: ["elasticidade, ajuste perfeito ao corpo e conforto durante todo o uso","flexibilidade, resistência e um caimento que valoriza a silhueta com elegância","toque leve, alta durabilidade e excelente adaptação ao corpo","conforto, mobilidade e ajuste que acompanha os movimentos com naturalidade","tecido tecnológico, leve e ideal para um caimento mais estruturado"],
-      jeans: ["resistência, estilo atemporal e versatilidade para diferentes combinações","estrutura firme, durabilidade e um visual moderno que nunca sai de moda","caimento estruturado, resistência e um toque urbano ao visual","tecido encorpado, estiloso e ideal para looks versáteis","visual marcante, durabilidade e personalidade na composição"],
-      generico: ["conforto no uso, versatilidade e um caimento que valoriza o visual","leveza, praticidade e um estilo moderno para diversas ocasiões","conforto prolongado, elegância e facilidade na composição de looks","praticidade no dia a dia e um visual sempre atual","equilíbrio entre conforto, estilo e versatilidade"]
+    const titulo=document.getElementById('descTitulo').value.trim();
+    const composicao=document.getElementById('descComposicao').value.trim();
+    const tipoSelecionado=document.getElementById("tipoTecido").value;
+    if(!titulo){showToast('Preencha os campos na Seção 1 primeiro.',2000);return;}
+    if(!composicao){showToast('Informe a composição do produto.',1800);return;}
+    function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+    const banco={
+      viscose:["toque extremamente macio, leveza no uso e um caimento fluido que valoriza o corpo com naturalidade","sensação suave ao toque, frescor ao vestir e um caimento elegante que acompanha os movimentos","leveza, conforto prolongado e um caimento solto que traz sofisticação ao visual","toque delicado, fluidez no tecido e uma sensação agradável ao longo do dia","caimento leve, frescor ao vestir e conforto ideal para uso contínuo"],
+      algodao:["respirabilidade natural, conforto térmico e toque suave que proporciona bem-estar no uso diário","maciez ao toque, durabilidade e uma sensação agradável na pele durante todo o dia","conforto prolongado, leveza e ótima adaptação ao corpo","tecido leve, respirável e ideal para quem busca conforto no dia a dia","toque macio, frescor e praticidade para diferentes ocasiões"],
+      poliamida:["elasticidade, ajuste perfeito ao corpo e conforto durante todo o uso","flexibilidade, resistência e um caimento que valoriza a silhueta com elegância","toque leve, alta durabilidade e excelente adaptação ao corpo","conforto, mobilidade e ajuste que acompanha os movimentos com naturalidade","tecido tecnológico, leve e ideal para um caimento mais estruturado"],
+      jeans:["resistência, estilo atemporal e versatilidade para diferentes combinações","estrutura firme, durabilidade e um visual moderno que nunca sai de moda","caimento estruturado, resistência e um toque urbano ao visual","tecido encorpado, estiloso e ideal para looks versáteis","visual marcante, durabilidade e personalidade na composição"],
+      generico:["conforto no uso, versatilidade e um caimento que valoriza o visual","leveza, praticidade e um estilo moderno para diversas ocasiões","conforto prolongado, elegância e facilidade na composição de looks","praticidade no dia a dia e um visual sempre atual","equilíbrio entre conforto, estilo e versatilidade"]
     };
-    const beneficio1 = pick(banco[tipoSelecionado]);
-    const beneficio2 = pick(banco[tipoSelecionado]);
-    const aberturas = [
-      `A <b>${titulo}</b> é uma escolha elegante que une ${beneficio1}.`,
-      `Pensada para o dia a dia, a <b>${titulo}</b> oferece ${beneficio1}.`,
-      `Com design atemporal, a <b>${titulo}</b> proporciona ${beneficio1}.`,
-      `A <b>${titulo}</b> se destaca por entregar ${beneficio1}.`,
-      `Versátil e sofisticada, a <b>${titulo}</b> garante ${beneficio1}.`,
-      `Perfeita para diferentes ocasiões, a <b>${titulo}</b> traz ${beneficio1}.`,
-      `Com um acabamento refinado, a <b>${titulo}</b> oferece ${beneficio1}.`,
-      `A <b>${titulo}</b> combina estilo e ${beneficio1}.`
-    ];
-    const meio = [
-      `Além disso, se destaca por ${beneficio2}, tornando a peça ainda mais versátil para diferentes ocasiões.`,
-      `Outro ponto forte é ${beneficio2}, garantindo praticidade e elegância no uso.`,
-      `Seu diferencial está em ${beneficio2}, ideal para quem valoriza conforto aliado ao estilo.`,
-      `Isso sem contar ${beneficio2}, que faz toda a diferença no caimento da peça.`,
-      `Com ${beneficio2}, ela se adapta perfeitamente ao dia a dia e também a momentos especiais.`
-    ];
-    const fechamentos = [
-      "Uma peça que se adapta facilmente a diferentes propostas de look.",
-      "Ideal para compor produções elegantes e modernas com praticidade.",
-      "Perfeita para quem busca estilo sem abrir mão do conforto no dia a dia.",
-      "Uma escolha versátil que acompanha diversas ocasiões.",
-      "Modelo pensado para valorizar o visual com naturalidade.",
-      "Combina facilmente com diferentes estilos e ocasiões.",
-      "Um item essencial para um guarda-roupa funcional e atual.",
-      "Perfeita para criar composições equilibradas e sofisticadas."
-    ];
-    const descricaoHTML = `<div style="font-size: 14px; text-align: justify;">\n${pick(aberturas)}\n\n${pick(meio)}\n\n${pick(fechamentos)}\n<br><br>\n• <b>Composição:</b> ${composicao}\n</div>`.trim();
-    outputEl.innerText = descricaoHTML;
-    previewEl.innerHTML = descricaoHTML;
-    showToast('Descrição gerada! ✨', 1500);
+    const b1=pick(banco[tipoSelecionado]);
+    const b2=pick(banco[tipoSelecionado]);
+    const aberturas=[`A <b>${titulo}</b> é uma escolha elegante que une ${b1}.`,`Pensada para o dia a dia, a <b>${titulo}</b> oferece ${b1}.`,`Com design atemporal, a <b>${titulo}</b> proporciona ${b1}.`,`A <b>${titulo}</b> se destaca por entregar ${b1}.`,`Versátil e sofisticada, a <b>${titulo}</b> garante ${b1}.`,`Perfeita para diferentes ocasiões, a <b>${titulo}</b> traz ${b1}.`,`Com um acabamento refinado, a <b>${titulo}</b> oferece ${b1}.`,`A <b>${titulo}</b> combina estilo e ${b1}.`];
+    const meio=[`Além disso, se destaca por ${b2}, tornando a peça ainda mais versátil para diferentes ocasiões.`,`Outro ponto forte é ${b2}, garantindo praticidade e elegância no uso.`,`Seu diferencial está em ${b2}, ideal para quem valoriza conforto aliado ao estilo.`,`Isso sem contar ${b2}, que faz toda a diferença no caimento da peça.`,`Com ${b2}, ela se adapta perfeitamente ao dia a dia e também a momentos especiais.`];
+    const fechamentos=["Uma peça que se adapta facilmente a diferentes propostas de look.","Ideal para compor produções elegantes e modernas com praticidade.","Perfeita para quem busca estilo sem abrir mão do conforto no dia a dia.","Uma escolha versátil que acompanha diversas ocasiões.","Modelo pensado para valorizar o visual com naturalidade.","Combina facilmente com diferentes estilos e ocasiões.","Um item essencial para um guarda-roupa funcional e atual.","Perfeita para criar composições equilibradas e sofisticadas."];
+    const html=`<div style="font-size: 14px; text-align: justify;">\n${pick(aberturas)}\n\n${pick(meio)}\n\n${pick(fechamentos)}\n<br><br>\n• <b>Composição:</b> ${composicao}\n</div>`.trim();
+    document.getElementById('descHtmlOutput').innerText=html;
+    document.getElementById('descPreview').innerHTML=html;
+    showToast('Descrição gerada! ✨',1500);
     atualizarPreview();
   }
 
   // ===== Section 4 =====
-  document.getElementById('mkMarca').addEventListener('change', function() {
-    if (this.value) document.getElementById('mkMarkup').value = this.value;
-  });
-  ['mkMarkup', 'mkCusto'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') calcularMarkup(); });
-  });
-  document.getElementById('mkCusto').addEventListener('input', atualizarPreview);
-  document.getElementById('mkMarkup').addEventListener('input', atualizarPreview);
-
   let _mkPrecoAtual = '';
 
   function calcularMarkup() {
-    const markup = parseFloat(document.getElementById('mkMarkup').value);
-    const custo = parseFloat(document.getElementById('mkCusto').value);
-    if (isNaN(markup) || isNaN(custo) || markup <= 0 || custo <= 0) { showToast('Preencha o markup e o custo corretamente.', 2000); return; }
-    const bruto = custo * markup;
-    const base = Math.floor(bruto / 10) * 10;
-    const resto = bruto - base;
-    const precoFinal = resto < 5 ? base - 0.10 : base + 9.90;
-    _mkPrecoAtual = precoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('mkResultado').textContent = _mkPrecoAtual;
-    document.getElementById('mkResultadoWrap').style.display = 'block';
-    showToast('Preço calculado! ✅', 1400);
+    const markup=parseFloat(document.getElementById('mkMarkup').value);
+    const custo=parseFloat(document.getElementById('mkCusto').value);
+    if(isNaN(markup)||isNaN(custo)||markup<=0||custo<=0){showToast('Preencha o markup e o custo.',2000);return;}
+    const bruto=custo*markup;
+    const base=Math.floor(bruto/10)*10;
+    const resto=bruto-base;
+    const precoFinal=resto<5?base-0.10:base+9.90;
+    _mkPrecoAtual=precoFinal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('mkResultado').textContent=_mkPrecoAtual;
+    document.getElementById('mkResultadoWrap').style.display='block';
+    showToast('Preço calculado! ✅',1400);
     atualizarPreview();
   }
 
   function copiarMarkup() {
-    if (!_mkPrecoAtual) { showToast('Nada para copiar 😅', 1500); return; }
-    navigator.clipboard.writeText(_mkPrecoAtual).then(() => showToast('Copiado! ✅', 1400)).catch(() => {
-      const tmp = document.createElement('textarea');
-      tmp.value = _mkPrecoAtual;
-      document.body.appendChild(tmp);
-      tmp.select();
-      document.execCommand('copy');
-      tmp.remove();
-      showToast('Copiado! ✅', 1400);
+    if(!_mkPrecoAtual){showToast('Nada para copiar 😅',1500);return;}
+    navigator.clipboard.writeText(_mkPrecoAtual).then(()=>showToast('Copiado! ✅',1400)).catch(()=>{
+      const t=document.createElement('textarea');t.value=_mkPrecoAtual;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();showToast('Copiado! ✅',1400);
     });
   }
 
   function limparMarkup() {
-    _mkPrecoAtual = '';
-    document.getElementById('mkMarca').value = '';
-    document.getElementById('mkMarkup').value = '';
-    document.getElementById('mkCusto').value = '';
-    document.getElementById('mkResultado').textContent = '';
-    document.getElementById('mkResultadoWrap').style.display = 'none';
+    _mkPrecoAtual='';
+    ['mkMarca','mkMarkup','mkCusto'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mkResultado').textContent='';
+    document.getElementById('mkResultadoWrap').style.display='none';
     atualizarPreview();
   }
 
-  // ===== Section 5: Categorização =====
-  function _normCat(str) {
-    return (str || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s-]/g," ").replace(/\s+/g," ").trim();
-  }
+  // ===== Section 5 =====
+  function _normCat(str) { return (str||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s-]/g," ").replace(/\s+/g," ").trim(); }
   function _buscarCat(input) {
-    const val = _normCat(input);
-    if (!val) return null;
-    const db = getCatDb();
-    for (const grupo of db) {
-      if (grupo.chaves.some(k => val.includes(_normCat(k)) || _normCat(k).includes(val))) return grupo;
-    }
-    return null;
+    const val=_normCat(input);
+    if(!val) return null;
+    return getCatDb().find(g=>g.chaves.some(k=>val.includes(_normCat(k))||_normCat(k).includes(val)))||null;
   }
   function _renderCat(grupo) {
-    const chips = document.getElementById('catChips');
-    const vazio = document.getElementById('catVazio');
-    const detectada = document.getElementById('catDetectada');
-    const selecionadaWrap = document.getElementById('catSelecionadaWrap');
-    const selecionadaOut = document.getElementById('catSelecionadaOutput');
-    chips.innerHTML = '';
-    selecionadaWrap.style.display = 'none';
-    selecionadaOut.innerText = '';
-    if (!grupo) { detectada.innerText = ''; vazio.style.display = 'flex'; return; }
-    vazio.style.display = 'none';
-    detectada.innerText = `Categoria detectada: ${grupo.label}${grupo.custom ? ' (custom)' : ''}`;
-    grupo.opcoes.forEach(op => {
-      const btn = document.createElement('button');
-      btn.className = 'icon-btn';
-      btn.style.cssText = 'font-size:12px;padding:8px 14px;font-weight:700;border-radius:999px;';
-      btn.textContent = op;
-      btn.addEventListener('click', () => {
-        chips.querySelectorAll('button').forEach(b => { b.style.background=''; b.style.color=''; b.style.borderColor=''; });
-        btn.style.background = 'var(--accent)';
-        btn.style.color = 'var(--bg)';
-        btn.style.borderColor = 'var(--accent)';
-        selecionadaOut.innerText = op;
-        selecionadaWrap.style.display = 'block';
-        showToast('Selecionado! Clique em Copiar ✅', 1400);
-        atualizarPreview();
+    const chips=document.getElementById('catChips');
+    const vazio=document.getElementById('catVazio');
+    const detectada=document.getElementById('catDetectada');
+    const swrap=document.getElementById('catSelecionadaWrap');
+    const sout=document.getElementById('catSelecionadaOutput');
+    if(!chips) return;
+    chips.innerHTML=''; swrap.style.display='none'; sout.innerText='';
+    if(!grupo){detectada.innerText=''; vazio.style.display='flex'; return;}
+    vazio.style.display='none';
+    detectada.innerText=`Categoria detectada: ${grupo.label}${grupo.custom?' (custom)':''}`;
+    grupo.opcoes.forEach(op=>{
+      const btn=document.createElement('button');
+      btn.className='icon-btn'; btn.style.cssText='font-size:12px;padding:8px 14px;font-weight:700;border-radius:999px;';
+      btn.textContent=op;
+      btn.addEventListener('click',()=>{
+        chips.querySelectorAll('button').forEach(b=>{b.style.background='';b.style.color='';b.style.borderColor='';});
+        btn.style.background='var(--accent)'; btn.style.color='var(--bg)'; btn.style.borderColor='var(--accent)';
+        sout.innerText=op; swrap.style.display='block';
+        showToast('Selecionado! Clique em Copiar ✅',1400); atualizarPreview();
       });
       chips.appendChild(btn);
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const catInput = document.getElementById('categoria');
-    if (catInput) {
-      catInput.addEventListener('input', () => {
-        const grupo = _buscarCat(catInput.value);
-        _renderCat(grupo);
-      });
-    }
-  });
-
-  // =====================================================
-  // ===== Section 6: Armazenamento e Exportação =========
-  // =====================================================
-
+  // ===== Section 6 =====
   const STORAGE_KEY = 'qvestido_produtos_v1';
   const BENEFICIOS_HTML = '<ul><li><strong>Frete fixo</strong> para todo o Brasil.</li><li><strong>Entrega rápida</strong>. Atendemos todo o Brasil com agilidade.</li><li><strong>7 dias para troca ou devolução</strong> após o recebimento. Fácil e rápido, até para produtos da Outlet!</li></ul>';
 
-  function carregarProdutos() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-    catch(e) { return []; }
-  }
-
-  function salvarProdutosStorage(lista) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
-  }
+  function carregarProdutos() { try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch(e){return[];} }
+  function salvarProdutosStorage(lista) { localStorage.setItem(STORAGE_KEY,JSON.stringify(lista)); }
 
   function coletarDadosAtuais() {
-    const cat = document.getElementById("categoria").value.toUpperCase();
-    const comp = document.getElementById("comprimento").value.toUpperCase();
-    const tecido = document.getElementById("tecido").value.toUpperCase();
-    const cor = document.getElementById("cor").value.toUpperCase();
-    const marca = document.getElementById("marca").value.toUpperCase();
-    const inicio = document.getElementById("gradeInicio").value;
-    const fim = document.getElementById("gradeFim").value;
-    const skuBase = document.getElementById("codigoManual").value.toUpperCase();
-    const pesoBase = parseFloat(document.getElementById("pesoBase").value) || 0;
-
-    const base = comp ? `${cat} ${comp}` : cat;
-    const tituloPai = cat && tecido && cor && marca ? `${base} EM ${tecido} ${cor} - ${marca}` : '';
-
-    const ncm = extrairNcm();
-    const preco = _mkPrecoAtual;
-    const custo = document.getElementById("mkCusto").value || '';
-    const categorizacao = document.getElementById("catSelecionadaOutput").innerText || '';
-    const tituloSEO = document.getElementById("outputTitulo").innerText || '';
-    const metaDesc = document.getElementById("outputMetaTag").innerText || '';
-    const url = document.getElementById("urlOutput").innerText || '';
-    const descEc = document.getElementById("descHtmlOutput").innerText || '';
-    const keyword = obterKeyword(marca);
-
-    const inicioIndex = tamanhos.indexOf(inicio);
-    const fimIndex = tamanhos.indexOf(fim);
-    const gradeValida = inicioIndex !== -1 && fimIndex !== -1 && inicioIndex <= fimIndex;
-    const grade = gradeValida ? `${inicio} → ${fim}` : '';
-
-    return {
-      id: Date.now(),
-      dataSalvo: new Date().toLocaleString('pt-BR'),
-      categoria: cat, comprimento: comp, tecido, cor, marca,
-      skuBase, tituloPai, ncm, preco, custo, pesoBase,
-      categorizacao, tituloSEO, metaDesc, url, descEc,
-      keyword,
-      gradeInicio: inicio, gradeFim: fim, grade,
-      gradeValida, inicioIndex, fimIndex
-    };
+    const cat=(document.getElementById("categoria")?.value||'').toUpperCase();
+    const comp=(document.getElementById("comprimento")?.value||'').toUpperCase();
+    const tecido=(document.getElementById("tecido")?.value||'').toUpperCase();
+    const cor=(document.getElementById("cor")?.value||'').toUpperCase();
+    const marca=(document.getElementById("marca")?.value||'').toUpperCase();
+    const inicio=document.getElementById("gradeInicio")?.value||'';
+    const fim=document.getElementById("gradeFim")?.value||'';
+    const skuBase=(document.getElementById("codigoManual")?.value||'').toUpperCase();
+    const pesoBase=parseFloat(document.getElementById("pesoBase")?.value)||0;
+    const base=comp?`${cat} ${comp}`:cat;
+    const tituloPai=cat&&tecido&&cor&&marca?`${base} EM ${tecido} ${cor} - ${marca}`:'';
+    const ncm=extrairNcm();
+    const preco=_mkPrecoAtual;
+    const custo=document.getElementById("mkCusto")?.value||'';
+    const categorizacao=document.getElementById("catSelecionadaOutput")?.innerText||'';
+    const tituloSEO=document.getElementById("outputTitulo")?.innerText||'';
+    const metaDesc=document.getElementById("outputMetaTag")?.innerText||'';
+    const url=document.getElementById("urlOutput")?.innerText||'';
+    const descEc=document.getElementById("descHtmlOutput")?.innerText||'';
+    const keyword=obterKeyword(marca);
+    const inicioIndex=tamanhos.indexOf(inicio);
+    const fimIndex=tamanhos.indexOf(fim);
+    const gradeValida=inicioIndex!==-1&&fimIndex!==-1&&inicioIndex<=fimIndex;
+    const grade=gradeValida?`${inicio} → ${fim}`:'';
+    return {id:Date.now(),dataSalvo:new Date().toLocaleString('pt-BR'),categoria:cat,comprimento:comp,tecido,cor,marca,skuBase,tituloPai,ncm,preco,custo,pesoBase,categorizacao,tituloSEO,metaDesc,url,descEc,keyword,gradeInicio:inicio,gradeFim:fim,grade,gradeValida,inicioIndex,fimIndex};
   }
 
   function atualizarPreview() {
-    const d = coletarDadosAtuais();
-    const set = (id, val) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const v = val || '';
-      el.textContent = v ? (v.length > 28 ? v.substring(0,28)+'…' : v) : '—';
-      el.className = 'val ' + (v ? 'ok' : 'missing');
-    };
-    set('prv-sku', d.skuBase);
-    set('prv-desc', d.tituloPai);
-    set('prv-ncm', d.ncm);
-    set('prv-preco', d.preco ? 'R$ ' + d.preco : '');
-    set('prv-custo', d.custo ? 'R$ ' + d.custo : '');
-    set('prv-cor', d.cor);
-    set('prv-marca', d.marca);
-    set('prv-grade', d.grade);
-    set('prv-cat', d.categorizacao);
-    set('prv-seo', d.tituloSEO);
-    set('prv-meta', d.metaDesc);
-    set('prv-url', d.url);
-    set('prv-desc-ec', d.descEc ? 'Gerada ✓' : '');
-    set('prv-peso', d.pesoBase ? d.pesoBase + ' kg' : '');
-    set('prv-kw', d.keyword);
-    // Atualiza banner de keyword
+    const d=coletarDadosAtuais();
+    const set=(id,val)=>{ const el=document.getElementById(id); if(!el)return; const v=val||''; el.textContent=v?(v.length>28?v.substring(0,28)+'…':v):'—'; el.className='val '+(v?'ok':'missing'); };
+    set('prv-sku',d.skuBase); set('prv-desc',d.tituloPai); set('prv-ncm',d.ncm);
+    set('prv-preco',d.preco?'R$ '+d.preco:''); set('prv-custo',d.custo?'R$ '+d.custo:'');
+    set('prv-cor',d.cor); set('prv-marca',d.marca); set('prv-grade',d.grade);
+    set('prv-cat',d.categorizacao); set('prv-seo',d.tituloSEO); set('prv-meta',d.metaDesc);
+    set('prv-url',d.url); set('prv-desc-ec',d.descEc?'Gerada ✓':'');
+    set('prv-peso',d.pesoBase?d.pesoBase+' kg':''); set('prv-kw',d.keyword);
     atualizarBannerKeyword();
   }
 
   function salvarProduto() {
-    const d = coletarDadosAtuais();
-    if (!d.skuBase) { showToast('⚠️ Preencha o Código da Peça (SKU base) na Seção 1.', 2200); return; }
-    if (!d.tituloPai) { showToast('⚠️ Gere o título na Seção 1 primeiro.', 2000); return; }
-    if (!d.gradeValida) { showToast('⚠️ Selecione uma grade válida na Seção 1.', 2000); return; }
-    const lista = carregarProdutos();
+    const d=coletarDadosAtuais();
+    if(!d.skuBase){showToast('⚠️ Preencha o Código da Peça (SKU base).',2200);return;}
+    if(!d.tituloPai){showToast('⚠️ Gere o título na Seção 1 primeiro.',2000);return;}
+    if(!d.gradeValida){showToast('⚠️ Selecione uma grade válida na Seção 1.',2000);return;}
+    const lista=carregarProdutos();
     lista.push(d);
     salvarProdutosStorage(lista);
     renderizarLista();
-    showToast(`✅ Produto "${d.skuBase}" salvo! (${lista.length} no total)`, 2000);
+    showToast(`✅ Produto "${d.skuBase}" salvo! (${lista.length} no total)`,2000);
   }
 
   function removerProduto(id) {
-    const lista = carregarProdutos().filter(p => p.id !== id);
+    const lista=carregarProdutos().filter(p=>p.id!==id);
     salvarProdutosStorage(lista);
     renderizarLista();
-    showToast('Produto removido.', 1400);
+    showToast('Produto removido.',1400);
   }
 
   function limparTodosProdutos() {
-    const lista = carregarProdutos();
-    if (lista.length === 0) { showToast('Nenhum produto para limpar.', 1500); return; }
-    if (!confirm(`Tem certeza? Isso vai apagar ${lista.length} produto(s) salvos.`)) return;
+    const lista=carregarProdutos();
+    if(lista.length===0){showToast('Nenhum produto para limpar.',1500);return;}
+    if(!confirm(`Tem certeza? Isso vai apagar ${lista.length} produto(s) salvos.`)) return;
     salvarProdutosStorage([]);
     renderizarLista();
-    showToast('Lista limpa! 🗑️', 1400);
+    showToast('Lista limpa! 🗑️',1400);
   }
 
   function renderizarLista() {
-    const lista = carregarProdutos();
-    const container = document.getElementById('listaProdutos');
-    const contador = document.getElementById('contadorProdutos');
-    contador.textContent = lista.length;
-    if (lista.length === 0) {
-      container.innerHTML = `<div class="empty-state"><div class="icon">📂</div><div>Nenhum produto salvo ainda.<br>Gere os dados nas seções acima e clique em <b>Salvar produto atual</b>.</div></div>`;
-      return;
-    }
-    container.innerHTML = '';
-    lista.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'produto-card';
-      card.innerHTML = `
-        <div class="produto-card-info">
-          <div class="produto-card-titulo">${p.tituloPai || p.skuBase}</div>
-          <div class="produto-card-meta">SKU: ${p.skuBase} &nbsp;|&nbsp; Grade: ${p.grade} &nbsp;|&nbsp; NCM: ${p.ncm || '—'} &nbsp;|&nbsp; KW: ${p.keyword || '—'} &nbsp;|&nbsp; Salvo: ${p.dataSalvo}</div>
-        </div>
-        <div class="produto-card-actions">
-          <button class="mini-btn danger" onclick="removerProduto(${p.id})">🗑️ Remover</button>
-        </div>
-      `;
+    const lista=carregarProdutos();
+    const container=document.getElementById('listaProdutos');
+    const contador=document.getElementById('contadorProdutos');
+    if(!container) return;
+    contador.textContent=lista.length;
+    if(lista.length===0){container.innerHTML=`<div class="empty-state"><div class="icon">📂</div><div>Nenhum produto salvo ainda.<br>Gere os dados nas seções acima e clique em <b>Salvar produto atual</b>.</div></div>`;return;}
+    container.innerHTML='';
+    lista.forEach(p=>{
+      const card=document.createElement('div'); card.className='produto-card';
+      card.innerHTML=`<div class="produto-card-info"><div class="produto-card-titulo">${p.tituloPai||p.skuBase}</div><div class="produto-card-meta">SKU: ${p.skuBase} &nbsp;|&nbsp; Grade: ${p.grade} &nbsp;|&nbsp; NCM: ${p.ncm||'—'} &nbsp;|&nbsp; KW: ${p.keyword||'—'} &nbsp;|&nbsp; Salvo: ${p.dataSalvo}</div></div><div class="produto-card-actions"><button class="mini-btn danger" onclick="removerProduto(${p.id})">🗑️ Remover</button></div>`;
       container.appendChild(card);
     });
   }
 
   function toTitleCase(str) {
-    if (!str) return '';
-    return String(str).toLowerCase().split(/(\s+|-)/).map(w => {
-      if (!w || /^\s+$/.test(w) || w === '-') return w;
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join('');
+    if(!str) return '';
+    return String(str).toLowerCase().split(/(\s+|-)/).map(w=>(!w||/^\s+$/.test(w)||w==='-')?w:w.charAt(0).toUpperCase()+w.slice(1)).join('');
   }
 
-  // Gera as linhas da planilha (PAI + filhos) — SEM coluna ID
   function gerarLinhasPlanilha(p) {
-    const linhas = [];
-    const origem = 'Nacional, exceto as indicadas nos códigos 3, 4, 5 e 8';
-    const situacao = 'Ativo';
-    const unidade = 'Un';
-    const loja = 'S';
-    const compCm = '26,00';
-    const largCm = '29,00';
-    const altCm = '7,00';
-
-    const precoNum = p.preco ? p.preco.replace(/\./g,'').replace(',','.') : '';
-    const custoNum = p.custo ? p.custo.replace(',','.') : '';
-
-    const catLower = String(p.categoria || '').toLowerCase();
-    const pesoInicial = /(blusa|camisa|colete)/i.test(catLower) ? 0.100 : 0.200;
-
-    const descCompleta = p.descEc || '';
-    const keyword = p.keyword || '';
-
-    // Linha PAI (ID vazio, com Keywords)
-    linhas.push([
-      '',                 // ID (vazio)
-      p.skuBase,          // Codigo SKU
-      p.tituloPai,        // Descricao
-      unidade,            // Unidade
-      p.skuBase,          // Cod do fabricante
-      p.ncm,              // Classificação fiscal (NCM)
-      origem,             // Origem
-      situacao,           // Situacao
-      precoNum,           // Preco
-      custoNum,           // Preco de custo
-      '',                 // Peso Bruto (PAI vazio)
-      p.categorizacao,    // Categorizacao
-      BENEFICIOS_HTML,    // Benefícios
-      toTitleCase(p.cor), // Cor
-      '',                 // Detalhes
-      toTitleCase(p.marca), // Marca
-      loja,               // Produto vendido na loja virtual
-      p.tituloSEO,        // Título para a pagina
-      p.metaDesc,         // Metatag Description
-      compCm,             // Comprimento (Cm)
-      largCm,             // Largura (Cm)
-      altCm,              // Altura (Cm)
-      descCompleta,       // Descricao para E-commerce
-      descCompleta,       // Descricao detalhada do produto
-      p.url,              // URL
-      '',                 // Tamanho (PAI vazio)
-      '',                 // Guia de Medidas
-      keyword             // Keywords ← NOVA COLUNA
-    ]);
-
-    // Linhas FILHOS
-    let skuIdx = 0;
-    for (let i = p.inicioIndex; i <= p.fimIndex; i++) {
-      const tam = tamanhos[i];
-      const tamLabel = tamanhoLabel[tam] || tam;
-      const pesoNum = pesoInicial + skuIdx * 0.020;
-      const peso = pesoNum.toFixed(3).replace('.', ',');
+    const linhas=[];
+    const origem='Nacional, exceto as indicadas nos códigos 3, 4, 5 e 8';
+    const situacao='Ativo'; const unidade='Un'; const loja='S';
+    const compCm='26,00'; const largCm='29,00'; const altCm='7,00';
+    const precoNum=p.preco?p.preco.replace(/\./g,'').replace(',','.'):'';
+    const custoNum=p.custo?p.custo.replace(',','.'):'';
+    const catLower=String(p.categoria||'').toLowerCase();
+    const pesoInicial=/(blusa|camisa|colete)/i.test(catLower)?0.100:0.200;
+    const descCompleta=p.descEc||'';
+    const keyword=p.keyword||'';
+    linhas.push(['',(p.skuBase),(p.tituloPai),unidade,(p.skuBase),(p.ncm),origem,situacao,precoNum,custoNum,'',p.categorizacao,BENEFICIOS_HTML,toTitleCase(p.cor),'',toTitleCase(p.marca),loja,p.tituloSEO,p.metaDesc,compCm,largCm,altCm,descCompleta,descCompleta,p.url,'','',keyword]);
+    let skuIdx=0;
+    for(let i=p.inicioIndex;i<=p.fimIndex;i++){
+      const tam=tamanhos[i];
+      const tamLabel=tamanhoLabel[tam]||tam;
+      const pesoNum=pesoInicial+skuIdx*0.020;
+      const peso=pesoNum.toFixed(3).replace('.',',');
       skuIdx++;
-      linhas.push([
-        '',                         // ID (vazio)
-        `${p.skuBase}-${tam}`,      // Codigo SKU filho
-        `${p.tituloPai} - ${tam}`,  // Descricao filho
-        unidade,
-        p.skuBase,                  // Cod do fabricante = Código Pai
-        p.ncm,
-        origem,
-        situacao,
-        precoNum,
-        custoNum,
-        peso,                       // Peso Bruto filho
-        p.categorizacao,
-        '',                         // Benefícios (vazio no filho)
-        toTitleCase(p.cor),
-        '',
-        toTitleCase(p.marca),
-        loja,
-        p.tituloSEO,
-        p.metaDesc,
-        compCm,
-        largCm,
-        altCm,
-        descCompleta,
-        descCompleta,
-        '',                         // URL (vazio no filho)
-        tamLabel,                   // Tamanho
-        '',                         // Guia de Medidas
-        keyword                     // Keywords ← NOVA COLUNA
-      ]);
+      linhas.push([``,`${p.skuBase}-${tam}`,`${p.tituloPai} - ${tam}`,unidade,p.skuBase,p.ncm,origem,situacao,precoNum,custoNum,peso,p.categorizacao,'',toTitleCase(p.cor),'',toTitleCase(p.marca),loja,p.tituloSEO,p.metaDesc,compCm,largCm,altCm,descCompleta,descCompleta,'',tamLabel,'',keyword]);
     }
-
     return linhas;
   }
 
   function exportarCSV() {
-    const lista = carregarProdutos();
-    if (lista.length === 0) { showToast('Nenhum produto para exportar.', 1800); return; }
-    if (typeof XLSX === 'undefined') { showToast('Biblioteca XLSX não carregada. Verifique a internet.', 2500); return; }
-
-    // Colunas — COM 'ID' vazio + 'Keywords' no final
-    const colunas = [
-      'ID','Codigo SKU','Descricao','Unidade','Cod do fabricante','Classificação fiscal',
-      'Origem','Situacao','Preco','Preco de custo','Peso Bruto','Categorizacao','Benefícios',
-      'Cor','Detalhes','Marca','Produto vendido na loja virtual','Título para a pagina',
-      'Metatag Description','Comprimento (Cm)','Largura (Cm)','Altura (Cm)',
-      'Descricao para E-commerce','Descricao detalhada do produto','URL','Tamanho','Guia de Medidas',
-      'Keywords'
-    ];
-
-    const aoa = [colunas];
-    lista.forEach(p => {
-      const rows = gerarLinhasPlanilha(p);
-      rows.forEach(row => aoa.push(row.map(v => v === null || v === undefined ? '' : v)));
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(aoa.map(r => r.map(v => String(v))));
-    ws['!cols'] = colunas.map(c => ({ wch: Math.min(Math.max(c.length + 4, 14), 40) }));
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
-
-    const agora = new Date();
-    const dataStr = `${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}`;
-    const marcaInput = (document.getElementById('marca')?.value || (lista[0] && lista[0].marca) || 'SEM-MARCA');
-    const marcaSan = String(marcaInput).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'SEM-MARCA';
-    const filename = `PLANILHA_CADASTRO_${marcaSan}_${dataStr}.xlsx`;
-
-    XLSX.writeFile(wb, filename, { bookType: 'xlsx', compression: true });
-    showToast(`Planilha .xlsx exportada! ${lista.length} produto(s). ✅`, 2000);
+    const lista=carregarProdutos();
+    if(lista.length===0){showToast('Nenhum produto para exportar.',1800);return;}
+    if(typeof XLSX==='undefined'){showToast('Biblioteca XLSX não carregada.',2500);return;}
+    const colunas=['ID','Codigo SKU','Descricao','Unidade','Cod do fabricante','Classificação fiscal','Origem','Situacao','Preco','Preco de custo','Peso Bruto','Categorizacao','Benefícios','Cor','Detalhes','Marca','Produto vendido na loja virtual','Título para a pagina','Metatag Description','Comprimento (Cm)','Largura (Cm)','Altura (Cm)','Descricao para E-commerce','Descricao detalhada do produto','URL','Tamanho','Guia de Medidas','Keywords'];
+    const aoa=[colunas];
+    lista.forEach(p=>{ gerarLinhasPlanilha(p).forEach(row=>aoa.push(row.map(v=>v===null||v===undefined?'':v))); });
+    const ws=XLSX.utils.aoa_to_sheet(aoa.map(r=>r.map(v=>String(v))));
+    ws['!cols']=colunas.map(c=>({wch:Math.min(Math.max(c.length+4,14),40)}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Produtos');
+    const agora=new Date();
+    const dataStr=`${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}`;
+    const marcaInput=(document.getElementById('marca')?.value||(lista[0]&&lista[0].marca)||'SEM-MARCA');
+    const marcaSan=String(marcaInput).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'SEM-MARCA';
+    XLSX.writeFile(wb,`PLANILHA_CADASTRO_${marcaSan}_${dataStr}.xlsx`,{bookType:'xlsx',compression:true});
+    showToast(`Planilha exportada! ${lista.length} produto(s). ✅`,2000);
   }
-
-  // Inicialização
-  document.addEventListener('DOMContentLoaded', () => {
-    renderizarLista();
-    renderizarTabelaKeywords();
-    renderizarListaCatCustom();
-    atualizarPreview();
-  });
-
-  // Atualiza preview + banner keyword sempre que campos mudarem
-  ['categoria','comprimento','tecido','cor','marca','pesoBase','codigoManual'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', () => { atualizarPreview(); atualizarBannerKeyword(); });
-  });
 </script>
 </body>
 </html>

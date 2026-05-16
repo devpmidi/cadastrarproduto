@@ -26,6 +26,10 @@
       --green-light: #dcfce7;
       --red: #dc2626;
       --red-light: #fee2e2;
+      --amber: #d97706;
+      --amber-light: #fef3c7;
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
     }
 
     body.dark-mode{
@@ -42,6 +46,8 @@
       --focus: 0 0 0 4px rgba(255,255,255,.14);
       --green-light: #14532d;
       --red-light: #450a0a;
+      --amber-light: #451a03;
+      --blue-light: #1e3a5f;
     }
 
     *{ box-sizing: border-box; }
@@ -101,13 +107,14 @@
 
     label{ display: block; margin: 12px 0 6px; font-weight: 800; font-size: 12px; color: var(--muted); letter-spacing: .2px; }
 
-    input[type="text"], input[type="number"], select, input[type="file"]{
+    input[type="text"], input[type="number"], select, input[type="file"], textarea{
       width: 100%; padding: 12px 14px; border-radius: var(--radius-sm);
       border: 1px solid var(--border); background: var(--surface); color: var(--text);
       font-size: 14px; transition: box-shadow .2s ease, border-color .2s ease, transform .15s ease;
       outline: none; font-family: var(--font);
     }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="file"]:focus{
+    textarea{ resize: vertical; min-height: 80px; }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="file"]:focus, textarea:focus{
       border-color: var(--accent); box-shadow: var(--focus);
     }
 
@@ -127,6 +134,7 @@
 
     .btn.success{ background: var(--green); border-color: var(--green); color: #fff; }
     .btn.danger{ background: var(--red); border-color: var(--red); color: #fff; }
+    .btn.amber{ background: var(--amber); border-color: var(--amber); color: #fff; }
 
     .output{
       margin-top: 10px; background: var(--surface); border: 1px solid var(--border);
@@ -216,6 +224,61 @@
     .preview-item .val{ font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .preview-item .val.ok{ color: var(--green); }
     .preview-item .val.missing{ color: var(--red); }
+
+    /* === Keywords Table === */
+    .kw-table{
+      width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px;
+    }
+    .kw-table th{
+      text-align: left; padding: 8px 10px; font-weight: 800; font-size: 11px;
+      color: var(--muted); letter-spacing: .3px; border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .kw-table td{
+      padding: 8px 10px; border-bottom: 1px solid var(--border);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .kw-table tr:last-child td{ border-bottom: none; }
+    .kw-table tr:hover td{ background: var(--surface-2); }
+    .kw-tag{
+      display: inline-block; background: var(--blue-light); color: var(--blue);
+      border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700;
+      font-family: ui-monospace, monospace; letter-spacing: .3px;
+    }
+    body.dark-mode .kw-tag{ color: #93c5fd; }
+    .kw-detected-banner{
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      background: var(--green-light); border: 1px solid var(--green);
+      border-radius: var(--radius-sm); margin-bottom: 14px;
+      font-size: 13px; font-weight: 700;
+    }
+    .kw-detected-banner.none{
+      background: var(--surface-2); border-color: var(--border); color: var(--muted);
+    }
+    .kw-detected-banner .kw-name{ font-size: 14px; font-weight: 900; }
+    .kw-detected-banner .kw-code{
+      font-family: ui-monospace, monospace; font-size: 13px;
+      background: var(--green); color: #fff; border-radius: 6px;
+      padding: 2px 10px; letter-spacing: .3px;
+    }
+
+    /* === Cat custom items === */
+    .cat-custom-item{
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); margin-bottom: 6px; animation: fadeIn .2s ease;
+    }
+    .cat-custom-info{ flex: 1; min-width: 0; }
+    .cat-custom-label{ font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+    .cat-custom-keys{ font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .cat-custom-opcoes{ font-size: 11px; color: var(--blue); font-family: ui-monospace, monospace; }
+    body.dark-mode .cat-custom-opcoes{ color: #93c5fd; }
+    .custom-badge{
+      display: inline-block; background: var(--amber-light); color: var(--amber);
+      border-radius: 999px; font-size: 10px; font-weight: 900; padding: 1px 8px;
+      vertical-align: middle; margin-left: 6px; letter-spacing: .2px;
+    }
+    body.dark-mode .custom-badge{ color: #fcd34d; }
   </style>
 </head>
 
@@ -227,7 +290,7 @@
         <img src="https://recursos.qvestido.com.br/i/SVG-diversos/logo.svg" alt="QVestido" />
         <div class="titlewrap">
           <p class="title">Gerador de Cadastro</p>
-          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • Descrições IA • Markup • Exportar Planilha</p>
+          <p class="subtitle">Títulos • SKU • SEO • URL • NCM • Descrições IA • Markup • Keywords • Exportar Planilha</p>
         </div>
       </div>
       <div class="actions">
@@ -458,6 +521,89 @@
         <div id="catVazio" style="color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;padding:12px 0;">
           <span>⬆️ Preencha o campo <b>Categoria</b> na Seção 1 para ver as opções</span>
         </div>
+
+        <div class="divider"></div>
+
+        <!-- Nova categoria -->
+        <h3>➕ Adicionar nova categoria <span class="custom-badge" id="catCustomCount">0 custom</span></h3>
+        <p class="desc" style="margin-bottom:10px;">Crie uma nova categoria que será salva localmente e funcionará como as categorias padrão.</p>
+
+        <div class="row">
+          <div>
+            <label for="newCatLabel">Nome da categoria (display)</label>
+            <input type="text" id="newCatLabel" placeholder="Ex: Regata">
+          </div>
+          <div>
+            <label for="newCatChaves">Palavras-chave (separadas por vírgula)</label>
+            <input type="text" id="newCatChaves" placeholder="Ex: REGATA, REGATAS, TOP">
+          </div>
+        </div>
+
+        <label for="newCatOpcoes">Opções de categorização (uma por linha, formato Pai>Filho)</label>
+        <textarea id="newCatOpcoes" placeholder="Ex:&#10;Roupas>Regatas&#10;Moda Praia>Regata Fitness"></textarea>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn amber" style="flex:1;" onclick="adicionarCategoriaCustom()">💾 Salvar categoria</button>
+          <button class="btn secondary" style="flex:1;margin-top:10px;" onclick="limparFormCategoria()">Limpar campos</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>📋 Categorias personalizadas</h3>
+        <div id="listaCatCustom">
+          <div class="empty-state" style="padding:18px;"><div class="icon" style="font-size:22px;">📂</div><div>Nenhuma categoria personalizada ainda.</div></div>
+        </div>
+      </section>
+
+      <!-- ===================== Section 7: Keywords ===================== -->
+      <section class="card" id="section7">
+        <h2>🔑 Keywords por Marca</h2>
+        <p class="desc">A keyword correta é detectada automaticamente a partir da marca preenchida na Seção 1 e incluída na coluna <b>Keywords</b> da planilha exportada.</p>
+
+        <!-- Banner de detecção automática -->
+        <div id="kwDetectedBanner" class="kw-detected-banner none">
+          <span>⬆️ Preencha o campo <b>Marca</b> na Seção 1 para detectar a keyword automaticamente.</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Tabela de keywords -->
+        <h3>Tabela de keywords cadastradas <span class="badge" id="kwTotalBadge">0</span></h3>
+        <div style="overflow-x:auto;">
+          <table class="kw-table" id="kwTable">
+            <thead>
+              <tr>
+                <th>Marca</th>
+                <th>Keyword</th>
+                <th>Tipo</th>
+                <th style="width:80px;"></th>
+              </tr>
+            </thead>
+            <tbody id="kwTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Formulário nova keyword -->
+        <h3>➕ Cadastrar nova keyword</h3>
+        <p class="desc" style="margin-bottom:10px;">A keyword é gerada automaticamente como <b>tabela + marca</b> (sem espaços e minúsculas). Você pode editar antes de salvar.</p>
+
+        <div class="row">
+          <div>
+            <label for="newKwMarca">Nome da marca</label>
+            <input type="text" id="newKwMarca" placeholder="Ex: NOVA MARCA" oninput="sugerirKeyword()">
+          </div>
+          <div>
+            <label for="newKwKeyword">Keyword gerada (editável)</label>
+            <input type="text" id="newKwKeyword" placeholder="Ex: tabelanovamarca">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn amber" style="flex:1;" onclick="adicionarKeywordCustom()">💾 Salvar keyword</button>
+          <button class="btn secondary" style="flex:1;margin-top:10px;" onclick="limparFormKeyword()">Limpar</button>
+        </div>
       </section>
 
       <!-- ===================== Section 6: Produtos Salvos ===================== -->
@@ -465,7 +611,7 @@
         <div class="section-header">
           <h2>📦 Produtos Salvos <span class="badge" id="contadorProdutos">0</span></h2>
         </div>
-        <p class="desc">Salve cada produto gerado nas seções acima. Os dados ficam armazenados no navegador e podem ser exportados como CSV no formato exato da planilha base.</p>
+        <p class="desc">Salve cada produto gerado nas seções acima. Os dados ficam armazenados no navegador e podem ser exportados como xlsx no formato exato da planilha base.</p>
 
         <!-- Preview do que será salvo -->
         <h3>Preview do produto atual</h3>
@@ -484,6 +630,7 @@
           <div class="preview-item"><div class="key">URL</div><div class="val missing" id="prv-url">—</div></div>
           <div class="preview-item"><div class="key">Descrição E-commerce</div><div class="val missing" id="prv-desc-ec">—</div></div>
           <div class="preview-item"><div class="key">Peso Base (kg)</div><div class="val missing" id="prv-peso">—</div></div>
+          <div class="preview-item"><div class="key">Keywords</div><div class="val missing" id="prv-kw">—</div></div>
         </div>
 
         <button class="btn success" onclick="salvarProduto()">💾 Salvar produto atual na lista</button>
@@ -517,7 +664,6 @@
 
   const tamanhos = ["XPP","PP","P","M","G","GG","G1","G2","G3","G4","34","36","38","40","42","44","46","48","50","52"];
 
-  // Mapeamento de tamanho para label da planilha (ex: P -> P/38)
   const tamanhoLabel = {
     "XPP":"XPP/34","PP":"PP/36","P":"P/38","M":"M/40","G":"G/42","GG":"GG/44",
     "G1":"G1/46","G2":"G2/48","G3":"G3/50","G4":"G4/52",
@@ -525,7 +671,257 @@
     "46":"G1/46","48":"G2/48","50":"G3/50","52":"G4/52"
   };
 
-  // Toast
+  // =============================================
+  // ===== KEYWORDS — banco de dados embutido =====
+  // =============================================
+
+  const KEYWORDS_STORAGE_KEY = 'qvestido_keywords_v1';
+
+  // Keywords padrão (inalterable)
+  const _keywordsBuiltin = {
+    "ARTSY":           "tabelaartsy",
+    "DOCE MARIA":      "tabeladocemaria",
+    "DOCE TRAMA":      "tabeladocetrama",
+    "HAPUK":           "tabelahapuk",
+    "JANY PIM":        "tabelajanypim",
+    "LAURA ROSA":      "tabelalaurarosa",
+    "LEKAZIS":         "tabelalekazis",
+    "LINDA DE MORRER": "tabelalindademorrer",
+    "LIZ":             "tabelaliz",
+    "LUZIA FAZZOLLI":  "tabelaluziafazzolli",
+    "PURO SHARMY":     "tabelapurosharmy",
+    "TITANIUM JEANS":  "tabelatitaniumjeans",
+    "TLI CRIO":        "tabelatlicrio",
+    "VIA TOLENTINO":   "tabelaviatolentino"
+  };
+
+  function carregarKeywordsCustom() {
+    try { return JSON.parse(localStorage.getItem(KEYWORDS_STORAGE_KEY) || '{}'); }
+    catch(e) { return {}; }
+  }
+
+  function salvarKeywordsCustomStorage(obj) {
+    localStorage.setItem(KEYWORDS_STORAGE_KEY, JSON.stringify(obj));
+  }
+
+  // Retorna objeto unificado: builtin + custom (custom pode sobrescrever)
+  function getAllKeywords() {
+    return { ..._keywordsBuiltin, ...carregarKeywordsCustom() };
+  }
+
+  // Busca keyword pela marca (tolerante a variações)
+  function obterKeyword(marcaRaw) {
+    if (!marcaRaw) return '';
+    const marcaNorm = norm(marcaRaw);
+    const all = getAllKeywords();
+    // Busca exata primeiro
+    for (const [key, val] of Object.entries(all)) {
+      if (norm(key) === marcaNorm) return val;
+    }
+    // Busca parcial
+    for (const [key, val] of Object.entries(all)) {
+      const kn = norm(key);
+      if (marcaNorm.includes(kn) || kn.includes(marcaNorm)) return val;
+    }
+    return '';
+  }
+
+  // Gera sugestão automática de keyword a partir da marca
+  function sugerirKeyword() {
+    const marca = document.getElementById('newKwMarca').value.trim();
+    if (!marca) { document.getElementById('newKwKeyword').value = ''; return; }
+    const sugestao = 'tabela' + marca.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]/g,'');
+    document.getElementById('newKwKeyword').value = sugestao;
+  }
+
+  function adicionarKeywordCustom() {
+    const marca = document.getElementById('newKwMarca').value.trim().toUpperCase();
+    const keyword = document.getElementById('newKwKeyword').value.trim().toLowerCase();
+    if (!marca) { showToast('⚠️ Preencha o nome da marca.', 2000); return; }
+    if (!keyword) { showToast('⚠️ Preencha a keyword.', 2000); return; }
+    if (!keyword.startsWith('tabela')) { showToast('⚠️ A keyword deve começar com "tabela".', 2200); return; }
+    const custom = carregarKeywordsCustom();
+    custom[marca] = keyword;
+    salvarKeywordsCustomStorage(custom);
+    renderizarTabelaKeywords();
+    limparFormKeyword();
+    showToast(`✅ Keyword "${keyword}" salva para "${marca}"!`, 2000);
+    atualizarPreview();
+  }
+
+  function removerKeywordCustom(marca) {
+    const custom = carregarKeywordsCustom();
+    delete custom[marca];
+    salvarKeywordsCustomStorage(custom);
+    renderizarTabelaKeywords();
+    showToast('Keyword removida.', 1400);
+    atualizarPreview();
+  }
+
+  function limparFormKeyword() {
+    document.getElementById('newKwMarca').value = '';
+    document.getElementById('newKwKeyword').value = '';
+  }
+
+  function renderizarTabelaKeywords() {
+    const tbody = document.getElementById('kwTableBody');
+    const badge = document.getElementById('kwTotalBadge');
+    const custom = carregarKeywordsCustom();
+    const all = getAllKeywords();
+    const total = Object.keys(all).length;
+    badge.textContent = total;
+    tbody.innerHTML = '';
+
+    // Builtin primeiro, depois custom
+    const builtin = _keywordsBuiltin;
+    const allEntries = [
+      ...Object.entries(builtin).map(([m,k]) => ({marca:m,keyword:k,tipo:'padrão'})),
+      ...Object.entries(custom).map(([m,k]) => ({marca:m,keyword:k,tipo:'custom'}))
+    ].sort((a,b) => a.marca.localeCompare(b.marca));
+
+    allEntries.forEach(({marca,keyword,tipo}) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700;">${marca}</td>
+        <td><span class="kw-tag">${keyword}</span></td>
+        <td style="font-size:11px;">
+          ${tipo === 'custom'
+            ? '<span class="custom-badge">custom</span>'
+            : '<span style="color:var(--muted);font-size:10px;font-weight:700;">padrão</span>'}
+        </td>
+        <td>
+          ${tipo === 'custom'
+            ? `<button class="mini-btn danger" onclick="removerKeywordCustom('${marca.replace(/'/g,"\\'")}')" title="Remover">🗑️</button>`
+            : ''}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Atualiza o banner de detecção da keyword
+  function atualizarBannerKeyword() {
+    const marcaRaw = document.getElementById('marca').value.trim();
+    const banner = document.getElementById('kwDetectedBanner');
+    const kw = obterKeyword(marcaRaw);
+    if (!marcaRaw) {
+      banner.className = 'kw-detected-banner none';
+      banner.innerHTML = '<span>⬆️ Preencha o campo <b>Marca</b> na Seção 1 para detectar a keyword automaticamente.</span>';
+    } else if (kw) {
+      banner.className = 'kw-detected-banner';
+      banner.innerHTML = `<span>✅ Keyword detectada para <span class="kw-name">${marcaRaw.toUpperCase()}</span>:</span> <span class="kw-code">${kw}</span>`;
+    } else {
+      banner.className = 'kw-detected-banner none';
+      banner.innerHTML = `<span>⚠️ Marca "<b>${marcaRaw.toUpperCase()}</b>" não tem keyword cadastrada. Cadastre na seção acima.</span>`;
+    }
+  }
+
+  // =============================================
+  // ===== CATEGORIAS CUSTOM =====================
+  // =============================================
+
+  const CAT_CUSTOM_KEY = 'qvestido_categorias_v1';
+
+  const _catDbBuiltin = [
+    { chaves:["VESTIDO","VESTIDOS"], label:"Vestidos", opcoes:["Vestidos>Vestidos Curto","Vestidos>Vestidos Longo","Vestidos>Vestidos Midi","Vestidos>Vestidos Longuete","Vestidos>Vestidos Jeans"] },
+    { chaves:["CONJUNTO","CONJUNTOS"], label:"Conjuntos", opcoes:["Conjuntos>Conjuntos Longos","Conjuntos>Conjuntos Midi","Conjuntos>Conjuntos Jeans","Conjuntos>Conjuntos Curto"] },
+    { chaves:["MODA PRAIA","MAIO","MAIÔ","BIQUINI","BIQUÍNI"], label:"Moda Praia", opcoes:["Moda Praia>Maiôs","Moda Praia>Shorts Saia","Moda Praia>Biquinis"] },
+    { chaves:["BLUSA","BLUSAS"], label:"Blusas", opcoes:["Roupas>Blusas e Camisas","Roupas>Blusas Jeans"] },
+    { chaves:["CAMISA","CAMISAS"], label:"Camisas", opcoes:["Roupas>Blusas e Camisas","Roupas>Camisas Jeans"] },
+    { chaves:["T-SHIRT","TSHIRT","CAMISETA"], label:"T-Shirts", opcoes:["Roupas>T-shirts"] },
+    { chaves:["BLAZER","BLAZERS","CASACO","CASACOS","CASAQUETO"], label:"Blazers e Casacos", opcoes:["Roupas>Blazers e Casacos"] },
+    { chaves:["JAQUETA","JAQUETAS"], label:"Jaquetas", opcoes:["Roupas>Jaquetas Jeans"] },
+    { chaves:["CALCA","CALCAS","CALÇA","CALÇAS"], label:"Calças", opcoes:["Roupas>Calças","Jeans>Calças Jeans"] },
+    { chaves:["MACACAO","MACACÃO","MACACOES"], label:"Macacão", opcoes:["Roupas>Macacão","Jeans>Salopete Jeans"] },
+    { chaves:["SAIA","SAIAS"], label:"Saias", opcoes:["Roupas>Saias>Saias Midi","Roupas>Saias>Saias Longa","Roupas>Saias>Saias Curta","Roupas>Saias Jeans","Jeans>Saias Jeans"] },
+    { chaves:["SHORT","SHORTS","BERMUDA","BERMUDAS"], label:"Shorts e Bermudas", opcoes:["Roupas>Bermudas e Shorts","Moda Praia>Shorts Saia"] },
+    { chaves:["FITNESS","LEGGING","LEGGINGS"], label:"Fitness", opcoes:["Roupas>Fitness"] }
+  ];
+
+  function carregarCategoriasCustom() {
+    try { return JSON.parse(localStorage.getItem(CAT_CUSTOM_KEY) || '[]'); }
+    catch(e) { return []; }
+  }
+
+  function salvarCategoriasCustomStorage(lista) {
+    localStorage.setItem(CAT_CUSTOM_KEY, JSON.stringify(lista));
+  }
+
+  // Retorna _catDb completo: builtin + custom
+  function getCatDb() {
+    return [..._catDbBuiltin, ...carregarCategoriasCustom()];
+  }
+
+  function adicionarCategoriaCustom() {
+    const label = document.getElementById('newCatLabel').value.trim();
+    const chavesRaw = document.getElementById('newCatChaves').value.trim();
+    const opcoesRaw = document.getElementById('newCatOpcoes').value.trim();
+
+    if (!label) { showToast('⚠️ Preencha o nome da categoria.', 2000); return; }
+    if (!chavesRaw) { showToast('⚠️ Preencha ao menos uma palavra-chave.', 2000); return; }
+    if (!opcoesRaw) { showToast('⚠️ Preencha ao menos uma opção de categorização.', 2000); return; }
+
+    const chaves = chavesRaw.split(',').map(s => s.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w\s-]/g,' ').trim()).filter(Boolean);
+    const opcoes = opcoesRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+    const lista = carregarCategoriasCustom();
+    // Evita duplicata de label
+    if (lista.some(c => c.label.toLowerCase() === label.toLowerCase())) {
+      showToast(`⚠️ Já existe uma categoria com o nome "${label}".`, 2200); return;
+    }
+
+    lista.push({ id: Date.now(), label, chaves, opcoes, custom: true });
+    salvarCategoriasCustomStorage(lista);
+    renderizarListaCatCustom();
+    limparFormCategoria();
+    showToast(`✅ Categoria "${label}" salva!`, 1800);
+  }
+
+  function removerCategoriaCustom(id) {
+    const lista = carregarCategoriasCustom().filter(c => c.id !== id);
+    salvarCategoriasCustomStorage(lista);
+    renderizarListaCatCustom();
+    showToast('Categoria removida.', 1400);
+  }
+
+  function limparFormCategoria() {
+    document.getElementById('newCatLabel').value = '';
+    document.getElementById('newCatChaves').value = '';
+    document.getElementById('newCatOpcoes').value = '';
+  }
+
+  function renderizarListaCatCustom() {
+    const lista = carregarCategoriasCustom();
+    const container = document.getElementById('listaCatCustom');
+    const badge = document.getElementById('catCustomCount');
+    badge.textContent = lista.length + ' custom';
+
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="empty-state" style="padding:18px;"><div class="icon" style="font-size:22px;">📂</div><div>Nenhuma categoria personalizada ainda.</div></div>';
+      return;
+    }
+    container.innerHTML = '';
+    lista.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'cat-custom-item';
+      div.innerHTML = `
+        <div class="cat-custom-info">
+          <div class="cat-custom-label">${c.label} <span class="custom-badge">custom</span></div>
+          <div class="cat-custom-keys">Chaves: ${c.chaves.join(', ')}</div>
+          <div class="cat-custom-opcoes">${c.opcoes.join(' • ')}</div>
+        </div>
+        <button class="mini-btn danger" onclick="removerCategoriaCustom(${c.id})">🗑️</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // =============================================
+  // ===== Toast ===================================
+  // =============================================
+
   let toastTimer = null;
   function showToast(msg, ms = 1600) {
     const el = document.getElementById("toast");
@@ -608,7 +1004,6 @@
       `NCM: ${ncm}\nTítulo lido: ${tituloPrev}\nRegra: ${tecidoEhMalha(tecidoRaw) ? "MALHA (6109 quando aplicável)" : "TECIDO PLANO (620x)"}`;
   }
 
-  // Extrai só o código NCM da string do output
   function extrairNcm() {
     const txt = document.getElementById("ncmOutput").innerText || "";
     const m = txt.match(/NCM:\s*([\d.]+)/);
@@ -888,29 +1283,14 @@
   }
 
   // ===== Section 5: Categorização =====
-  const _catDb = [
-    { chaves:["VESTIDO","VESTIDOS"], label:"Vestidos", opcoes:["Vestidos>Vestidos Curto","Vestidos>Vestidos Longo","Vestidos>Vestidos Midi","Vestidos>Vestidos Longuete","Vestidos>Vestidos Jeans"] },
-    { chaves:["CONJUNTO","CONJUNTOS"], label:"Conjuntos", opcoes:["Conjuntos>Conjuntos Longos","Conjuntos>Conjuntos Midi","Conjuntos>Conjuntos Jeans","Conjuntos>Conjuntos Curto"] },
-    { chaves:["MODA PRAIA","MAIO","MAIÔ","BIQUINI","BIQUÍNI"], label:"Moda Praia", opcoes:["Moda Praia>Maiôs","Moda Praia>Shorts Saia","Moda Praia>Biquinis"] },
-    { chaves:["BLUSA","BLUSAS"], label:"Blusas", opcoes:["Roupas>Blusas e Camisas","Roupas>Blusas Jeans"] },
-    { chaves:["CAMISA","CAMISAS"], label:"Camisas", opcoes:["Roupas>Blusas e Camisas","Roupas>Camisas Jeans"] },
-    { chaves:["T-SHIRT","TSHIRT","CAMISETA"], label:"T-Shirts", opcoes:["Roupas>T-shirts"] },
-    { chaves:["BLAZER","BLAZERS","CASACO","CASACOS","CASAQUETO"], label:"Blazers e Casacos", opcoes:["Roupas>Blazers e Casacos"] },
-    { chaves:["JAQUETA","JAQUETAS"], label:"Jaquetas", opcoes:["Roupas>Jaquetas Jeans"] },
-    { chaves:["CALCA","CALCAS","CALÇA","CALÇAS"], label:"Calças", opcoes:["Roupas>Calças","Jeans>Calças Jeans"] },
-    { chaves:["MACACAO","MACACÃO","MACACOES"], label:"Macacão", opcoes:["Roupas>Macacão","Jeans>Salopete Jeans"] },
-    { chaves:["SAIA","SAIAS"], label:"Saias", opcoes:["Roupas>Saias>Saias Midi","Roupas>Saias>Saias Longa","Roupas>Saias>Saias Curta","Roupas>Saias Jeans","Jeans>Saias Jeans"] },
-    { chaves:["SHORT","SHORTS","BERMUDA","BERMUDAS"], label:"Shorts e Bermudas", opcoes:["Roupas>Bermudas e Shorts","Moda Praia>Shorts Saia"] },
-    { chaves:["FITNESS","LEGGING","LEGGINGS"], label:"Fitness", opcoes:["Roupas>Fitness"] }
-  ];
-
   function _normCat(str) {
     return (str || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s-]/g," ").replace(/\s+/g," ").trim();
   }
   function _buscarCat(input) {
     const val = _normCat(input);
     if (!val) return null;
-    for (const grupo of _catDb) {
+    const db = getCatDb();
+    for (const grupo of db) {
       if (grupo.chaves.some(k => val.includes(_normCat(k)) || _normCat(k).includes(val))) return grupo;
     }
     return null;
@@ -926,7 +1306,7 @@
     selecionadaOut.innerText = '';
     if (!grupo) { detectada.innerText = ''; vazio.style.display = 'flex'; return; }
     vazio.style.display = 'none';
-    detectada.innerText = `Categoria detectada: ${grupo.label}`;
+    detectada.innerText = `Categoria detectada: ${grupo.label}${grupo.custom ? ' (custom)' : ''}`;
     grupo.opcoes.forEach(op => {
       const btn = document.createElement('button');
       btn.className = 'icon-btn';
@@ -957,7 +1337,7 @@
   });
 
   // =====================================================
-  // ===== Section 6: Armazenamento e Exportação =====
+  // ===== Section 6: Armazenamento e Exportação =========
   // =====================================================
 
   const STORAGE_KEY = 'qvestido_produtos_v1';
@@ -972,7 +1352,6 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
   }
 
-  // Coleta todos os dados gerados das seções
   function coletarDadosAtuais() {
     const cat = document.getElementById("categoria").value.toUpperCase();
     const comp = document.getElementById("comprimento").value.toUpperCase();
@@ -995,6 +1374,7 @@
     const metaDesc = document.getElementById("outputMetaTag").innerText || '';
     const url = document.getElementById("urlOutput").innerText || '';
     const descEc = document.getElementById("descHtmlOutput").innerText || '';
+    const keyword = obterKeyword(marca);
 
     const inicioIndex = tamanhos.indexOf(inicio);
     const fimIndex = tamanhos.indexOf(fim);
@@ -1004,35 +1384,18 @@
     return {
       id: Date.now(),
       dataSalvo: new Date().toLocaleString('pt-BR'),
-      categoria: cat,
-      comprimento: comp,
-      tecido,
-      cor,
-      marca,
-      skuBase,
-      tituloPai,
-      ncm,
-      preco,
-      custo,
-      pesoBase,
-      categorizacao,
-      tituloSEO,
-      metaDesc,
-      url,
-      descEc,
-      gradeInicio: inicio,
-      gradeFim: fim,
-      grade,
-      gradeValida,
-      inicioIndex,
-      fimIndex
+      categoria: cat, comprimento: comp, tecido, cor, marca,
+      skuBase, tituloPai, ncm, preco, custo, pesoBase,
+      categorizacao, tituloSEO, metaDesc, url, descEc,
+      keyword,
+      gradeInicio: inicio, gradeFim: fim, grade,
+      gradeValida, inicioIndex, fimIndex
     };
   }
 
-  // Atualiza o preview em tempo real na Section 6
   function atualizarPreview() {
     const d = coletarDadosAtuais();
-    const set = (id, val, campo) => {
+    const set = (id, val) => {
       const el = document.getElementById(id);
       if (!el) return;
       const v = val || '';
@@ -1053,16 +1416,16 @@
     set('prv-url', d.url);
     set('prv-desc-ec', d.descEc ? 'Gerada ✓' : '');
     set('prv-peso', d.pesoBase ? d.pesoBase + ' kg' : '');
+    set('prv-kw', d.keyword);
+    // Atualiza banner de keyword
+    atualizarBannerKeyword();
   }
 
   function salvarProduto() {
     const d = coletarDadosAtuais();
-
-    // Validações mínimas
     if (!d.skuBase) { showToast('⚠️ Preencha o Código da Peça (SKU base) na Seção 1.', 2200); return; }
     if (!d.tituloPai) { showToast('⚠️ Gere o título na Seção 1 primeiro.', 2000); return; }
     if (!d.gradeValida) { showToast('⚠️ Selecione uma grade válida na Seção 1.', 2000); return; }
-
     const lista = carregarProdutos();
     lista.push(d);
     salvarProdutosStorage(lista);
@@ -1091,20 +1454,18 @@
     const container = document.getElementById('listaProdutos');
     const contador = document.getElementById('contadorProdutos');
     contador.textContent = lista.length;
-
     if (lista.length === 0) {
       container.innerHTML = `<div class="empty-state"><div class="icon">📂</div><div>Nenhum produto salvo ainda.<br>Gere os dados nas seções acima e clique em <b>Salvar produto atual</b>.</div></div>`;
       return;
     }
-
     container.innerHTML = '';
-    lista.forEach((p, idx) => {
+    lista.forEach(p => {
       const card = document.createElement('div');
       card.className = 'produto-card';
       card.innerHTML = `
         <div class="produto-card-info">
           <div class="produto-card-titulo">${p.tituloPai || p.skuBase}</div>
-          <div class="produto-card-meta">SKU: ${p.skuBase} &nbsp;|&nbsp; Grade: ${p.grade} &nbsp;|&nbsp; NCM: ${p.ncm || '—'} &nbsp;|&nbsp; Salvo: ${p.dataSalvo}</div>
+          <div class="produto-card-meta">SKU: ${p.skuBase} &nbsp;|&nbsp; Grade: ${p.grade} &nbsp;|&nbsp; NCM: ${p.ncm || '—'} &nbsp;|&nbsp; KW: ${p.keyword || '—'} &nbsp;|&nbsp; Salvo: ${p.dataSalvo}</div>
         </div>
         <div class="produto-card-actions">
           <button class="mini-btn danger" onclick="removerProduto(${p.id})">🗑️ Remover</button>
@@ -1114,7 +1475,6 @@
     });
   }
 
-  // Aa: Primeira letra maiúscula de cada palavra (Title Case)
   function toTitleCase(str) {
     if (!str) return '';
     return String(str).toLowerCase().split(/(\s+|-)/).map(w => {
@@ -1123,8 +1483,8 @@
     }).join('');
   }
 
-  // Gera as linhas da planilha (PAI + filhos) para um produto
-  function gerarLinhasPlanilha(p, idNumerico) {
+  // Gera as linhas da planilha (PAI + filhos) — SEM coluna ID
+  function gerarLinhasPlanilha(p) {
     const linhas = [];
     const origem = 'Nacional, exceto as indicadas nos códigos 3, 4, 5 e 8';
     const situacao = 'Ativo';
@@ -1134,25 +1494,22 @@
     const largCm = '29,00';
     const altCm = '7,00';
 
-    // Preço sem formatação pt-BR (substitui vírgula por ponto para a planilha)
     const precoNum = p.preco ? p.preco.replace(/\./g,'').replace(',','.') : '';
     const custoNum = p.custo ? p.custo.replace(',','.') : '';
 
-    // Regra Peso Bruto: blusa/camisa/colete inicia em 0,100; demais em 0,200
-    // Incremento de 0,020 por SKU (somente filhos). Código pai não tem peso.
     const catLower = String(p.categoria || '').toLowerCase();
     const pesoInicial = /(blusa|camisa|colete)/i.test(catLower) ? 0.100 : 0.200;
 
-    // Descrição: a mesma para "Descricao para E-commerce" e "Descricao detalhada do produto"
     const descCompleta = p.descEc || '';
+    const keyword = p.keyword || '';
 
-    // Linha PAI
+    // Linha PAI (ID vazio, com Keywords)
     linhas.push([
-      idNumerico,         // ID
+      '',                 // ID (vazio)
       p.skuBase,          // Codigo SKU
       p.tituloPai,        // Descricao
       unidade,            // Unidade
-      p.skuBase,          // Cod do fabricante = Código Pai
+      p.skuBase,          // Cod do fabricante
       p.ncm,              // Classificação fiscal (NCM)
       origem,             // Origem
       situacao,           // Situacao
@@ -1161,9 +1518,9 @@
       '',                 // Peso Bruto (PAI vazio)
       p.categorizacao,    // Categorizacao
       BENEFICIOS_HTML,    // Benefícios
-      toTitleCase(p.cor),              // Cor
-      '',                 // Detalhes (vazio)
-      toTitleCase(p.marca),            // Marca
+      toTitleCase(p.cor), // Cor
+      '',                 // Detalhes
+      toTitleCase(p.marca), // Marca
       loja,               // Produto vendido na loja virtual
       p.tituloSEO,        // Título para a pagina
       p.metaDesc,         // Metatag Description
@@ -1171,10 +1528,11 @@
       largCm,             // Largura (Cm)
       altCm,              // Altura (Cm)
       descCompleta,       // Descricao para E-commerce
-      descCompleta,       // Descricao detalhada do produto (mesma)
+      descCompleta,       // Descricao detalhada do produto
       p.url,              // URL
       '',                 // Tamanho (PAI vazio)
-      ''                  // Guia de Medidas
+      '',                 // Guia de Medidas
+      keyword             // Keywords ← NOVA COLUNA
     ]);
 
     // Linhas FILHOS
@@ -1182,38 +1540,38 @@
     for (let i = p.inicioIndex; i <= p.fimIndex; i++) {
       const tam = tamanhos[i];
       const tamLabel = tamanhoLabel[tam] || tam;
-      // Peso conforme regra: inicial + 0,020 * posição. Forçado como texto "0,200".
       const pesoNum = pesoInicial + skuIdx * 0.020;
       const peso = pesoNum.toFixed(3).replace('.', ',');
       skuIdx++;
       linhas.push([
-        idNumerico,                 // ID (mesmo do PAI)
+        '',                         // ID (vazio)
         `${p.skuBase}-${tam}`,      // Codigo SKU filho
         `${p.tituloPai} - ${tam}`,  // Descricao filho
         unidade,
         p.skuBase,                  // Cod do fabricante = Código Pai
-        p.ncm,                      // Classificação fiscal (NCM)
+        p.ncm,
         origem,
         situacao,
         precoNum,
         custoNum,
-        peso,                       // Peso Bruto (filho) — texto 0,200
-        p.categorizacao,            // Categorizacao (igual ao pai)
+        peso,                       // Peso Bruto filho
+        p.categorizacao,
         '',                         // Benefícios (vazio no filho)
         toTitleCase(p.cor),
-        '',                         // Detalhes (vazio)
+        '',
         toTitleCase(p.marca),
         loja,
-        p.tituloSEO,                // Título SEO (igual ao pai)
-        p.metaDesc,                 // Meta Description (igual ao pai)
+        p.tituloSEO,
+        p.metaDesc,
         compCm,
         largCm,
         altCm,
-        descCompleta,               // Descricao para E-commerce (mesma)
-        descCompleta,               // Descricao detalhada do produto (mesma)
+        descCompleta,
+        descCompleta,
         '',                         // URL (vazio no filho)
-        tamLabel,                   // Tamanho — formato P/38
-        ''
+        tamLabel,                   // Tamanho
+        '',                         // Guia de Medidas
+        keyword                     // Keywords ← NOVA COLUNA
       ]);
     }
 
@@ -1225,54 +1583,50 @@
     if (lista.length === 0) { showToast('Nenhum produto para exportar.', 1800); return; }
     if (typeof XLSX === 'undefined') { showToast('Biblioteca XLSX não carregada. Verifique a internet.', 2500); return; }
 
+    // Colunas — COM 'ID' vazio + 'Keywords' no final
     const colunas = [
       'ID','Codigo SKU','Descricao','Unidade','Cod do fabricante','Classificação fiscal',
       'Origem','Situacao','Preco','Preco de custo','Peso Bruto','Categorizacao','Benefícios',
       'Cor','Detalhes','Marca','Produto vendido na loja virtual','Título para a pagina',
       'Metatag Description','Comprimento (Cm)','Largura (Cm)','Altura (Cm)',
-      'Descricao para E-commerce','Descricao detalhada do produto','URL','Tamanho','Guia de Medidas'
+      'Descricao para E-commerce','Descricao detalhada do produto','URL','Tamanho','Guia de Medidas',
+      'Keywords'
     ];
 
-    // Monta matriz: cabeçalho + linhas
     const aoa = [colunas];
-    lista.forEach((p, idx) => {
-      const rows = gerarLinhasPlanilha(p, idx + 1);
+    lista.forEach(p => {
+      const rows = gerarLinhasPlanilha(p);
       rows.forEach(row => aoa.push(row.map(v => v === null || v === undefined ? '' : v)));
     });
 
-    // Cria worksheet (todas as células como string p/ preservar zeros à esquerda e vírgulas)
     const ws = XLSX.utils.aoa_to_sheet(aoa.map(r => r.map(v => String(v))));
-
-    // Define largura padrão das colunas
     ws['!cols'] = colunas.map(c => ({ wch: Math.min(Math.max(c.length + 4, 14), 40) }));
 
-    // Cria workbook e adiciona a aba
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
 
-    // Nome do arquivo
     const agora = new Date();
     const dataStr = `${String(agora.getDate()).padStart(2,'0')}-${String(agora.getMonth()+1).padStart(2,'0')}-${agora.getFullYear()}`;
-    const marcaInput = (document.getElementById('marca')?.value || document.getElementById('marca2')?.value || (lista[0] && lista[0].marca) || 'SEM-MARCA');
+    const marcaInput = (document.getElementById('marca')?.value || (lista[0] && lista[0].marca) || 'SEM-MARCA');
     const marcaSan = String(marcaInput).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'SEM-MARCA';
     const filename = `PLANILHA_CADASTRO_${marcaSan}_${dataStr}.xlsx`;
 
-    // Gera e baixa o .xlsx real
     XLSX.writeFile(wb, filename, { bookType: 'xlsx', compression: true });
-
     showToast(`Planilha .xlsx exportada! ${lista.length} produto(s). ✅`, 2000);
   }
 
   // Inicialização
   document.addEventListener('DOMContentLoaded', () => {
     renderizarLista();
+    renderizarTabelaKeywords();
+    renderizarListaCatCustom();
     atualizarPreview();
   });
 
-  // Atualiza preview sempre que campos relevantes mudarem
+  // Atualiza preview + banner keyword sempre que campos mudarem
   ['categoria','comprimento','tecido','cor','marca','pesoBase','codigoManual'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('input', atualizarPreview);
+    if (el) el.addEventListener('input', () => { atualizarPreview(); atualizarBannerKeyword(); });
   });
 </script>
 </body>

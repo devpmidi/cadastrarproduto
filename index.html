@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async onload="initGoogle()"></script>
 
   <style>
     /* ================================================
@@ -293,7 +294,9 @@
         <button class="login-tab" onclick="trocarAba('reset')">Esqueci a senha</button>
         <button class="login-tab" id="tabAdmin" onclick="trocarAba('admin')" style="display:none;">Admin</button>
       </div>
-
+      
+      <div id="googleBtn" style="display:flex;justify-content:center;margin-top:12px;"></div>
+      
       <div class="login-panel active" id="panelEntrar">
         <label class="login-label">Login (usuário)</label>
         <input class="login-input" type="text" id="loginUser" placeholder="seu.login" autocomplete="username" />
@@ -808,6 +811,47 @@
   function instalarPWA(){
     if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('pwaBanner').classList.remove('show'); }); }
   }
+
+  // ==================== LOGIN COM GOOGLE ====================
+    const GOOGLE_CLIENT_ID = '681073823767-qblb0eph3slh3lrjrlalffdljl0njb8l.apps.googleusercontent.com';
+
+    // quem pode entrar (e-mails da equipe, tudo minúsculo)
+    const EMAILS_PERMITIDOS = [
+      'midi@qvestido.com.br',
+      'fulana@qvestido.com.br'
+    ];
+
+    function initGoogle(){
+      if(!window.google || !GOOGLE_CLIENT_ID.includes('.apps.googleusercontent.com')) return;
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: aoLogarComGoogle
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('googleBtn'),
+        { theme:'outline', size:'large', shape:'pill', text:'continue_with', locale:'pt-BR', width:280 }
+      );
+    }
+
+    // lê o conteúdo do token (só decodifica, não valida assinatura)
+    function lerToken(jwt){
+      const p = jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      const json = decodeURIComponent(atob(p).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(json);
+    }
+
+    function aoLogarComGoogle(resp){
+      const dados = lerToken(resp.credential);
+      const email = (dados.email||'').toLowerCase();
+      if(!dados.email_verified){ mostrarLoginMsg('loginMsg','E-mail do Google não verificado.','error'); return; }
+      if(!EMAILS_PERMITIDOS.includes(email)){
+        mostrarLoginMsg('loginMsg','A conta '+email+' não tem acesso. Fale com o admin.','error');
+        return;
+      }
+      // sucesso — reaproveita o fluxo que você já tem
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({login: email}));
+      entrarNoApp(email);
+    }
 
   // ==================== LOGIN ====================
   const SESSION_KEY = 'qvestido_session_v1';

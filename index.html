@@ -41,8 +41,8 @@
       --amber:#93610a; --amber-light:#fdf3dd;
       --blue:#1d4fd7;  --blue-light:#e8eefc;
       --radius:16px; --radius-sm:10px;
-      --font:'Inter',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
       --sidebar-w:232px;
     }
     body.dark-mode{
@@ -61,6 +61,8 @@
     html{scroll-behavior:smooth}
     body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);transition:background-color .25s,color .25s;font-size:14px;-webkit-font-smoothing:antialiased}
     @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+    .ios-emoji{width:1em;height:1em;vertical-align:-0.15em;margin:0 .05em;display:inline-block;object-fit:contain}
 
     /* ============ LOGIN ============ */
     #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -790,7 +792,8 @@
     </div>
   </div>
 
-<script>
+<script>  
+  
   // =====================================================================
   // ⚙️  CONFIGURAÇÃO — URL do Apps Script (mesmo backend de antes)
   // =====================================================================
@@ -2005,6 +2008,88 @@
 
     verificarRascunho();
   }
+
+  // ==================== EMOJIS ESTILO iOS ====================
+  (function () {
+    var EMOJI_BASE = 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.1.2/img/apple/64/';
+    var RE;
+    try { RE = new RegExp('\\p{RGI_Emoji}', 'gv'); }
+    catch (e) { return; }
+
+    function temEmoji(s){ RE.lastIndex = 0; return RE.test(s); }
+    function arquivo(emoji){
+      var cps = [];
+      for (var ch of emoji) cps.push(ch.codePointAt(0).toString(16));
+      return cps.join('-');
+    }
+    var IGNORAR = {SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1,OPTION:1,CODE:1,PRE:1,NOSCRIPT:1,IMG:1,SVG:1,CANVAS:1};
+
+    function criarImg(emoji){
+      var img = document.createElement('img');
+      img.className = 'ios-emoji';
+      img.alt = emoji;
+      img.draggable = false;
+      img.setAttribute('data-e', emoji);
+      img.src = EMOJI_BASE + arquivo(emoji) + '.png';
+      img.onerror = function(){
+        var t = document.createTextNode(this.getAttribute('data-e'));
+        if (this.parentNode) this.parentNode.replaceChild(t, this);
+      };
+      return img;
+    }
+
+    function trocarNoTexto(node){
+      var txt = node.nodeValue;
+      if (!txt) return;
+      RE.lastIndex = 0;
+      if (!RE.test(txt)) return;
+      RE.lastIndex = 0;
+      var frag = document.createDocumentFragment(), ult = 0, m;
+      while ((m = RE.exec(txt)) !== null) {
+        if (m.index > ult) frag.appendChild(document.createTextNode(txt.slice(ult, m.index)));
+        frag.appendChild(criarImg(m[0]));
+        ult = m.index + m[0].length;
+      }
+      if (ult < txt.length) frag.appendChild(document.createTextNode(txt.slice(ult)));
+      if (node.parentNode) node.parentNode.replaceChild(frag, node);
+    }
+
+    function varrer(root){
+      if (!root || (root.nodeType === 1 && IGNORAR[root.nodeName])) return;
+      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(n){
+          var p = n.parentNode;
+          if (!p || IGNORAR[p.nodeName]) return NodeFilter.FILTER_REJECT;
+          if (p.classList && p.classList.contains('ios-emoji')) return NodeFilter.FILTER_REJECT;
+          return temEmoji(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+      });
+      var lista = [], n;
+      while ((n = w.nextNode())) lista.push(n);
+      lista.forEach(trocarNoTexto);
+    }
+
+    function iniciarEmojis(){
+      varrer(document.body);
+      new MutationObserver(function(muts){
+        for (var i = 0; i < muts.length; i++){
+          var mu = muts[i];
+          if (mu.type === 'childList'){
+            for (var j = 0; j < mu.addedNodes.length; j++){
+              var nd = mu.addedNodes[j];
+              if (nd.nodeType === 3) trocarNoTexto(nd);
+              else if (nd.nodeType === 1) varrer(nd);
+            }
+          } else if (mu.type === 'characterData' && mu.target.nodeType === 3){
+            trocarNoTexto(mu.target);
+          }
+        }
+      }).observe(document.body, {childList:true, subtree:true, characterData:true});
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciarEmojis);
+    else iniciarEmojis();
+  })();
 </script>
 </body>
 </html>

@@ -58,6 +58,57 @@
       --amber:#fbbf24; --amber-light:#2a2005;
       --blue:#93b4ff;  --blue-light:#101c33;
     }
+    /* ===== TEMA ROSA BEBÊ ===== */
+    body.theme-rosa{
+      --bg:#fdf1f6; --surface:#ffffff; --surface-2:#fbe6ee;
+      --text:#3d2330; --muted:#9c6980;
+      --border:#f6dbe6; --border-strong:#eec2d3;
+      --accent:#d6568a; --accent-ink:#ffffff;
+      --focus:0 0 0 3px rgba(214,86,138,.18);
+      --shadow:0 10px 30px rgba(160,60,110,.12); --shadow-soft:0 4px 14px rgba(160,60,110,.08);
+    }
+    /* ===== TEMA AZUL BEBÊ ===== */
+    body.theme-azul{
+      --bg:#eef5fd; --surface:#ffffff; --surface-2:#e2edfb;
+      --text:#16273a; --muted:#5f7791;
+      --border:#dbe8f7; --border-strong:#bcd3ee;
+      --accent:#3f7fd6; --accent-ink:#ffffff;
+      --focus:0 0 0 3px rgba(63,127,214,.18);
+      --shadow:0 10px 30px rgba(40,90,160,.12); --shadow-soft:0 4px 14px rgba(40,90,160,.08);
+    }
+    /* ===== TEMA VERDE ===== */
+    body.theme-verde{
+      --bg:#eef7f0; --surface:#ffffff; --surface-2:#dff0e5;
+      --text:#173021; --muted:#5c7d67;
+      --border:#d7ebdd; --border-strong:#bbdcc6;
+      --accent:#2f9e5c; --accent-ink:#ffffff;
+      --focus:0 0 0 3px rgba(47,158,92,.18);
+      --shadow:0 10px 30px rgba(30,120,70,.12); --shadow-soft:0 4px 14px rgba(30,120,70,.08);
+    }
+    /* ===== SELETOR DE TEMA ===== */
+    .tema-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:6px}
+    .tema-card{appearance:none;border:2px solid var(--border);background:var(--surface);border-radius:var(--radius-sm);padding:12px;cursor:pointer;font-family:var(--font);text-align:left;transition:transform .15s,border-color .2s;display:flex;flex-direction:column;gap:8px}
+    .tema-card:hover{transform:translateY(-2px);border-color:var(--border-strong)}
+    .tema-card.sel{border-color:var(--accent)}
+    .tema-swatch{height:34px;border-radius:8px;border:1px solid var(--border);display:flex;overflow:hidden}
+    .tema-swatch span{flex:1}
+    .tema-name{font-size:12.5px;font-weight:800;color:var(--text);display:flex;align-items:center;justify-content:space-between}
+    .tema-check{font-size:12px;color:var(--accent);opacity:0}
+    .tema-card.sel .tema-check{opacity:1}
+    /* ===== SALDO ===== */
+    .dep-toggle{display:flex;gap:6px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:5px}
+    .dep-opt{flex:1;padding:10px;border:none;background:transparent;border-radius:9px;font-family:var(--font);font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
+    .dep-opt.sel{background:var(--accent);color:var(--accent-ink)}
+    .tam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:6px}
+    .tam-cell{border:1px solid var(--border);border-radius:10px;padding:8px 8px 9px;display:flex;flex-direction:column;gap:4px;transition:border-color .15s,background .15s}
+    .tam-cell.filled{border-color:var(--accent);background:var(--surface-2)}
+    .tam-cell label{margin:0;font-size:11px;font-weight:800;color:var(--muted);text-align:center;letter-spacing:.3px}
+    .tam-cell input{padding:7px 6px;text-align:center;font-size:14px;font-weight:800}
+    .saldo-item{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+    .saldo-item-info{flex:1;min-width:0}
+    .saldo-item-cod{font-size:13px;font-weight:800;font-family:var(--mono)}
+    .saldo-item-meta{font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.7;margin-top:2px}
+    .saldo-chip{display:inline-block;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1px 7px;font-size:10.5px;font-weight:800;margin:3px 3px 0 0;font-family:var(--mono)}
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);transition:background-color .25s,color .25s;font-size:14px;-webkit-font-smoothing:antialiased}
@@ -107,8 +158,19 @@
     .nav-item.active{background:var(--accent);color:var(--accent-ink)}
     .nav-sep{height:1px;background:var(--border);margin:12px 6px}
     .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:6px}
-    .user-chip{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;color:var(--muted)}
+    .user-chip{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-family:var(--font);font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:border-color .15s,background .15s}
+    .user-chip:hover{border-color:var(--accent);background:var(--surface)}
     .user-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+    .user-chip .uc-text{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+    .user-chip .uc-name{color:var(--text);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .user-chip .uc-mail{font-size:10px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .user-chip .uc-cog{width:15px;height:15px;flex-shrink:0;opacity:.55}
+    .user-chip:hover .uc-cog{opacity:1}
+    .acc-avatar{width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0}
+    .acc-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:10.5px;font-weight:800;letter-spacing:.2px}
+    .acc-badge.google{background:var(--blue-light);color:var(--blue)}
+    .acc-badge.senha{background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+    .acc-note{font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.5;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:6px}
     .main{flex:1;margin-left:var(--sidebar-w);padding:26px 28px 90px;max-width:1180px}
     @media(max-width:860px){
       .sidebar{transform:translateX(-100%)}
@@ -364,14 +426,25 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
           Exportar
         </button>
+        <button class="nav-item" data-view="saldo" onclick="showView('saldo')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 21V12h6v9"/></svg>
+          Saldo
+        </button>
 
         <div class="sidebar-bottom">
           <div class="nav-sep"></div>
-          <button class="nav-item" id="darkModeToggle" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
-            <span id="darkModeLabel">Modo escuro</span>
+          <button class="nav-item" id="temaBtn" type="button" onclick="abrirTema()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 000 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0022 10.4C22 5.7 17.5 2 12 2z"/></svg>
+            Tema
           </button>
-          <div class="user-chip"><span class="dot"></span><span id="userLabel">—</span></div>
+          <button class="user-chip" id="userChip" type="button" onclick="abrirMinhaConta()" title="Minha conta">
+            <span class="dot"></span>
+            <span class="uc-text">
+              <span class="uc-name" id="userLabel">—</span>
+              <span class="uc-mail" id="userMail"></span>
+            </span>
+            <svg class="uc-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </button>
           <button class="nav-item" onclick="fazerLogout()" style="color:var(--red);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
             Sair
@@ -419,7 +492,7 @@
           <div class="shortcut-grid">
             <button class="shortcut" onclick="novoProduto()"><span class="sc-icon">🧵</span><span><span class="sc-title">Cadastrar produto</span><br><span class="sc-sub">Assistente passo a passo</span></span></button>
             <button class="shortcut" onclick="showView('produtos')"><span class="sc-icon">📦</span><span><span class="sc-title">Ver produtos</span><br><span class="sc-sub">Buscar, filtrar e editar</span></span></button>
-            <button class="shortcut" onclick="showView('exportar')"><span class="sc-icon">⬇️</span><span><span class="sc-title">Exportar planilha</span><br><span class="sc-sub">Excel, CSV, Bling, Tiny…</span></span></button>
+            <button class="shortcut" onclick="showView('exportar')"><span class="sc-icon">⬇️</span><span><span class="sc-title">Exportar planilha</span><br><span class="sc-sub">Excel, CSV, JSON, Eccosys</span></span></button>
             <button class="shortcut" onclick="showView('keywords')"><span class="sc-icon">🔑</span><span><span class="sc-title">Keywords</span><br><span class="sc-sub">Tabelas por marca</span></span></button>
           </div>
 
@@ -733,12 +806,9 @@
               <button class="export-opt" onclick="exportarXML()"><span class="e-name">🗂️ XML</span><span class="e-sub">Estrutura genérica de produtos</span></button>
             </div>
             <div class="divider"></div>
-            <h2>Plataformas / ERPs</h2>
-            <p class="desc">Mapeamentos de colunas aproximados dos modelos de importação. <b>Valide a primeira importação com poucos itens</b> — cada conta pode ter colunas ligeiramente diferentes.</p>
+            <h2>Plataforma / ERP</h2>
+            <p class="desc">Exportação no modelo que a QVestido usa. <b>Valide a primeira importação com poucos itens</b> pra conferir as colunas.</p>
             <div class="export-grid">
-              <button class="export-opt" onclick="exportarTiny()"><span class="e-name">Tiny ERP</span><span class="e-sub">CSV modelo de importação de produtos</span></button>
-              <button class="export-opt" onclick="exportarBling()"><span class="e-name">Bling</span><span class="e-sub">CSV modelo de importação de produtos</span></button>
-              <button class="export-opt" onclick="exportarTray()"><span class="e-name">Tray</span><span class="e-sub">XLSX com colunas de loja virtual</span></button>
               <button class="export-opt" onclick="exportarEccosys()"><span class="e-name">Eccosys</span><span class="e-sub">XLSX no layout completo atual</span></button>
             </div>
             <div class="divider"></div>
@@ -748,6 +818,61 @@
               <button class="icon-btn" onclick="document.getElementById('importJsonInput').click()">Importar backup JSON</button>
               <input type="file" id="importJsonInput" accept="application/json" style="display:none;" onchange="importarJSON(this)">
             </div>
+          </div>
+        </section>
+
+        <!-- ============ VIEW: SALDO ============ -->
+        <section class="view" id="view-saldo">
+          <div class="page-head">
+            <div><h1>Gerar saldo</h1><div class="sub">Monte a planilha de saldo/estoque no formato Eccosys (.xls) — Matriz SP ou Filial Petrolina.</div></div>
+          </div>
+
+          <div class="card">
+            <h2>Depósito</h2>
+            <p class="desc">Escolha para qual depósito você está lançando. Cada depósito tem a sua própria lista.</p>
+            <div class="dep-toggle">
+              <button class="dep-opt sel" id="depMatriz" onclick="trocarDeposito('matriz')">🏢 Matriz SP</button>
+              <button class="dep-opt" id="depPetrolina" onclick="trocarDeposito('petrolina')">🏬 Filial Petrolina</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px;">
+            <h2>Adicionar código</h2>
+            <div class="row3">
+              <div>
+                <label for="saldoCodigo">Código da peça *</label>
+                <input type="text" id="saldoCodigo" placeholder="Ex: SA006VD" list="saldoCodigosList" oninput="saldoAutoCusto()">
+                <datalist id="saldoCodigosList"></datalist>
+              </div>
+              <div>
+                <label for="saldoEndereco">Endereço / Localização</label>
+                <input type="text" id="saldoEndereco" placeholder="Ex: QV005-COL06-P01">
+              </div>
+              <div>
+                <label for="saldoCusto">Preço de custo (R$)</label>
+                <input type="text" id="saldoCusto" placeholder="Ex: 57,80">
+              </div>
+            </div>
+
+            <label style="margin-top:12px;">Tamanhos e saldo</label>
+            <p class="desc" style="margin-top:0;">Preencha a quantidade só nos tamanhos que tiver. Tamanho em branco não entra na planilha.</p>
+            <div class="tam-grid" id="saldoTamGrid"></div>
+
+            <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+              <button class="btn" style="flex:1;min-width:160px;" onclick="adicionarSaldoItem()">＋ Adicionar à lista</button>
+              <button class="btn secondary" style="flex:1;min-width:120px;" onclick="limparFormSaldo()">Limpar campos</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <h2 style="margin:0;">Lista — <span id="saldoDepNome">Matriz SP</span> <span class="badge" id="saldoCount">0</span></h2>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn success sm" onclick="exportarSaldoXls()">⬇️ Baixar .xls</button>
+                <button class="btn danger sm" onclick="limparListaSaldo()">Limpar lista</button>
+              </div>
+            </div>
+            <div id="saldoLista" style="margin-top:12px;"></div>
           </div>
         </section>
       </main>
@@ -792,6 +917,86 @@
         <button class="btn secondary" onclick="fecharEdicaoProduto()">Cancelar</button>
         <button class="btn success" onclick="salvarEdicaoProduto()">💾 Salvar alterações</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL MINHA CONTA ============ -->
+  <div class="modal-overlay" id="contaModalOverlay">
+    <div class="modal-box" style="max-width:460px;">
+      <div class="modal-header"><h2>👤 Minha conta</h2><button class="modal-close" onclick="fecharMinhaConta()">✕</button></div>
+
+      <div style="display:flex;align-items:center;gap:14px;margin:10px 0 4px;">
+        <div class="acc-avatar" id="accAvatar">M</div>
+        <div style="min-width:0;">
+          <div id="accNomeTopo" style="font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;">—</div>
+          <div id="accMailTopo" style="font-size:11.5px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;">—</div>
+          <div style="margin-top:6px;"><span class="acc-badge" id="accTipoBadge">—</span></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="margin:4px 0 6px;font-size:12.5px;font-weight:800;">Nome de exibição</h3>
+      <p class="desc" style="margin-bottom:6px;">O nome que aparece na saudação e no menu lateral. Fica salvo neste dispositivo.</p>
+      <label for="accNome">Nome</label>
+      <input type="text" id="accNome" placeholder="Ex: Midian" maxlength="40">
+      <label for="accUser">Usuário</label>
+      <input type="text" id="accUser" readonly style="opacity:.65;cursor:default;">
+      <button class="btn success full" onclick="salvarNomeExibicao()">💾 Salvar nome</button>
+
+      <div id="accSenhaBloco">
+        <div class="divider"></div>
+        <h3 style="margin:4px 0 6px;font-size:12.5px;font-weight:800;">Trocar senha</h3>
+        <label for="accSenhaAtual">Senha atual</label>
+        <input type="password" id="accSenhaAtual" placeholder="Sua senha de hoje" autocomplete="current-password">
+        <div class="row">
+          <div><label for="accSenhaNova">Nova senha</label><input type="password" id="accSenhaNova" placeholder="Nova senha" autocomplete="new-password"></div>
+          <div><label for="accSenhaNova2">Confirmar</label><input type="password" id="accSenhaNova2" placeholder="Repetir a nova" autocomplete="new-password" onkeydown="if(event.key==='Enter') alterarSenhaConta()"></div>
+        </div>
+        <button class="btn full" id="btnAccSenha" onclick="alterarSenhaConta()">🔒 Alterar senha</button>
+      </div>
+
+      <div id="accSenhaGoogle" style="display:none;">
+        <div class="divider"></div>
+        <div class="acc-note">🔐 Você entra pelo <b>Google</b>, então não há senha pra gerenciar aqui — ela fica na sua Conta Google.</div>
+      </div>
+
+      <div id="accMsg" style="display:none;margin-top:12px;font-size:12px;font-weight:700;text-align:center;padding:9px 12px;border-radius:9px;"></div>
+
+      <div class="modal-actions">
+        <button class="btn secondary" onclick="fecharMinhaConta()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL TEMA ============ -->
+  <div class="modal-overlay" id="temaModalOverlay">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-header"><h2>🎨 Tema</h2><button class="modal-close" onclick="fecharTema()">✕</button></div>
+      <p class="desc">Escolha as cores do app. Fica salvo neste dispositivo.</p>
+      <div class="tema-grid">
+        <button class="tema-card" data-tema="claro" onclick="aplicarTema('claro')">
+          <div class="tema-swatch"><span style="background:#f7f7f5"></span><span style="background:#ffffff"></span><span style="background:#111110"></span></div>
+          <div class="tema-name">Claro <span class="tema-check">✓</span></div>
+        </button>
+        <button class="tema-card" data-tema="escuro" onclick="aplicarTema('escuro')">
+          <div class="tema-swatch"><span style="background:#0c0c0b"></span><span style="background:#141413"></span><span style="background:#f1f1ee"></span></div>
+          <div class="tema-name">Escuro <span class="tema-check">✓</span></div>
+        </button>
+        <button class="tema-card" data-tema="rosa" onclick="aplicarTema('rosa')">
+          <div class="tema-swatch"><span style="background:#fdf1f6"></span><span style="background:#fbe6ee"></span><span style="background:#d6568a"></span></div>
+          <div class="tema-name">Rosa bebê <span class="tema-check">✓</span></div>
+        </button>
+        <button class="tema-card" data-tema="azul" onclick="aplicarTema('azul')">
+          <div class="tema-swatch"><span style="background:#eef5fd"></span><span style="background:#e2edfb"></span><span style="background:#3f7fd6"></span></div>
+          <div class="tema-name">Azul bebê <span class="tema-check">✓</span></div>
+        </button>
+        <button class="tema-card" data-tema="verde" onclick="aplicarTema('verde')">
+          <div class="tema-swatch"><span style="background:#eef7f0"></span><span style="background:#dff0e5"></span><span style="background:#2f9e5c"></span></div>
+          <div class="tema-name">Verde <span class="tema-check">✓</span></div>
+        </button>
+      </div>
+      <div class="modal-actions"><button class="btn secondary" onclick="fecharTema()">Fechar</button></div>
     </div>
   </div>
 
@@ -850,7 +1055,7 @@
         return;
       }
       // sucesso — reaproveita o fluxo que você já tem
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({login: email}));
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({login: email, metodo:'google'}));
       entrarNoApp(email);
     }
 
@@ -895,7 +1100,7 @@
     btn.disabled=true; btn.textContent='Verificando...';
     const res=await chamarAPI({action:'login',login,senha});
     btn.disabled=false; btn.textContent='Entrar';
-    if(res.ok){ sessionStorage.setItem(SESSION_KEY,JSON.stringify({login:res.login||login})); entrarNoApp(res.login||login); }
+    if(res.ok){ sessionStorage.setItem(SESSION_KEY,JSON.stringify({login:res.login||login,metodo:'senha'})); entrarNoApp(res.login||login); }
     else mostrarLoginMsg('loginMsg',res.msg||'Erro ao fazer login.','error');
   }
 
@@ -928,10 +1133,13 @@
     else mostrarLoginMsg('adminMsg',res.msg||'Erro ao criar usuário.','error');
   }
 
+  let _usuarioAtual='';
   function entrarNoApp(login){
+    _usuarioAtual=login;
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appScreen').classList.add('visible');
-    document.getElementById('userLabel').textContent=login;
+    document.getElementById('userLabel').textContent=nomeExibicao(login);
+    const mailEl=document.getElementById('userMail'); if(mailEl) mailEl.textContent=login;
     inicializarApp(login);
   }
   function fazerLogout(){
@@ -943,6 +1151,218 @@
     const sess=sessionStorage.getItem(SESSION_KEY);
     if(sess){ try{ const {login}=JSON.parse(sess); if(login){entrarNoApp(login);return;} }catch(e){} }
   });
+
+  // ==================== MINHA CONTA ====================
+  const PERFIS_KEY='qvestido_perfis_v1';
+  function carregarPerfis(){ try{return JSON.parse(localStorage.getItem(PERFIS_KEY)||'{}');}catch(e){return{};} }
+  function nomeExibicao(login){
+    if(!login) return '';
+    const perfis=carregarPerfis();
+    if(perfis[login] && perfis[login].nome && perfis[login].nome.trim()) return perfis[login].nome.trim();
+    const base=String(login).split('@')[0].split('.')[0]||login;
+    return base.charAt(0).toUpperCase()+base.slice(1);
+  }
+  function sessaoAtual(){ try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'{}'); }catch(e){ return {}; } }
+  function accMostrarMsg(txt,tipo){
+    const el=document.getElementById('accMsg'); if(!el) return;
+    el.textContent=txt; el.style.display='block';
+    el.style.background=tipo==='ok'?'var(--green-light)':'var(--red-light)';
+    el.style.color=tipo==='ok'?'var(--green)':'var(--red)';
+  }
+  function abrirMinhaConta(){
+    const s=sessaoAtual();
+    const login=_usuarioAtual||s.login||'';
+    const metodo=s.metodo||'senha';
+    const nome=nomeExibicao(login);
+    const perfis=carregarPerfis();
+    document.getElementById('accAvatar').textContent=(nome[0]||'?').toUpperCase();
+    document.getElementById('accNomeTopo').textContent=nome;
+    document.getElementById('accMailTopo').textContent=login;
+    document.getElementById('accNome').value=(perfis[login]&&perfis[login].nome)||'';
+    document.getElementById('accNome').placeholder=nome;
+    document.getElementById('accUser').value=login;
+    const badge=document.getElementById('accTipoBadge');
+    if(metodo==='google'){ badge.className='acc-badge google'; badge.textContent='Conta Google'; }
+    else { badge.className='acc-badge senha'; badge.textContent='Login e senha'; }
+    document.getElementById('accSenhaBloco').style.display = metodo==='google'?'none':'block';
+    document.getElementById('accSenhaGoogle').style.display = metodo==='google'?'block':'none';
+    ['accSenhaAtual','accSenhaNova','accSenhaNova2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('accMsg').style.display='none';
+    document.getElementById('contaModalOverlay').classList.add('show');
+    toggleSidebar(false);
+  }
+  function fecharMinhaConta(){ document.getElementById('contaModalOverlay').classList.remove('show'); }
+  function salvarNomeExibicao(){
+    const s=sessaoAtual(); const login=_usuarioAtual||s.login||'';
+    if(!login){accMostrarMsg('Sessão não encontrada.','erro');return;}
+    const nome=document.getElementById('accNome').value.trim();
+    const perfis=carregarPerfis();
+    perfis[login]={...(perfis[login]||{}),nome};
+    localStorage.setItem(PERFIS_KEY,JSON.stringify(perfis));
+    const exib=nomeExibicao(login);
+    document.getElementById('userLabel').textContent=exib;
+    document.getElementById('accNomeTopo').textContent=exib;
+    document.getElementById('accAvatar').textContent=(exib[0]||'?').toUpperCase();
+    atualizarDashboard();
+    accMostrarMsg('✅ Nome salvo!','ok');
+    showToast('Nome atualizado! ✨',1600);
+  }
+  async function alterarSenhaConta(){
+    const s=sessaoAtual(); const login=_usuarioAtual||s.login||'';
+    const atual=document.getElementById('accSenhaAtual').value.trim();
+    const nova=document.getElementById('accSenhaNova').value.trim();
+    const nova2=document.getElementById('accSenhaNova2').value.trim();
+    if(!atual){accMostrarMsg('Digite sua senha atual.','erro');return;}
+    if(!nova){accMostrarMsg('Digite a nova senha.','erro');return;}
+    if(nova.length<4){accMostrarMsg('A nova senha deve ter pelo menos 4 caracteres.','erro');return;}
+    if(nova!==nova2){accMostrarMsg('A confirmação não coincide.','erro');return;}
+    if(nova===atual){accMostrarMsg('A nova senha é igual à atual.','erro');return;}
+    const btn=document.getElementById('btnAccSenha');
+    btn.disabled=true; btn.textContent='Verificando...';
+    const check=await chamarAPI({action:'login',login,senha:atual});
+    if(!check.ok){ btn.disabled=false; btn.textContent='🔒 Alterar senha'; accMostrarMsg('Senha atual incorreta.','erro'); return; }
+    btn.textContent='Alterando...';
+    const res=await chamarAPI({action:'reset',login,novaSenha:nova});
+    btn.disabled=false; btn.textContent='🔒 Alterar senha';
+    if(res.ok){
+      ['accSenhaAtual','accSenhaNova','accSenhaNova2'].forEach(id=>document.getElementById(id).value='');
+      accMostrarMsg('✅ Senha alterada com sucesso!','ok');
+      showToast('Senha alterada! 🔒',1800);
+    } else accMostrarMsg(res.msg||'Não foi possível alterar a senha.','erro');
+  }
+
+  // ==================== TEMA ====================
+  const TEMA_KEY='qvestido_tema';
+  function temaSalvo(){
+    let t=localStorage.getItem(TEMA_KEY);
+    if(!t){ t=(localStorage.getItem('qvestido_darkmode')==='1')?'escuro':'claro'; }
+    return t;
+  }
+  function aplicarTema(tema){
+    const b=document.body;
+    b.classList.remove('dark-mode','theme-rosa','theme-azul','theme-verde');
+    if(tema==='escuro') b.classList.add('dark-mode');
+    else if(tema==='rosa') b.classList.add('theme-rosa');
+    else if(tema==='azul') b.classList.add('theme-azul');
+    else if(tema==='verde') b.classList.add('theme-verde');
+    localStorage.setItem(TEMA_KEY,tema);
+    document.querySelectorAll('.tema-card').forEach(c=>c.classList.toggle('sel',c.dataset.tema===tema));
+  }
+  function abrirTema(){ aplicarTema(temaSalvo()); document.getElementById('temaModalOverlay').classList.add('show'); toggleSidebar(false); }
+  function fecharTema(){ document.getElementById('temaModalOverlay').classList.remove('show'); }
+  try{ aplicarTema(temaSalvo()); }catch(e){}
+
+  // ==================== SALDO (Matriz / Petrolina) ====================
+  const SALDO_KEY='qvestido_saldo_v1';
+  const SALDO_TAMANHOS=["XPP","PP","P","M","G","GG","G1","G2","G3","G4"];
+  const DEP_INFO={matriz:{nome:'Matriz SP',ender:'QV005-COL06-P01'},petrolina:{nome:'Filial Petrolina',ender:'PNZ03-COL03-P03'}};
+  let saldoDeposito='matriz';
+
+  function carregarSaldo(){ try{const d=JSON.parse(localStorage.getItem(SALDO_KEY)||'{}');return {matriz:d.matriz||[],petrolina:d.petrolina||[]};}catch(e){return {matriz:[],petrolina:[]};} }
+  function salvarSaldoStorage(obj){ localStorage.setItem(SALDO_KEY,JSON.stringify(obj)); }
+  function _parseCusto(s){ s=String(s||'').trim(); if(!s) return ''; if(s.indexOf(',')>=0) s=s.replace(/\./g,'').replace(',','.'); const n=parseFloat(s); return isNaN(n)?'':n; }
+
+  function montarGradeSaldo(){
+    const grid=document.getElementById('saldoTamGrid'); if(!grid||grid.dataset.pronto) return;
+    grid.innerHTML=SALDO_TAMANHOS.map(t=>
+      '<div class="tam-cell" id="tamcell-'+t+'"><label>'+t+'</label><input type="number" min="0" step="1" id="saldotam-'+t+'" placeholder="0" oninput="marcarTamCell(\''+t+'\')"></div>'
+    ).join('');
+    grid.dataset.pronto='1';
+  }
+  function marcarTamCell(t){
+    const inp=document.getElementById('saldotam-'+t);
+    document.getElementById('tamcell-'+t).classList.toggle('filled',inp.value.trim()!=='');
+  }
+  function trocarDeposito(dep){
+    saldoDeposito=dep;
+    document.getElementById('depMatriz').classList.toggle('sel',dep==='matriz');
+    document.getElementById('depPetrolina').classList.toggle('sel',dep==='petrolina');
+    const end=document.getElementById('saldoEndereco'); if(end&&!end.value) end.placeholder='Ex: '+DEP_INFO[dep].ender;
+    renderSaldoLista();
+  }
+  function limparFormSaldo(){
+    ['saldoCodigo','saldoEndereco','saldoCusto'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    SALDO_TAMANHOS.forEach(t=>{const el=document.getElementById('saldotam-'+t);if(el)el.value='';const c=document.getElementById('tamcell-'+t);if(c)c.classList.remove('filled');});
+  }
+  function saldoAutoCusto(){
+    const cod=document.getElementById('saldoCodigo').value.trim().toUpperCase();
+    if(!cod) return;
+    const prod=carregarProdutos().find(p=>String(p.skuBase||'').toUpperCase()===cod);
+    const cEl=document.getElementById('saldoCusto');
+    if(prod&&prod.custo&&cEl&&!cEl.value) cEl.value=prod.custo;
+  }
+  function adicionarSaldoItem(){
+    const codigo=document.getElementById('saldoCodigo').value.trim().toUpperCase();
+    const endereco=document.getElementById('saldoEndereco').value.trim();
+    const custo=document.getElementById('saldoCusto').value.trim();
+    if(!codigo){showToast('⚠️ Preencha o código da peça.',2000);return;}
+    const tam={};
+    SALDO_TAMANHOS.forEach(t=>{ const v=document.getElementById('saldotam-'+t).value.trim(); if(v!==''&&!isNaN(Number(v))&&Number(v)>=0) tam[t]=String(Number(v)); });
+    if(Object.keys(tam).length===0){showToast('⚠️ Preencha o saldo de pelo menos um tamanho.',2200);return;}
+    const dados=carregarSaldo();
+    dados[saldoDeposito].push({id:Date.now(),codigo,endereco,custo,tam});
+    salvarSaldoStorage(dados);
+    limparFormSaldo();
+    renderSaldoLista();
+    showToast('✅ '+codigo+' adicionado à lista de '+DEP_INFO[saldoDeposito].nome+'!',2200);
+  }
+  function removerSaldoItem(id){
+    const dados=carregarSaldo();
+    dados[saldoDeposito]=dados[saldoDeposito].filter(i=>i.id!==id);
+    salvarSaldoStorage(dados); renderSaldoLista();
+  }
+  function limparListaSaldo(){
+    const dados=carregarSaldo();
+    if(!dados[saldoDeposito].length){showToast('A lista já está vazia.',1500);return;}
+    if(!confirm('Limpar toda a lista de '+DEP_INFO[saldoDeposito].nome+'?')) return;
+    dados[saldoDeposito]=[]; salvarSaldoStorage(dados); renderSaldoLista();
+    showToast('Lista limpa.',1400);
+  }
+  function renderSaldoLista(){
+    const cont=document.getElementById('saldoLista'); if(!cont) return;
+    const lista=carregarSaldo()[saldoDeposito]||[];
+    document.getElementById('saldoCount').textContent=lista.length;
+    document.getElementById('saldoDepNome').textContent=DEP_INFO[saldoDeposito].nome;
+    if(!lista.length){ cont.innerHTML='<div class="empty-state"><div class="icon">📦</div><div>Nenhum código na lista de '+DEP_INFO[saldoDeposito].nome+' ainda.<br>Adicione acima!</div></div>'; return; }
+    cont.innerHTML='';
+    lista.forEach(it=>{
+      const chips=Object.entries(it.tam).map(([t,q])=>'<span class="saldo-chip">'+t+': '+q+'</span>').join('');
+      const total=Object.values(it.tam).reduce((s,q)=>s+Number(q),0);
+      const div=document.createElement('div'); div.className='saldo-item';
+      div.innerHTML='<div class="saldo-item-info"><div class="saldo-item-cod">'+it.codigo+'</div>'+
+        '<div class="saldo-item-meta">📍 '+(it.endereco||'sem endereço')+' · 💰 '+(it.custo?'R$ '+it.custo:'sem custo')+' · Σ '+total+' un<br>'+chips+'</div></div>'+
+        '<button class="mini-btn danger" onclick="removerSaldoItem('+it.id+')">🗑️</button>';
+      cont.appendChild(div);
+    });
+  }
+  function atualizarDatalistSaldo(){
+    const dl=document.getElementById('saldoCodigosList'); if(!dl) return;
+    const cods=[...new Set(carregarProdutos().map(p=>p.skuBase).filter(Boolean))].sort();
+    dl.innerHTML=cods.map(c=>'<option value="'+c+'"></option>').join('');
+  }
+  function exportarSaldoXls(){
+    const lista=carregarSaldo()[saldoDeposito]||[];
+    if(!lista.length){showToast('Nenhum código na lista pra exportar.',2000);return;}
+    if(typeof XLSX==='undefined'){showToast('Biblioteca XLSX não carregada.',2500);return;}
+    const depNome=DEP_INFO[saldoDeposito].nome;
+    const aoa=[['Código','Depósito','Localização','Quantidade','Preço Custo']];
+    lista.forEach(it=>{
+      const custoNum=_parseCusto(it.custo);
+      SALDO_TAMANHOS.forEach(t=>{
+        if(it.tam[t]===undefined) return;
+        aoa.push([it.codigo+'-'+t, depNome, it.endereco||'', Number(it.tam[t]), custoNum]);
+      });
+    });
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols']=[{wch:18},{wch:16},{wch:22},{wch:12},{wch:12}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Planilha1');
+    const agora=new Date();
+    const dataStr=String(agora.getDate()).padStart(2,'0')+'-'+String(agora.getMonth()+1).padStart(2,'0')+'-'+agora.getFullYear();
+    const nome='SALDO_'+(saldoDeposito==='matriz'?'MATRIZ':'FILIALPETROLINA')+'_'+dataStr+'.xls';
+    XLSX.writeFile(wb,nome,{bookType:'biff8'});
+    showToast('✅ '+depNome+' exportado! '+(aoa.length-1)+' linha(s). 📊',2600);
+  }
 
   // ==================== NAVEGAÇÃO / SHELL ====================
   function toggleSidebar(open){
@@ -958,6 +1378,7 @@
     if(name==='produtos') renderizarLista();
     if(name==='keywords') renderizarTabelaKeywords();
     if(name==='exportar') document.getElementById('expCount').textContent=carregarProdutos().length;
+    if(name==='saldo'){ montarGradeSaldo(); atualizarDatalistSaldo(); renderSaldoLista(); }
     window.scrollTo({top:0,behavior:'smooth'});
   }
   function novoProduto(){ showView('wizard'); irParaPasso(1); }
@@ -1746,10 +2167,11 @@
   function atualizarDashboard(){
     const lista=carregarProdutos();
     atualizarBadges();
-    const sess=(()=>{try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'{}').login||'';}catch(e){return'';}})();
+    const sess=_usuarioAtual||(()=>{try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'{}').login||'';}catch(e){return'';}})();
     const h=new Date().getHours();
     const saud=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
-    document.getElementById('dashSaudacao').textContent=saud+(sess?', '+sess.split('.')[0].charAt(0).toUpperCase()+sess.split('.')[0].slice(1):'')+' 👋';
+    const primeiroNome=(nomeExibicao(sess).split(' ')[0])||'';
+    document.getElementById('dashSaudacao').textContent=saud+(primeiroNome?', '+primeiroNome:'')+' 👋';
     document.getElementById('dashData').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     document.getElementById('statTotal').textContent=lista.length;
     const hoje=new Date().toLocaleDateString('pt-BR');
@@ -1927,61 +2349,6 @@
     _baixarTexto(xml,_nomeArquivo('PRODUTOS')+'.xml','application/xml');
     showToast('XML exportado! ✅',1800);
   }
-  function exportarTiny(){
-    const lista=_checarLista(); if(!lista) return;
-    const cols=['ID','Código (SKU)','Descrição','Unidade','NCM','Origem','Preço','Preço de custo','Situação','Estoque','Peso líquido (Kg)','Peso bruto (Kg)','GTIN/EAN','Marca','Descrição complementar','Tipo do produto','Código pai','Variações'];
-    const aoa=[cols];
-    lista.forEach(p=>{
-      const precoS=p.preco?p.preco.replace(/\./g,'').replace(',','.'):'';
-      const custoS=p.custo?String(p.custo).replace(',','.'):'';
-      aoa.push(['',p.skuBase,p.tituloPai,'Un',p.ncm,'0',precoS,custoS,'Ativo','','','','',toTitleCase(p.marca),p.descEc||'','V (pai)','','']);
-      const pesoInicial=p.pesoBase>0?p.pesoBase:0.200;
-      let k=0;
-      for(let i=p.inicioIndex;i<=p.fimIndex;i++){
-        const tam=tamanhos[i];
-        aoa.push(['',p.skuBase+'-'+tam,p.tituloPai+' - '+tam,'Un',p.ncm,'0',precoS,custoS,'Ativo','0','',(pesoInicial+k*0.020).toFixed(3),'',toTitleCase(p.marca),'','V (filho)',p.skuBase,'Tamanho:'+(tamanhoLabel[tam]||tam)]);
-        k++;
-      }
-    });
-    _baixarTexto('\uFEFF'+_csvDeAoa(aoa,';'),_nomeArquivo('TINY_PRODUTOS')+'.csv','text/csv;charset=utf-8');
-    showToast('CSV Tiny exportado! Valide as colunas no modelo da sua conta. ✅',2600);
-  }
-  function exportarBling(){
-    const lista=_checarLista(); if(!lista) return;
-    const cols=['Código','Descrição','Unidade','NCM','Origem','Preço','Preço de custo','Situação','Peso bruto (Kg)','Marca','Descrição complementar','Código pai','Variação'];
-    const aoa=[cols];
-    lista.forEach(p=>{
-      const precoS=p.preco?p.preco.replace(/\./g,'').replace(',','.'):'';
-      const custoS=p.custo?String(p.custo).replace(',','.'):'';
-      aoa.push([p.skuBase,p.tituloPai,'Un',p.ncm,'0',precoS,custoS,'Ativo','',toTitleCase(p.marca),p.descEc||'','','']);
-      const pesoInicial=p.pesoBase>0?p.pesoBase:0.200;
-      let k=0;
-      for(let i=p.inicioIndex;i<=p.fimIndex;i++){
-        const tam=tamanhos[i];
-        aoa.push([p.skuBase+'-'+tam,p.tituloPai+' - '+tam,'Un',p.ncm,'0',precoS,custoS,'Ativo',(pesoInicial+k*0.020).toFixed(3),toTitleCase(p.marca),'',p.skuBase,'Tamanho:'+(tamanhoLabel[tam]||tam)]);
-        k++;
-      }
-    });
-    _baixarTexto('\uFEFF'+_csvDeAoa(aoa,';'),_nomeArquivo('BLING_PRODUTOS')+'.csv','text/csv;charset=utf-8');
-    showToast('CSV Bling exportado! Valide as colunas no modelo da sua conta. ✅',2600);
-  }
-  function exportarTray(){
-    const lista=_checarLista(); if(!lista) return;
-    const cols=['Referência','Nome','Preço','Preço de custo','NCM','Peso (Kg)','Marca','Categoria','Disponível','Título SEO','Meta description','URL','Descrição','Referência pai','Variação 1 (Tamanho)'];
-    const aoa=[cols];
-    lista.forEach(p=>{
-      aoa.push([p.skuBase,p.tituloPai,p.preco||'',p.custo||'',p.ncm,'',toTitleCase(p.marca),p.categorizacao,'S',p.tituloSEO,p.metaDesc,p.url,p.descEc||'','','']);
-      const pesoInicial=p.pesoBase>0?p.pesoBase:0.200;
-      let k=0;
-      for(let i=p.inicioIndex;i<=p.fimIndex;i++){
-        const tam=tamanhos[i];
-        aoa.push([p.skuBase+'-'+tam,p.tituloPai+' - '+tam,p.preco||'',p.custo||'',p.ncm,(pesoInicial+k*0.020).toFixed(3).replace('.',','),toTitleCase(p.marca),p.categorizacao,'S','','','','',p.skuBase,tamanhoLabel[tam]||tam]);
-        k++;
-      }
-    });
-    _baixarXlsxDeAoa(aoa.map(r=>r.map(v=>String(v==null?'':v))),_nomeArquivo('TRAY_PRODUTOS'),'Tray');
-    showToast('XLSX Tray exportado! Valide as colunas no modelo da sua loja. ✅',2600);
-  }
   function exportarEccosys(){
     const lista=_checarLista(); if(!lista) return;
     _baixarXlsxDeAoa(_aoaPadrao(lista),_nomeArquivo('ECCOSYS_CADASTRO'),'Produtos');
@@ -2035,16 +2402,12 @@
       el.addEventListener('change',salvarRascunho);
     });
 
-    // modo escuro (persistido)
-    const dm=localStorage.getItem('qvestido_darkmode')==='1';
-    if(dm){document.body.classList.add('dark-mode');document.getElementById('darkModeLabel').textContent='Modo claro';}
-    document.getElementById('darkModeToggle').addEventListener('click',()=>{
-      const on=document.body.classList.toggle('dark-mode');
-      localStorage.setItem('qvestido_darkmode',on?'1':'0');
-      document.getElementById('darkModeLabel').textContent=on?'Modo claro':'Modo escuro';
-    });
+    // tema (persistido)
+    aplicarTema(temaSalvo());
+    document.getElementById('temaModalOverlay').addEventListener('click',e=>{ if(e.target.id==='temaModalOverlay') fecharTema(); });
 
     document.getElementById('editModalOverlay').addEventListener('click',e=>{ if(e.target.id==='editModalOverlay') fecharEdicaoProduto(); });
+    document.getElementById('contaModalOverlay').addEventListener('click',e=>{ if(e.target.id==='contaModalOverlay') fecharMinhaConta(); });
 
     // atalho: Ctrl/Cmd+K foca a busca
     document.addEventListener('keydown',e=>{

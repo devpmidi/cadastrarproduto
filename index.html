@@ -95,6 +95,13 @@
     .tema-name{font-size:12.5px;font-weight:800;color:var(--text);display:flex;align-items:center;justify-content:space-between}
     .tema-check{font-size:12px;color:var(--accent);opacity:0}
     .tema-card.sel .tema-check{opacity:1}
+    .ender-grid{display:grid;grid-template-columns:auto 1fr auto 1fr auto 1fr;gap:6px;align-items:center;margin-top:2px}
+    .ender-grid .sep{font-weight:800;color:var(--muted);font-size:12px;padding:0 1px}
+    .ender-grid input{padding:9px 8px;text-align:center;font-weight:700}
+    .ender-grid .fixo{width:56px;background:var(--surface-2);color:var(--muted);font-weight:800;text-align:center}
+    .ender-preview{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);margin-top:7px}
+    .ender-preview span{color:var(--accent)}
+    @media(max-width:520px){.ender-grid{grid-template-columns:1fr 1fr 1fr}.ender-grid .sep{display:none}}
     /* ===== SALDO ===== */
     .dep-toggle{display:flex;gap:6px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:5px}
     .dep-opt{flex:1;padding:10px;border:none;background:transparent;border-radius:9px;font-family:var(--font);font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
@@ -845,8 +852,16 @@
                 <datalist id="saldoCodigosList"></datalist>
               </div>
               <div>
-                <label for="saldoEndereco">Endereço / Localização</label>
-                <input type="text" id="saldoEndereco" placeholder="Ex: QV005-COL06-P01">
+                <label>Endereço / Localização</label>
+                <div class="ender-grid">
+                  <input type="text" id="enderPrefixo" class="fixo" value="QV" oninput="montarEndereco()">
+                  <input type="number" id="enderNum" min="0" placeholder="005" oninput="montarEndereco()">
+                  <span class="sep">-COL</span>
+                  <input type="number" id="enderCol" min="0" placeholder="06" oninput="montarEndereco()">
+                  <span class="sep">-P</span>
+                  <input type="number" id="enderP" min="0" placeholder="01" oninput="montarEndereco()">
+                </div>
+                <div class="ender-preview">Endereço: <span id="enderPreview">—</span></div>
               </div>
               <div>
                 <label for="saldoCusto">Preço de custo (R$)</label>
@@ -1255,7 +1270,7 @@
   // ==================== SALDO (Matriz / Petrolina) ====================
   const SALDO_KEY='qvestido_saldo_v1';
   const SALDO_TAMANHOS=["XPP","PP","P","M","G","GG","G1","G2","G3","G4"];
-  const DEP_INFO={matriz:{nome:'Matriz SP',ender:'QV005-COL06-P01'},petrolina:{nome:'Filial Petrolina',ender:'PNZ03-COL03-P03'}};
+  const DEP_INFO={matriz:{nome:'Matriz SP',prefixo:'QV'},petrolina:{nome:'Filial Petrolina',prefixo:'PNZ'}};
   let saldoDeposito='matriz';
 
   function carregarSaldo(){ try{const d=JSON.parse(localStorage.getItem(SALDO_KEY)||'{}');return {matriz:d.matriz||[],petrolina:d.petrolina||[]};}catch(e){return {matriz:[],petrolina:[]};} }
@@ -1273,15 +1288,30 @@
     const inp=document.getElementById('saldotam-'+t);
     document.getElementById('tamcell-'+t).classList.toggle('filled',inp.value.trim()!=='');
   }
+  function padNum(v,n){ v=String(v||'').trim().replace(/\D/g,''); return v?v.padStart(n,'0'):''; }
+  function montarEndereco(){
+    const pre=(document.getElementById('enderPrefixo').value||'').trim().toUpperCase();
+    const num=padNum(document.getElementById('enderNum').value,3);
+    const col=padNum(document.getElementById('enderCol').value,2);
+    const p=padNum(document.getElementById('enderP').value,2);
+    let s='';
+    if(pre||num) s=pre+num;
+    if(col) s+='-COL'+col;
+    if(p) s+='-P'+p;
+    document.getElementById('enderPreview').textContent=s||'—';
+    return s;
+  }
   function trocarDeposito(dep){
     saldoDeposito=dep;
     document.getElementById('depMatriz').classList.toggle('sel',dep==='matriz');
     document.getElementById('depPetrolina').classList.toggle('sel',dep==='petrolina');
-    const end=document.getElementById('saldoEndereco'); if(end&&!end.value) end.placeholder='Ex: '+DEP_INFO[dep].ender;
+    document.getElementById('enderPrefixo').value=DEP_INFO[dep].prefixo;
+    montarEndereco();
     renderSaldoLista();
   }
   function limparFormSaldo(){
-    ['saldoCodigo','saldoEndereco','saldoCusto'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['saldoCodigo','saldoCusto','enderNum'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    montarEndereco();
     SALDO_TAMANHOS.forEach(t=>{const el=document.getElementById('saldotam-'+t);if(el)el.value='';const c=document.getElementById('tamcell-'+t);if(c)c.classList.remove('filled');});
   }
   function saldoAutoCusto(){
@@ -1293,7 +1323,7 @@
   }
   function adicionarSaldoItem(){
     const codigo=document.getElementById('saldoCodigo').value.trim().toUpperCase();
-    const endereco=document.getElementById('saldoEndereco').value.trim();
+    const endereco=montarEndereco();
     const custo=document.getElementById('saldoCusto').value.trim();
     if(!codigo){showToast('⚠️ Preencha o código da peça.',2000);return;}
     const tam={};
@@ -1378,7 +1408,7 @@
     if(name==='produtos') renderizarLista();
     if(name==='keywords') renderizarTabelaKeywords();
     if(name==='exportar') document.getElementById('expCount').textContent=carregarProdutos().length;
-    if(name==='saldo'){ montarGradeSaldo(); atualizarDatalistSaldo(); renderSaldoLista(); }
+    if(name==='saldo'){ montarGradeSaldo(); atualizarDatalistSaldo(); renderSaldoLista(); trocarDeposito(saldoDeposito); }
     window.scrollTo({top:0,behavior:'smooth'});
   }
   function novoProduto(){ showView('wizard'); irParaPasso(1); }

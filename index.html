@@ -681,7 +681,7 @@
             </div>
           </div>
 
-          <!-- PASSO 5: CATEGORIZAÇÃO + TAGS -->
+          <!-- PASSO 5: CATEGORIZAÇÃO + MARCAS + TAGS -->
           <div class="wiz-pane card" id="wizPane5">
             <h2>5 · Categorização e tags</h2>
             <div id="catDetectada" style="margin-bottom:6px;font-size:12px;color:var(--muted);font-weight:800;min-height:16px;"></div>
@@ -692,6 +692,13 @@
               <div class="output small" id="catSelecionadaOutput"></div>
               <button class="icon-btn" style="margin-top:6px;" onclick="copiarTexto('catSelecionadaOutput', event)">📋 Copiar categorização</button>
             </div>
+
+            <div class="divider"></div>
+            <h3>Marca</h3>
+            <div id="marcaDetectada" style="margin-bottom:6px;font-size:12px;color:var(--muted);font-weight:800;min-height:16px;"></div>
+            <p class="desc" style="margin-bottom:2px;">Puxa direto do passo 1. Clique numa marca para trocar — título, SEO e keyword são atualizados na hora.</p>
+            <div class="chip-row" id="marcaChips"></div>
+            <div id="marcaKwInfo" style="margin-top:10px;font-size:11.5px;color:var(--muted);font-weight:700;font-family:var(--mono);"></div>
 
             <div class="divider"></div>
             <h3>Tags do produto</h3>
@@ -904,7 +911,7 @@
       <input type="hidden" id="editId">
       <div class="row">
         <div><label for="editSkuBase">SKU base</label><input type="text" id="editSkuBase"></div>
-        <div><label for="editMarca">Marca</label><input type="text" id="editMarca"></div>
+        <div><label for="editMarca">Marca</label><input type="text" id="editMarca" list="marcasList"></div>
         <div><label for="editCategoria">Categoria</label><input type="text" id="editCategoria"></div>
         <div><label for="editComprimento">Comprimento / Modelagem</label><input type="text" id="editComprimento"></div>
         <div><label for="editTecido">Tecido</label><input type="text" id="editTecido"></div>
@@ -1269,7 +1276,7 @@
 
   // ==================== SALDO (Matriz / Petrolina) ====================
   const SALDO_KEY='qvestido_saldo_v1';
-  const SALDO_TAMANHOS=["XPP","PP","P","M","G","GG","G1","G2","G3","G4"];
+  const SALDO_TAMANHOS=["XPP","PP","P","M","G","GG","G1","G2","G3","G4","34","36","38","40","42","44","46","48","50","52","54"];
   const DEP_INFO={matriz:{nome:'Matriz SP',prefixo:'QV'},petrolina:{nome:'Filial Petrolina',prefixo:'PNZ'}};
   let saldoDeposito='matriz';
 
@@ -1428,15 +1435,30 @@
     document.getElementById('gradeFim').value='GG';
   }
 
-  // ==================== KEYWORDS ====================
+  // ==================== KEYWORDS / MARCAS ====================
   const KEYWORDS_STORAGE_KEY = 'qvestido_keywords_v1';
   const _keywordsBuiltin = {
     "ARTSY":"tabelaartsy","DOCE MARIA":"tabeladocemaria","DOCE TRAMA":"tabeladocetrama",
     "HAPUK":"tabelahapuk","JANY PIM":"tabelajanypim","LAURA ROSA":"tabelalaurarosa",
     "LEKAZIS":"tabelalekazis","LINDA DE MORRER":"tabelalindademorrer","LIZ":"tabelaliz",
     "LUZIA FAZZOLLI":"tabelaluziafazzolli","PURO SHARMY":"tabelapurosharmy",
-    "TITANIUM JEANS":"tabelatitaniumjeans","TLI CRIO":"tabelatlicrio","VIA TOLENTINO":"tabelaviatolentino"
+    "TATA MARTELLO":"tabelatatamartello","TITANIUM JEANS":"tabelatitaniumjeans",
+    "TLIC RIO":"tabelatlicrio","VIA TOLENTINO":"tabelaviatolentino"
   };
+  // Nome "bonito" de cada marca, do jeito que precisa sair na categorização
+  const MARCAS_DISPLAY = {
+    "ARTSY":"Artsy","DOCE MARIA":"Doce Maria","DOCE TRAMA":"Doce Trama","HAPUK":"Hapuk",
+    "JANY PIM":"Jany Pim","LAURA ROSA":"Laura Rosa","LEKAZIS":"Lekazis",
+    "LINDA DE MORRER":"Linda de Morrer","LIZ":"Liz","LUZIA FAZZOLLI":"Luzia Fazzolli",
+    "PURO SHARMY":"Puro Sharmy","TATA MARTELLO":"Tata Martello","TITANIUM JEANS":"Titanium Jeans",
+    "TLIC RIO":"Tlic Rio","VIA TOLENTINO":"Via Tolentino"
+  };
+  function marcaDisplay(marcaRaw){
+    if(!marcaRaw) return '';
+    const n=norm(marcaRaw);
+    for(const[k,v] of Object.entries(MARCAS_DISPLAY)) if(norm(k)===n) return v;
+    return toTitleCase(marcaRaw);
+  }
   function carregarKeywordsCustom(){ try{return JSON.parse(localStorage.getItem(KEYWORDS_STORAGE_KEY)||'{}');}catch(e){return{};} }
   function salvarKeywordsCustomStorage(obj){ localStorage.setItem(KEYWORDS_STORAGE_KEY,JSON.stringify(obj)); }
   function getAllKeywords(){ return {..._keywordsBuiltin,...carregarKeywordsCustom()}; }
@@ -1462,12 +1484,13 @@
     salvarKeywordsCustomStorage(custom);
     renderizarTabelaKeywords(); limparFormKeyword();
     showToast('✅ Keyword "'+keyword+'" salva para "'+marca+'"!',2000);
-    atualizarPreview(); atualizarDatalistMarcas();
+    atualizarPreview(); atualizarDatalistMarcas(); _renderMarcaChips();
   }
   function removerKeywordCustom(marca){
     const custom=carregarKeywordsCustom(); delete custom[marca];
     salvarKeywordsCustomStorage(custom);
     renderizarTabelaKeywords(); showToast('Keyword removida.',1400); atualizarPreview();
+    atualizarDatalistMarcas(); _renderMarcaChips();
   }
   function limparFormKeyword(){ document.getElementById('newKwMarca').value=''; document.getElementById('newKwKeyword').value=''; }
   function renderizarTabelaKeywords(){
@@ -1487,10 +1510,11 @@
       tbody.appendChild(tr);
     });
   }
+  function listaMarcas(){ return Object.keys(getAllKeywords()).sort((a,b)=>a.localeCompare(b,'pt-BR')); }
   function atualizarDatalistMarcas(){
     const dl=document.getElementById('marcasList'); if(!dl) return;
     dl.innerHTML='';
-    Object.keys(getAllKeywords()).sort().forEach(m=>{const o=document.createElement('option');o.value=m;dl.appendChild(o);});
+    listaMarcas().forEach(m=>{const o=document.createElement('option');o.value=m;dl.appendChild(o);});
   }
   function atualizarBannerKeyword(){
     const marcaRaw=document.getElementById('marca')?.value.trim();
@@ -1573,7 +1597,7 @@
     document.getElementById('wizFill').style.width=((passoAtual-1)/(TOTAL_PASSOS-1)*100)+'%';
     if(passoAtual===3&&!document.getElementById('outputTitulo').innerText.trim()) gerarSeoAuto(false);
     if(passoAtual===4) _patchTitulo();
-    if(passoAtual===5){ const g=_buscarCat(document.getElementById('categoria').value); _renderCat(g); renderTagChips(); }
+    if(passoAtual===5){ const g=_buscarCat(document.getElementById('categoria').value); _renderCat(g); _renderMarcaChips(); renderTagChips(); }
     if(passoAtual===6) atualizarPreview();
     window.scrollTo({top:0,behavior:'smooth'});
   }
@@ -1750,36 +1774,97 @@
     atualizarPreview();
   };
 
-  // ===== Passo 5: categorização, tags, favorito =====
+  // ===== Passo 5: categorização, marcas, tags, favorito =====
   function _buscarCat(input){
     const v=norm(input); if(!v) return null;
     return getCatDb().find(g=>g.chaves.some(k=>v.includes(norm(k))||norm(k).includes(v)))||null;
   }
+  // categoria escolhida nos chips (só a parte da categoria, sem a marca)
+  let _catBase='';
+  // separa a parte da categoria de uma string completa "Cat>Sub, Marcas>X"
+  function _soCategoria(txt){ return String(txt||'').split(/\s*[|,]\s*Marcas>/i)[0].trim(); }
+  // monta o texto final: "Roupas>Blazers e Casacos, Marcas>Tata Martello"
+  function _montarCategorizacao(){
+    const sout=document.getElementById('catSelecionadaOutput');
+    const swrap=document.getElementById('catSelecionadaWrap');
+    if(!sout) return;
+    const marca=marcaDisplay((val('marca')||'').trim());
+    const partes=[];
+    if(_catBase) partes.push(_catBase);
+    if(marca) partes.push('Marcas>'+marca);
+    const final=partes.join(' | ');
+    sout.innerText=final;
+    if(swrap) swrap.style.display=final?'block':'none';
+  }
   function _renderCat(grupo){
     const chips=document.getElementById('catChips'), vazio=document.getElementById('catVazio'),
-          detectada=document.getElementById('catDetectada'), swrap=document.getElementById('catSelecionadaWrap'),
-          sout=document.getElementById('catSelecionadaOutput');
+          detectada=document.getElementById('catDetectada');
     if(!chips) return;
-    const selecionadaAntes=sout.innerText;
     chips.innerHTML='';
-    if(!grupo){detectada.innerText='';vazio.style.display='block';swrap.style.display='none';sout.innerText='';return;}
+    if(!grupo){detectada.innerText='';vazio.style.display='block';_catBase='';_montarCategorizacao();return;}
     vazio.style.display='none';
     detectada.innerText='✨ Categoria detectada: '+grupo.label+(grupo.custom?' (custom)':'');
     grupo.opcoes.forEach(op=>{
       const btn=document.createElement('button');
-      btn.className='chip'+(op===selecionadaAntes?' selected':'');
+      btn.className='chip'+(op===_catBase?' selected':'');
       btn.textContent=op;
       btn.addEventListener('click',()=>{
         chips.querySelectorAll('.chip').forEach(b=>b.classList.remove('selected'));
         btn.classList.add('selected');
-        sout.innerText=op; swrap.style.display='block';
+        _catBase=op;
+        _montarCategorizacao();
         showToast('Categorização selecionada ✅',1300);
         atualizarPreview(); salvarRascunho();
       });
       chips.appendChild(btn);
     });
-    if(selecionadaAntes){swrap.style.display='block';}
+    _montarCategorizacao();
   }
+
+  // ---- MARCAS: chips que puxam o que foi digitado no passo 1 ----
+  function _renderMarcaChips(){
+    const box=document.getElementById('marcaChips'); if(!box) return;
+    const det=document.getElementById('marcaDetectada');
+    const info=document.getElementById('marcaKwInfo');
+    const marcaRaw=(val('marca')||'').trim();
+    const atual=norm(marcaRaw);
+    box.innerHTML='';
+    let selecionada=false;
+    listaMarcas().forEach(m=>{
+      const btn=document.createElement('button');
+      const ehSel=!!atual&&norm(m)===atual;
+      if(ehSel) selecionada=true;
+      btn.className='chip'+(ehSel?' selected':'');
+      btn.textContent=marcaDisplay(m);
+      btn.title='Marcas>'+marcaDisplay(m);
+      btn.addEventListener('click',()=>{
+        document.getElementById('marca').value=m;
+        gerarTituloCompleto(true);
+        gerarSeoAuto(false);
+        _patchTitulo();
+        atualizarBannerKeyword();
+        _montarCategorizacao();
+        _renderMarcaChips();
+        atualizarPreview();
+        salvarRascunho();
+        showToast('Marcas>'+marcaDisplay(m)+' ✅',1500);
+      });
+      box.appendChild(btn);
+    });
+    const kw=obterKeyword(marcaRaw);
+    const linhaKw=kw?('🔑 keyword: '+kw):'';
+    if(!marcaRaw){
+      det.innerText='✨ Nenhuma marca preenchida no passo 1 — escolha uma abaixo.';
+      info.textContent='';
+    } else if(selecionada){
+      det.innerText='✨ Marca detectada: '+marcaDisplay(marcaRaw);
+      info.textContent='Marcas>'+marcaDisplay(marcaRaw)+(linhaKw?'   ·   '+linhaKw:'');
+    } else {
+      det.innerText='⚠️ "'+marcaRaw.toUpperCase()+'" não está na lista — clique numa marca abaixo ou cadastre em Keywords.';
+      info.textContent='Marcas>'+marcaDisplay(marcaRaw)+(linhaKw?'   ·   '+linhaKw:'');
+    }
+  }
+
   function renderTagChips(){
     const box=document.getElementById('tagChips'); if(!box) return;
     box.innerHTML='';
@@ -1827,15 +1912,15 @@
     // Modelagem
     const modHit=MODELAGENS_CONHECIDAS.slice().sort((a,b)=>b.length-a.length).find(m=>t.includes(norm(m)));
     if(modHit){ document.getElementById('comprimento').value=modHit; achou.push('modelagem'); }
-    // Marca
-    const marcaHit=Object.keys(getAllKeywords()).find(m=>t.includes(norm(m)));
+    // Marca (a mais longa que bater, para "DOCE MARIA" ganhar de "DOCE")
+    const marcaHit=listaMarcas().slice().sort((a,b)=>b.length-a.length).find(m=>t.includes(norm(m)));
     if(marcaHit){ document.getElementById('marca').value=marcaHit; achou.push('marca'); }
     // Referência tipo 384-102 / SA006VD
     const refHit=texto.match(/\b([A-Z]{2,4}\d{2,5}[A-Z]{0,3}|\d{3,4}-\d{2,4})\b/i);
     if(refHit&&!val('codigoManual')){ document.getElementById('codigoManual').value=refHit[1].toUpperCase(); achou.push('código'); }
     if(achou.length){
       showToast('✨ Detectado: '+achou.join(', ')+'. Confira os campos!',2600);
-      atualizarBannerKeyword(); atualizarPreview(); salvarRascunho();
+      atualizarBannerKeyword(); _renderMarcaChips(); _montarCategorizacao(); atualizarPreview(); salvarRascunho();
     } else showToast('Não reconheci nada no texto — preencha manualmente.',2200);
   }
 
@@ -1916,8 +2001,9 @@
     document.getElementById('wizFavBtn').classList.toggle('on',wizFav);
     if(_mkPrecoAtual){document.getElementById('mkResultado').textContent='R$ '+_mkPrecoAtual;document.getElementById('mkResultadoWrap').style.display='block';}
     if(d.outputs&&d.outputs['descHtmlOutput'])document.getElementById('descPreview').innerHTML=d.outputs['descHtmlOutput'];
-    if(d.outputs&&d.outputs['catSelecionadaOutput']&&d.outputs['catSelecionadaOutput'].trim())document.getElementById('catSelecionadaWrap').style.display='block';
-    _patchTitulo(); atualizarBannerKeyword(); atualizarPreview();
+    _catBase=_soCategoria(d.outputs&&d.outputs['catSelecionadaOutput']);
+    _montarCategorizacao();
+    _patchTitulo(); atualizarBannerKeyword(); _renderMarcaChips(); atualizarPreview();
     document.getElementById('draftBanner').classList.remove('show');
     showView('wizard'); irParaPasso(d.passo||1);
     showToast('📝 Rascunho recuperado!',1800);
@@ -1949,10 +2035,13 @@
     document.getElementById('fotoResult').style.display='none';
     document.getElementById('mkResultadoWrap').style.display='none';
     document.getElementById('gradeInicio').value='P';document.getElementById('gradeFim').value='GG';
-    wizTags=[];wizFav=false;_mkPrecoAtual='';_editandoId=null;
+    wizTags=[];wizFav=false;_mkPrecoAtual='';_editandoId=null;_catBase='';
     document.getElementById('wizFavBtn').classList.remove('on');
     localStorage.removeItem(DRAFT_KEY);
-    renderTagChips(); atualizarPreview(); atualizarBannerKeyword();
+    document.getElementById('catChips').innerHTML='';
+    document.getElementById('catDetectada').innerText='';
+    document.getElementById('catVazio').style.display='block';
+    renderTagChips(); _renderMarcaChips(); _montarCategorizacao(); atualizarPreview(); atualizarBannerKeyword();
     if(confirmar) showToast('Formulário limpo. 🧹',1400);
   }
 
@@ -2111,13 +2200,13 @@
     document.getElementById('descHtmlOutput').innerText=p.descEc||'';
     document.getElementById('descPreview').innerHTML=p.descEc||'';
     document.getElementById('descComposicao').value='';
-    document.getElementById('catSelecionadaOutput').innerText=p.categorizacao||'';
-    if(p.categorizacao) document.getElementById('catSelecionadaWrap').style.display='block';
+    _catBase=_soCategoria(p.categorizacao);
+    _montarCategorizacao();
     _mkPrecoAtual=p.preco||'';
     if(_mkPrecoAtual){document.getElementById('mkResultado').textContent='R$ '+_mkPrecoAtual;document.getElementById('mkResultadoWrap').style.display='block';}
     wizTags=[...(p.tags||[])]; wizFav=false;
     document.getElementById('wizFavBtn').classList.remove('on');
-    gerarNcmDoTitulo(true); _patchTitulo(); renderTagChips(); atualizarPreview(); atualizarBannerKeyword();
+    gerarNcmDoTitulo(true); _patchTitulo(); renderTagChips(); _renderMarcaChips(); atualizarPreview(); atualizarBannerKeyword();
     showView('wizard'); irParaPasso(1);
     showToast('⧉ Produto duplicado — informe o novo SKU e ajuste a cor.',2800);
   }
@@ -2414,12 +2503,15 @@
     atualizarDatalistMarcas();
     renderizarTabelaKeywords();
     renderTagChips();
+    _renderMarcaChips();
     renderizarLista();
     atualizarDashboard();
     atualizarPreview();
 
     // categoria → chips ao vivo
     document.getElementById('categoria').addEventListener('input',()=>{ _renderCat(_buscarCat(val('categoria'))); });
+    // marca → chips ao vivo
+    document.getElementById('marca').addEventListener('input',()=>{ _renderMarcaChips(); _montarCategorizacao(); });
 
     // markup: marca preenche o valor
     document.getElementById('mkMarca').addEventListener('change',function(){ if(this.value) document.getElementById('mkMarkup').value=this.value; salvarRascunho(); });
